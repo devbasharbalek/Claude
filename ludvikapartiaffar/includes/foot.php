@@ -14,6 +14,8 @@
           <li><a href="sortiment.php">Sortiment</a></li>
           <li><a href="bestall.php">Beställ</a></li>
           <li><a href="kontakt.php">Kontakt</a></li>
+          <li><a href="<?php echo current_user() ? 'konto.php' : 'logga-in.php'; ?>"><?php echo current_user() ? 'Mitt konto' : 'Logga in'; ?></a></li>
+          <li><a href="integritet.php">Integritet</a></li>
         </ul>
       </div>
       <div>

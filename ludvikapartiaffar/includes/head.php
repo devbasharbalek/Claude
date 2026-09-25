@@ -2,12 +2,17 @@
 $logoSrc = 'img/logo.png';
 $active = $active ?? '';
 $pageTitle = $pageTitle ?? 'Ludvika Partiaffär';
-function navClass($key, $active) { return $key === $active ? ' class="active"' : ''; }
+$navUser = current_user();
+$navItems = '';
+foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sortiment'], 'bestall' => ['bestall.php', 'Beställ'], 'kontakt' => ['kontakt.php', 'Kontakt']] as $key => [$href, $label]) {
+  $navItems .= '<li><a href="' . $href . '"' . ($key === $active ? ' class="active"' : '') . '>' . $label . '</a></li>';
+}
 ?><!DOCTYPE html>
 <html lang="sv">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="same-origin">
 <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
 <meta name="description" content="Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för restauranger och pizzerior i hela Dalarna sedan 60-talet.">
 <style>
@@ -296,7 +301,7 @@ function navClass($key, $active) { return $key === $active ? ' class="active"' :
   .field label{font-size:.86rem; font-weight:600;}
   .field label .req{color:var(--orange);}
   .field .hint{font-size:.8rem; color:var(--ink-soft);}
-  input[type=text], input[type=email], input[type=tel], select, textarea{
+  input[type=text], input[type=email], input[type=tel], input[type=password], input[type=search], select, textarea{
     font:inherit; font-size:.96rem; color:var(--ink);
     background:var(--bg); border:1px solid var(--border); border-radius:10px;
     padding:11px 12px; width:100%;
@@ -340,6 +345,99 @@ function navClass($key, $active) { return $key === $active ? ' class="active"' :
   .tack p{margin-top:14px; color:var(--ink-soft); font-size:1.02rem; line-height:1.65;}
   .tack .actions{margin-top:26px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
 
+  /* account & portal */
+  .account-btn{
+    display:inline-flex; align-items:center; gap:7px;
+    border:1px solid var(--border); background:var(--surface); color:var(--ink);
+    font-weight:600; font-size:.88rem; padding:9px 14px; border-radius:999px; text-decoration:none; white-space:nowrap;
+  }
+  .account-btn:hover, .account-btn.active{border-color:var(--brand); color:var(--brand);}
+  .account-btn svg{width:15px; height:15px;}
+  @media (max-width:820px){ .account-btn .account-label{display:none;} .account-btn{padding:9px 11px;} }
+
+  .flash{margin-top:20px; background:var(--green-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--green) 40%, transparent); border-radius:12px; padding:13px 16px; font-size:.95rem;}
+  .wrap.narrow{max-width:520px;}
+  .card-title{font-size:2.2rem; text-transform:uppercase;}
+  .lead{margin-top:10px; color:var(--ink-soft); line-height:1.6;}
+  .form-foot{margin-top:18px; font-size:.9rem; color:var(--ink-soft); line-height:1.7;}
+  .form-foot a{color:var(--brand); font-weight:600; text-decoration:none;}
+  .field .err{font-size:.8rem; color:var(--danger);}
+  .check.inline{border:none; background:none; padding:0; align-items:flex-start; font-size:.9rem;}
+  .check.inline:has(input:checked){background:none;}
+  .check.inline a{color:var(--brand);}
+
+  .portal-head{display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:24px;}
+  .portal-head h1{font-size:clamp(2rem,5vw,2.8rem); text-transform:uppercase;}
+  .portal-head p{margin-top:8px; color:var(--ink-soft);}
+  .portal-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .btn.small{padding:8px 14px; font-size:.84rem;}
+  .btn.danger{background:none; border-color:color-mix(in srgb, var(--danger) 50%, transparent); color:var(--danger);}
+
+  .tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;}
+  .tabs a{font-family:'IBM Plex Mono',monospace; font-size:.8rem; text-decoration:none; padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft);}
+  .tabs a.on{background:var(--brand); border-color:var(--brand); color:var(--brand-ink);}
+  .tabs a .count{opacity:.75; margin-left:4px;}
+
+  .table-wrap{overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:14px;}
+  table.list{width:100%; border-collapse:collapse; font-size:.92rem; min-width:620px;}
+  table.list th{text-align:left; font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); padding:12px 14px; border-bottom:1px solid var(--border); background:var(--bg-alt);}
+  table.list td{padding:13px 14px; border-bottom:1px solid var(--border); vertical-align:middle; font-variant-numeric:tabular-nums;}
+  table.list tr:last-child td{border-bottom:none;}
+  table.list td.muted{color:var(--ink-soft);}
+  table.list td.actions{text-align:right;}
+  table.list a.row-link{font-weight:600; color:var(--brand); text-decoration:none;}
+  @media (max-width:680px){
+    .table-wrap.stack{background:none; border:none; overflow:visible;}
+    .stack table.list{min-width:0;}
+    .stack table.list thead{display:none;}
+    .stack table.list tr{display:block; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:6px 16px; margin-bottom:10px;}
+    .stack table.list td{display:flex; justify-content:space-between; align-items:center; gap:14px; padding:9px 0; border-bottom:1px solid var(--border); text-align:right;}
+    .stack table.list tr td:last-child{border-bottom:none;}
+    .stack table.list td[data-label]::before{content:attr(data-label); font-family:'IBM Plex Mono',monospace; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); text-align:left; flex:none;}
+    .stack table.list td.actions{justify-content:flex-end;}
+    .stack table.list td.actions:empty{display:none;}
+  }
+  .empty{background:var(--surface); border:1px dashed var(--border); border-radius:14px; padding:36px; text-align:center; color:var(--ink-soft);}
+  .empty .btn{margin-top:16px;}
+
+  .pill{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:4px 9px; border-radius:999px; white-space:nowrap;}
+  .pill-ny{background:color-mix(in srgb, var(--orange) 18%, transparent); color:var(--orange);}
+  .pill-bekraftad{background:var(--brand-soft); color:var(--brand-deep);}
+  .pill-levererad{background:var(--green-soft); color:var(--green);}
+  .pill-avbruten{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
+  .pill-off{background:color-mix(in srgb, var(--danger) 14%, transparent); color:var(--danger);}
+
+  .detail-grid{display:grid; grid-template-columns:1.4fr .9fr; gap:18px; align-items:start;}
+  @media (max-width:820px){ .detail-grid{grid-template-columns:1fr;} }
+  .detail-card{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px;}
+  .detail-card + .detail-card{margin-top:16px;}
+  .detail-card h2{font-family:'IBM Plex Mono',monospace; font-weight:500; font-size:.74rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); margin-bottom:14px; line-height:1.3;}
+  dl.kv{display:grid; grid-template-columns:auto 1fr; gap:10px 18px; margin:0; font-size:.95rem;}
+  dl.kv dt{color:var(--ink-soft);}
+  dl.kv dd{margin:0; overflow-wrap:anywhere;}
+  .order-text{white-space:pre-wrap; font-size:.96rem; line-height:1.6; background:var(--bg); border-radius:10px; padding:14px; overflow-wrap:anywhere;}
+  .status-form{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .status-form select{width:auto;}
+  .back-link{display:inline-flex; align-items:center; gap:6px; color:var(--ink-soft); text-decoration:none; font-size:.9rem; margin-bottom:14px;}
+  .back-link:hover{color:var(--brand);}
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px;}
+  @media (max-width:720px){ .stat-row{grid-template-columns:1fr 1fr;} }
+  .stat-tile{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px;}
+  .stat-tile b{display:block; font-family:'Bebas Neue',sans-serif; font-weight:400; font-size:2.2rem; line-height:1; font-variant-numeric:tabular-nums;}
+  .stat-tile span{font-size:.8rem; color:var(--ink-soft);}
+  .stat-tile.warn b{color:var(--orange);}
+  .search{display:flex; gap:8px; margin-bottom:16px; max-width:420px;}
+
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
+  .prose{max-width:68ch;}
+  .prose h2{font-size:1.7rem; text-transform:uppercase; margin-top:34px;}
+  .prose h2:first-child{margin-top:0;}
+  .prose p, .prose li{color:var(--ink-soft); line-height:1.7; font-size:1rem;}
+  .prose p{margin-top:10px;}
+  .prose ul{margin:10px 0 0; padding-left:20px;}
+  .prose li + li{margin-top:6px;}
+  .prose a{color:var(--brand);}
+
   /* footer */
   footer.site-footer{background:var(--bg-alt); border-top:1px solid var(--border); padding-block:40px;}
   .footer-grid{display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:28px;}
@@ -369,13 +467,19 @@ function navClass($key, $active) { return $key === $active ? ' class="active"' :
 <header class="nav">
   <div class="nav-inner">
     <a class="logo-chip" href="index.php" aria-label="Ludvika Partiaffär – till startsidan"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
-    <ul class="nav-links">
-      <li><a href="index.php"<?php echo navClass('hem', $active); ?>>Hem</a></li>
-      <li><a href="sortiment.php"<?php echo navClass('sortiment', $active); ?>>Sortiment</a></li>
-      <li><a href="bestall.php"<?php echo navClass('bestall', $active); ?>>Beställ</a></li>
-      <li><a href="kontakt.php"<?php echo navClass('kontakt', $active); ?>>Kontakt</a></li>
-    </ul>
+    <ul class="nav-links"><?php echo $navItems; ?></ul>
     <div style="display:flex; gap:10px; align-items:center;">
+      <?php if ($navUser): ?>
+        <a class="account-btn<?php echo in_array($active, ['konto', 'admin'], true) ? ' active' : ''; ?>" href="<?php echo $navUser['role'] === 'admin' ? 'admin.php' : 'konto.php'; ?>">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          <span class="account-label"><?php echo $navUser['role'] === 'admin' ? 'Admin' : 'Mitt konto'; ?></span>
+        </a>
+      <?php else: ?>
+        <a class="account-btn<?php echo $active === 'login' ? ' active' : ''; ?>" href="logga-in.php">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+          <span class="account-label">Logga in</span>
+        </a>
+      <?php endif; ?>
       <a class="call-btn" href="tel:+4624018355" aria-label="Ring 0240-183 55">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .8 3a2 2 0 0 1-.4 2.1L8.1 10a16 16 0 0 0 6 6l1.2-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .7 3 .8a2 2 0 0 1 1.7 2Z"/></svg>
         <span class="call-label">0240-183 55</span>
@@ -387,12 +491,19 @@ function navClass($key, $active) { return $key === $active ? ' class="active"' :
   </div>
   <nav class="mobile-menu" id="mobileMenu" aria-label="Mobilmeny">
     <ul>
-      <li><a href="index.php"<?php echo navClass('hem', $active); ?>>Hem</a></li>
-      <li><a href="sortiment.php"<?php echo navClass('sortiment', $active); ?>>Sortiment</a></li>
-      <li><a href="bestall.php"<?php echo navClass('bestall', $active); ?>>Beställ</a></li>
-      <li><a href="kontakt.php"<?php echo navClass('kontakt', $active); ?>>Kontakt</a></li>
+      <?php echo $navItems; ?>
+      <?php if ($navUser): ?>
+        <li><a href="<?php echo $navUser['role'] === 'admin' ? 'admin.php' : 'konto.php'; ?>"><?php echo $navUser['role'] === 'admin' ? 'Admin' : 'Mitt konto'; ?></a></li>
+        <li><a href="logga-ut.php">Logga ut</a></li>
+      <?php else: ?>
+        <li><a href="logga-in.php">Logga in</a></li>
+        <li><a href="registrera.php">Skapa konto</a></li>
+      <?php endif; ?>
     </ul>
   </nav>
 </header>
 
 <main>
+<?php if ($flashMsg = flash()): ?>
+  <div class="wrap"><div class="flash" role="status"><?php echo e($flashMsg); ?></div></div>
+<?php endif; ?>

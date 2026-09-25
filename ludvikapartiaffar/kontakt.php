@@ -1,4 +1,5 @@
 <?php
+require __DIR__ . '/includes/app.php';
 $active = 'kontakt';
 $pageTitle = 'Kontakt – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';

@@ -1,7 +1,7 @@
 <?php
 $active = 'hem';
 $pageTitle = 'Ludvika Partiaffär – Grossist för restaurang & pizzeria i Dalarna';
-require __DIR__ . '/includes/sortiment-data.php';
+require __DIR__ . '/includes/app.php';
 require __DIR__ . '/includes/head.php';
 ?>
 

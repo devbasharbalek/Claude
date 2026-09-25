@@ -1,7 +1,7 @@
 <?php
 $active = 'sortiment';
 $pageTitle = 'Sortiment – Ludvika Partiaffär';
-require __DIR__ . '/includes/sortiment-data.php';
+require __DIR__ . '/includes/app.php';
 require __DIR__ . '/includes/head.php';
 ?>
 
