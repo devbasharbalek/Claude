@@ -35,7 +35,7 @@ require __DIR__ . '/includes/head.php';
         <p>Kryssa i varugrupperna och skriv vad du behöver i beställningsformuläret, så återkommer vi med bekräftelse.</p>
       </div>
       <div class="actions">
-        <a class="btn light" href="bestall.php">Till beställningen</a>
+        <a class="btn accent" href="bestall.php">Till beställningen</a>
         <a class="btn outline" href="tel:+4624018355">Ring oss</a>
       </div>
     </div>

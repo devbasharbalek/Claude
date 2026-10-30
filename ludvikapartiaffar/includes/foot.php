@@ -49,6 +49,29 @@
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
   }
+
+  // Ljust/mörkt läge. Utan eget val följer sidan enhetens inställning.
+  var root = document.documentElement;
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  var knappar = document.querySelectorAll('[data-tema]');
+  function tema(){ return root.getAttribute('data-theme') || (mq && mq.matches ? 'dark' : 'light'); }
+  function visa(){
+    var mork = tema() === 'dark';
+    for (var i = 0; i < knappar.length; i++) {
+      knappar[i].setAttribute('aria-checked', mork ? 'true' : 'false');
+      knappar[i].title = mork ? 'Byt till ljust läge' : 'Byt till mörkt läge';
+    }
+  }
+  for (var i = 0; i < knappar.length; i++) {
+    knappar[i].addEventListener('click', function(){
+      var nytt = tema() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', nytt);
+      try { localStorage.setItem('lp-tema', nytt); } catch (e) {}
+      visa();
+    });
+  }
+  if (mq && mq.addEventListener) mq.addEventListener('change', visa);
+  visa();
 })();
 </script>
 </body>

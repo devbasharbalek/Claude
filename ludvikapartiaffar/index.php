@@ -11,7 +11,7 @@ require __DIR__ . '/includes/head.php';
     <h1 class="headline">Din lokala leverantör sedan 60-talet</h1>
     <p class="hero-sub">Ludvika Partiaffär levererar frukt, grönt och ett brett storkökssortiment till restauranger och pizzerior i hela Dalarna &mdash; snabbt, pålitligt och med personlig service.</p>
     <div class="hero-actions">
-      <a class="btn light" href="bestall.php">
+      <a class="btn accent" href="bestall.php">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>
         Skicka beställning
       </a>
@@ -89,7 +89,7 @@ require __DIR__ . '/includes/head.php';
         <p>Fyll i vårt beställningsformulär så återkommer vi med bekräftelse, eller ring oss direkt under öppettiderna.</p>
       </div>
       <div class="actions">
-        <a class="btn light" href="bestall.php">Till beställningen</a>
+        <a class="btn accent" href="bestall.php">Till beställningen</a>
         <a class="btn outline" href="tel:+4624018355">0240-183 55</a>
       </div>
     </div>

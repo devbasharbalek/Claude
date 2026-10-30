@@ -15,57 +15,89 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 <meta name="referrer" content="same-origin">
 <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
 <meta name="description" content="Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för restauranger och pizzerior i hela Dalarna sedan 60-talet.">
+<script>try{var t=localStorage.getItem('lp-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
+  /* Profilfärger: logoblå #032CB9, gul #F7CC11 och vitt */
   :root{
-    --bg:#FAF7F0;
-    --bg-alt:#F1EADB;
+    color-scheme:light;
+    --bg:#FFFFFF;
+    --bg-alt:#F1F4FB;
     --surface:#FFFFFF;
-    --ink:#0E1030;
-    --ink-soft:#54536E;
-    --brand:#1414F0;
-    --brand-deep:#0000AD;
+    --ink:#0A1236;
+    --ink-soft:#4E5878;
+    --brand:#032CB9;
+    --brand-deep:#021F86;
     --brand-ink:#FFFFFF;
-    --brand-soft:#E4E3FF;
-    --green:#2E8B46;
+    --brand-soft:#E6ECFC;
+    --accent:#F7CC11;
+    --accent-ink:#0A1236;
+    --accent-soft:#FEF6D2;
+    --accent-text:#7A5A00;
+    --hero:#032CB9;
+    --hero-deep:#021F86;
+    --panel:#0A1236;
+    --panel-2:#16204D;
+    --topbar-bg:#F7CC11;
+    --topbar-ink:#0A1236;
+    --green:#1E7A3A;
     --green-soft:#E3F3E6;
-    --orange:#E1611F;
-    --border:#E3DBC7;
+    --border:#DCE2EF;
     --danger:#C62828;
-    --shadow: 0 1px 2px rgba(14,16,48,.05), 0 10px 28px -14px rgba(14,16,48,.22);
+    --shadow: 0 1px 2px rgba(10,18,54,.05), 0 10px 28px -14px rgba(10,18,54,.22);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0B0C22;
-      --bg-alt:#12142E;
-      --surface:#171939;
-      --ink:#F2F1FA;
-      --ink-soft:#B4B3CE;
-      --brand:#7981FF;
-      --brand-deep:#B4B9FF;
-      --brand-ink:#0B0C22;
-      --brand-soft:#242552;
+      color-scheme:dark;
+      --bg:#080D22;
+      --bg-alt:#0E1530;
+      --surface:#131B3B;
+      --ink:#EEF1FA;
+      --ink-soft:#A9B1CF;
+      --brand:#7D98FF;
+      --brand-deep:#B9C8FF;
+      --brand-ink:#08102E;
+      --brand-soft:#1B2756;
+      --accent:#F7CC11;
+      --accent-ink:#0A1236;
+      --accent-soft:#332C0C;
+      --accent-text:#F7CC11;
+      --hero:#032CB9;
+      --hero-deep:#021F86;
+      --panel:#131B3B;
+      --panel-2:#1C2650;
+      --topbar-bg:#0E1530;
+      --topbar-ink:#F7CC11;
       --green:#5FC77E;
-      --green-soft:#173322;
-      --orange:#F0925F;
-      --border:#2A2C51;
+      --green-soft:#143022;
+      --border:#26305A;
       --danger:#FF8A80;
       --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.6);
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0B0C22;
-    --bg-alt:#12142E;
-    --surface:#171939;
-    --ink:#F2F1FA;
-    --ink-soft:#B4B3CE;
-    --brand:#7981FF;
-    --brand-deep:#B4B9FF;
-    --brand-ink:#0B0C22;
-    --brand-soft:#242552;
+    color-scheme:dark;
+    --bg:#080D22;
+    --bg-alt:#0E1530;
+    --surface:#131B3B;
+    --ink:#EEF1FA;
+    --ink-soft:#A9B1CF;
+    --brand:#7D98FF;
+    --brand-deep:#B9C8FF;
+    --brand-ink:#08102E;
+    --brand-soft:#1B2756;
+    --accent:#F7CC11;
+    --accent-ink:#0A1236;
+    --accent-soft:#332C0C;
+    --accent-text:#F7CC11;
+    --hero:#032CB9;
+    --hero-deep:#021F86;
+    --panel:#131B3B;
+    --panel-2:#1C2650;
+    --topbar-bg:#0E1530;
+    --topbar-ink:#F7CC11;
     --green:#5FC77E;
-    --green-soft:#173322;
-    --orange:#F0925F;
-    --border:#2A2C51;
+    --green-soft:#143022;
+    --border:#26305A;
     --danger:#FF8A80;
     --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.6);
   }
@@ -90,7 +122,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   p{margin:0;}
   a{color:inherit;}
   img{max-width:100%; display:block;}
-  ::selection{background:var(--brand); color:var(--brand-ink);}
+  ::selection{background:var(--accent); color:var(--accent-ink);}
   :focus-visible{outline:2px solid var(--brand); outline-offset:2px;}
 
   .wrap{max-width:1120px; margin-inline:auto; padding-inline:24px;}
@@ -99,18 +131,18 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
     display:inline-flex; align-items:center; gap:8px;
     font-family:'IBM Plex Mono', monospace;
     font-size:.76rem; text-transform:uppercase; letter-spacing:.1em;
-    color:var(--green);
+    color:var(--brand);
   }
-  .eyebrow::before{content:""; width:7px; height:7px; border-radius:2px; background:var(--orange); transform:rotate(45deg);}
+  .eyebrow::before{content:""; width:7px; height:7px; border-radius:2px; background:var(--accent); transform:rotate(45deg);}
 
   /* top bar */
   .topbar{
-    background:var(--bg-alt); border-bottom:1px solid var(--border);
-    font-family:'IBM Plex Mono', monospace; font-size:.76rem; color:var(--ink-soft);
+    background:var(--topbar-bg); color:var(--topbar-ink);
+    font-family:'IBM Plex Mono', monospace; font-size:.76rem; font-weight:500;
   }
   .topbar .wrap{padding-block:7px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;}
   .topbar a{text-decoration:none;}
-  .topbar a:hover{color:var(--brand);}
+  .topbar a:hover{text-decoration:underline;}
 
   /* nav */
   header.nav{
@@ -166,26 +198,25 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
     display:inline-flex; align-items:center; gap:8px;
     border:1.5px solid transparent; cursor:pointer;
   }
-  .btn.light{background:#fff; color:#0000AD;}
+  .btn.accent{background:var(--accent); color:var(--accent-ink);}
   .btn.outline{border-color:rgba(255,255,255,.55); color:#fff;}
   .btn.primary{background:var(--brand); color:var(--brand-ink);}
   .btn.ghost{border-color:var(--border); color:var(--ink); background:var(--surface);}
   .btn svg{width:16px; height:16px;}
 
   /* hero */
-  .hero{background:#1414F0; color:#fff; padding-block:64px 0;}
+  .hero{background:var(--hero); color:#fff; padding-block:64px 0;}
   .hero-inner{max-width:1120px; margin-inline:auto; padding-inline:24px; display:grid; gap:16px;}
-  .hero .eyebrow{color:#CFE8FF;}
+  .hero .eyebrow, .page-hero .eyebrow{color:var(--accent);}
   h1.headline{font-size:clamp(2.6rem, 7vw, 5rem); max-width:14ch; text-transform:uppercase;}
   .hero-sub{margin-top:14px; font-size:1.1rem; line-height:1.6; color:#E4E6FF; max-width:52ch;}
   .hero-actions{margin-top:26px; display:flex; gap:12px; flex-wrap:wrap;}
 
-  .page-hero{background:#1414F0; color:#fff; padding-block:52px 48px;}
-  .page-hero .eyebrow{color:#CFE8FF;}
+  .page-hero{background:var(--hero); color:#fff; padding-block:52px 48px;}
   .page-hero h1{font-size:clamp(2.4rem, 6vw, 4rem); text-transform:uppercase; margin-top:10px;}
   .page-hero p{margin-top:14px; font-size:1.05rem; line-height:1.6; color:#E4E6FF; max-width:56ch;}
 
-  .stat-strip{margin-top:44px; background:#0000AD;}
+  .stat-strip{margin-top:44px; background:var(--hero-deep);}
   .stat-inner{max-width:1120px; margin-inline:auto; display:grid; grid-template-columns:repeat(3,1fr);}
   .stat{padding:20px 24px; border-left:1px solid rgba(255,255,255,.18); font-family:'IBM Plex Mono', monospace;}
   .stat:first-child{border-left:none;}
@@ -244,7 +275,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 
   /* cta band */
   .cta-band{
-    background:#1414F0; color:#fff; border-radius:20px; padding:40px;
+    background:var(--hero); color:#fff; border-radius:20px; padding:40px;
     display:flex; justify-content:space-between; align-items:center; gap:24px; flex-wrap:wrap;
   }
   .cta-band h2{font-size:clamp(1.8rem,4vw,2.6rem); text-transform:uppercase;}
@@ -253,19 +284,19 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 
   /* delivery */
   .leverans{
-    background:#0E1030; color:#F2F1FA; border-radius:20px; padding:40px;
+    background:var(--panel); color:#EEF1FA; border-radius:20px; padding:40px;
     display:grid; grid-template-columns:1.1fr .9fr; gap:32px; align-items:center;
   }
   @media (max-width:800px){ .leverans{grid-template-columns:1fr; padding:28px;} }
-  .leverans .eyebrow{color:#9FA1D6;}
+  .leverans .eyebrow{color:var(--accent);}
   .leverans h2{color:#fff; text-transform:uppercase; font-size:clamp(1.6rem,3.4vw,2.2rem); margin-top:10px;}
-  .leverans p{color:#C9C9DA; margin-top:14px; font-size:.98rem; line-height:1.65;}
+  .leverans p{color:#C5CBE3; margin-top:14px; font-size:.98rem; line-height:1.65;}
   .leverans-days{display:flex; gap:8px; margin-top:20px; flex-wrap:wrap;}
-  .day-chip{font-family:'IBM Plex Mono',monospace; font-size:.76rem; padding:7px 12px; border-radius:999px; border:1px solid #33355A; color:#9FA1D6;}
-  .day-chip.on{background:#E1611F; border-color:#E1611F; color:#1A0D05;}
-  .leverans-area{background:#171939; border-radius:14px; padding:24px;}
+  .day-chip{font-family:'IBM Plex Mono',monospace; font-size:.76rem; padding:7px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.2); color:#A9B1CF;}
+  .day-chip.on{background:var(--accent); border-color:var(--accent); color:var(--accent-ink); font-weight:600;}
+  .leverans-area{background:var(--panel-2); border-radius:14px; padding:24px;}
   .leverans-area b{font-family:'Bebas Neue',sans-serif; font-weight:400; font-size:1.5rem; color:#fff; display:block; text-transform:uppercase;}
-  .leverans-area span{font-size:.88rem; color:#AEB0DA; display:block; margin-top:8px; line-height:1.6;}
+  .leverans-area span{font-size:.88rem; color:#B3BBDA; display:block; margin-top:8px; line-height:1.6;}
 
   /* contact */
   .kontakt-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
@@ -282,7 +313,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .kontakt-row a:hover{color:var(--brand);}
   .maps-link{display:inline-flex; align-items:center; gap:6px; margin-top:18px; font-size:.88rem; color:var(--brand); text-decoration:none; font-weight:600;}
   .maps-link svg{width:14px; height:14px;}
-  .cta-card{background:#1414F0; color:#fff; border-radius:16px; padding:26px; display:flex; flex-direction:column; justify-content:center; gap:12px;}
+  .cta-card{background:var(--hero); color:#fff; border-radius:16px; padding:26px; display:flex; flex-direction:column; justify-content:center; gap:12px;}
   .cta-card h3{font-size:1.8rem; text-transform:uppercase;}
   .cta-card p{font-size:.94rem; color:#E4E6FF; line-height:1.6;}
   .cta-card .btn{margin-top:6px; align-self:flex-start;}
@@ -299,7 +330,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .field{display:flex; flex-direction:column; gap:6px;}
   .field.full{grid-column:1 / -1;}
   .field label{font-size:.86rem; font-weight:600;}
-  .field label .req{color:var(--orange);}
+  .field label .req{color:var(--accent-text);}
   .field .hint{font-size:.8rem; color:var(--ink-soft);}
   input[type=text], input[type=email], input[type=tel], input[type=password], input[type=search], input[type=number], input[type=date], input[type=time], select, textarea{
     font:inherit; font-size:.96rem; color:var(--ink);
@@ -402,7 +433,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .empty .btn{margin-top:16px;}
 
   .pill{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:.72rem; font-weight:600; text-transform:uppercase; letter-spacing:.04em; padding:4px 9px; border-radius:999px; white-space:nowrap;}
-  .pill-ny{background:color-mix(in srgb, var(--orange) 18%, transparent); color:var(--orange);}
+  .pill-ny{background:var(--accent-soft); color:var(--accent-text);}
   .pill-bekraftad{background:var(--brand-soft); color:var(--brand-deep);}
   .pill-levererad{background:var(--green-soft); color:var(--green);}
   .pill-avbruten{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
@@ -417,7 +448,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   dl.kv{display:grid; grid-template-columns:auto 1fr; gap:10px 18px; margin:0; font-size:.95rem;}
   dl.kv dt{color:var(--ink-soft);}
   dl.kv dd{margin:0; overflow-wrap:anywhere;}
-  .order-text{white-space:pre-wrap; font-size:.96rem; line-height:1.6; background:var(--bg); border-radius:10px; padding:14px; overflow-wrap:anywhere;}
+  .order-text{white-space:pre-wrap; font-size:.96rem; line-height:1.6; background:var(--bg-alt); border-radius:10px; padding:14px; overflow-wrap:anywhere;}
   .status-form{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
   .status-form select{width:auto;}
   .back-link{display:inline-flex; align-items:center; gap:6px; color:var(--ink-soft); text-decoration:none; font-size:.9rem; margin-bottom:14px;}
@@ -427,23 +458,23 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .stat-tile{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px;}
   .stat-tile b{display:block; font-family:'Bebas Neue',sans-serif; font-weight:400; font-size:2.2rem; line-height:1; font-variant-numeric:tabular-nums;}
   .stat-tile span{font-size:.8rem; color:var(--ink-soft);}
-  .stat-tile.warn b{color:var(--orange);}
+  .stat-tile.warn b{color:var(--accent-text);}
   .search{display:flex; gap:8px; margin-bottom:16px; max-width:420px;}
 
   /* superklipp */
   .pill-utkast{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
   .pill-oppen{background:var(--green-soft); color:var(--green);}
   .pill-stangd{background:var(--brand-soft); color:var(--brand-deep);}
-  .pill-topp{background:color-mix(in srgb, var(--orange) 18%, transparent); color:var(--orange); font-size:.62rem; padding:3px 7px; margin-left:6px; vertical-align:2px;}
+  .pill-topp{background:var(--accent); color:var(--accent-ink); font-size:.62rem; padding:3px 7px; margin-left:6px; vertical-align:2px;}
   .alert.info{background:var(--green-soft); border:1px solid color-mix(in srgb, var(--green) 40%, transparent); color:var(--ink);}
-  .alert.warn{background:color-mix(in srgb, var(--orange) 12%, transparent); border:1px solid color-mix(in srgb, var(--orange) 45%, transparent); color:var(--ink);}
+  .alert.warn{background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 70%, transparent); color:var(--ink);}
   .alert ul{margin:6px 0 0; padding-left:20px;}
 
-  .sk-deadline{display:inline-flex; flex-direction:column; gap:2px; background:#fff; color:#0000AD; border-radius:12px; padding:11px 16px; font-weight:700; font-size:1.02rem; margin-top:20px;}
-  .sk-deadline small{font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:#54536E; font-weight:500;}
+  .sk-deadline{display:inline-flex; flex-direction:column; gap:2px; background:var(--accent); color:var(--accent-ink); border-radius:12px; padding:11px 16px; font-weight:700; font-size:1.02rem; margin-top:20px;}
+  .sk-deadline small{font-family:'IBM Plex Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:#3D4462; font-weight:500;}
   .sk-veckor{display:flex; gap:8px; flex-wrap:wrap; margin-top:18px;}
   .sk-veckor a{font-family:'IBM Plex Mono',monospace; font-size:.8rem; text-decoration:none; padding:7px 13px; border-radius:999px; border:1px solid rgba(255,255,255,.5); color:#fff;}
-  .sk-veckor a.on{background:#fff; color:#0000AD; border-color:#fff;}
+  .sk-veckor a.on{background:var(--accent); color:var(--accent-ink); border-color:var(--accent);}
   .sk-tools{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .sk-tools input[type=search]{max-width:320px;}
   .sk-tools .form-note{margin:0;}
@@ -456,7 +487,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .sk-table th.num{text-align:right;}
   .sk-table td{padding:9px 14px; border-bottom:1px solid var(--border); vertical-align:middle; font-variant-numeric:tabular-nums;}
   .sk-table tr:last-child td{border-bottom:none;}
-  .sk-table tr.sk-kat td{background:var(--bg); font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:.02em; padding:12px 14px 7px; color:var(--brand);}
+  .sk-table tr.sk-kat td{background:var(--bg-alt); font-family:'Bebas Neue',sans-serif; font-size:1.4rem; letter-spacing:.02em; padding:12px 14px 7px; color:var(--brand);}
   .sk-table td.muted{color:var(--ink-soft);}
   .sk-table td.pris{text-align:right; font-weight:700; white-space:nowrap;}
   .sk-table td.pris small{font-weight:500; color:var(--ink-soft);}
@@ -495,12 +526,33 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .sk-edit input[type=text]{padding:7px 8px; font-size:.88rem; border-radius:8px;}
   .sk-edit .c-kat{width:130px;} .sk-edit .c-urs{width:70px;} .sk-edit .c-vikt{width:100px;} .sk-edit .c-enh{width:70px;} .sk-edit .c-pris{width:96px;}
   .sk-edit .c-topp{width:64px; text-align:center;}
-  .sk-edit .c-topp input{width:18px; height:18px; accent-color:var(--orange);}
+  .sk-edit .c-topp input{width:18px; height:18px; accent-color:var(--brand);}
   .sk-edit .c-x{width:40px; text-align:center;}
   .sk-edit .ta-bort{background:none; border:none; color:var(--ink-soft); cursor:pointer; font-size:1.2rem; line-height:1; padding:6px 8px; border-radius:8px;}
   .sk-edit .ta-bort:hover{color:var(--danger); background:color-mix(in srgb, var(--danger) 10%, transparent);}
   textarea.mejl{min-height:380px; font-size:.9rem;}
   details.sk-import summary{cursor:pointer; font-weight:600; color:var(--brand);}
+
+  /* ljust/mörkt läge */
+  .theme-switch{
+    position:relative; flex:none; width:58px; height:32px; padding:0; cursor:pointer;
+    border:1px solid var(--border); border-radius:999px; background:var(--bg-alt);
+  }
+  .theme-switch .knob{
+    position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--accent); color:var(--accent-ink); box-shadow:0 1px 3px rgba(0,0,0,.25);
+    transition:transform .2s ease, background-color .2s ease;
+  }
+  .theme-switch svg{width:14px; height:14px;}
+  .theme-switch .i-moon{display:none;}
+  .theme-switch[aria-checked="true"] .knob{transform:translateX(26px); background:var(--brand); color:var(--brand-ink);}
+  .theme-switch[aria-checked="true"] .i-sun{display:none;}
+  .theme-switch[aria-checked="true"] .i-moon{display:block;}
+  .theme-switch:hover{border-color:var(--brand);}
+  @media (prefers-reduced-motion: reduce){ .theme-switch .knob{transition:none;} }
+  .menu-theme{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; font-size:1rem;}
+  @media (max-width:820px){ .nav-theme{display:none;} }
 
   .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
   .prose{max-width:68ch;}
@@ -543,6 +595,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
     <a class="logo-chip" href="index.php" aria-label="Ludvika Partiaffär – till startsidan"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
     <ul class="nav-links"><?php echo $navItems; ?></ul>
     <div style="display:flex; gap:10px; align-items:center;">
+      <button type="button" class="theme-switch nav-theme" data-tema role="switch" aria-checked="false" aria-label="Mörkt läge" title="Byt till mörkt läge"><span class="knob" aria-hidden="true"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></span></button>
       <?php if ($navUser): ?>
         <a class="account-btn<?php echo in_array($active, ['konto', 'admin'], true) ? ' active' : ''; ?>" href="<?php echo $navUser['role'] === 'admin' ? 'admin.php' : 'konto.php'; ?>">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
@@ -573,6 +626,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
         <li><a href="logga-in.php">Logga in</a></li>
         <li><a href="registrera.php">Skapa konto</a></li>
       <?php endif; ?>
+      <li class="menu-theme"><span>Mörkt läge</span><button type="button" class="theme-switch" data-tema role="switch" aria-checked="false" aria-label="Mörkt läge" title="Byt till mörkt läge"><span class="knob" aria-hidden="true"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></span></button></li>
     </ul>
   </nav>
 </header>

@@ -43,7 +43,7 @@ require __DIR__ . '/includes/head.php';
         <h3>Redo att beställa?</h3>
         <p>Skicka en beställningsförfrågan via formuläret, eller ring oss direkt så hjälper vi dig &mdash; från fast leverans till en enstaka extrabeställning.</p>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <a class="btn light" href="bestall.php">Till beställningen</a>
+          <a class="btn accent" href="bestall.php">Till beställningen</a>
           <a class="btn outline" href="tel:+4624018355">Ring oss</a>
         </div>
       </div>
