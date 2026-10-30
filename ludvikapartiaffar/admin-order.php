@@ -11,6 +11,8 @@ if (!$order) {
   http_response_code(404);
   exit('Beställningen finns inte.');
 }
+superklipp_schema();
+$osk = order_superklipp($id);
 
 $statusMejl = [
   'bekraftad' => "Din beställning #%d är nu bekräftad. Vi levererar enligt överenskommelse.",
@@ -62,9 +64,14 @@ require __DIR__ . '/includes/head.php';
         <div class="detail-card">
           <h2>Beställning</h2>
           <dl class="kv">
-            <dt>Leveransdag</dt><dd><?php echo e($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']); ?></dd>
-            <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
+            <dt>Leveransdag</dt><dd><?php echo e(($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']) . ($osk ? ' ' . date('j/n', strtotime($osk['leveransdatum'])) : '')); ?></dd>
+            <?php if ($osk): ?>
+              <dt>Från</dt><dd><?php if ($osk['superklipp_id']): ?><a href="admin-superklipp-redigera.php?id=<?php echo (int)$osk['superklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php else: ?><?php echo e($osk['etikett']); ?><?php endif; ?></dd>
+            <?php else: ?>
+              <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
+            <?php endif; ?>
           </dl>
+          <?php if ($osk) echo sk_order_tabell(order_rader($id)); ?>
           <div class="order-text" style="margin-top:16px;"><?php echo $order['meddelande'] !== '' ? e($order['meddelande']) : '<span style="color:var(--ink-soft)">Inget meddelande</span>'; ?></div>
         </div>
 

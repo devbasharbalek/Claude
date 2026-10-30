@@ -247,3 +247,4 @@ function kategori_namn(string $csv): string {
 }
 
 require __DIR__ . '/sortiment-data.php';
+require __DIR__ . '/superklipp.php';

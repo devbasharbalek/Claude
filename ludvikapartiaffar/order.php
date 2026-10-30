@@ -3,6 +3,8 @@ require __DIR__ . '/includes/app.php';
 $user = require_login();
 
 $order = order_for_user((int)($_GET['id'] ?? 0), (int)$user['id']);
+superklipp_schema();
+$osk = $order ? order_superklipp((int)$order['id']) : null;
 if (!$order) {
   http_response_code(404);
   $active = 'konto';
@@ -27,7 +29,11 @@ require __DIR__ . '/includes/head.php';
         <p>Skickad <?php echo e(datum($order['created_at'])); ?><?php if ($order['updated_at'] !== $order['created_at']): ?> &middot; uppdaterad <?php echo e(datum($order['updated_at'])); ?><?php endif; ?></p>
       </div>
       <div class="portal-actions">
-        <a class="btn primary" href="bestall.php?igen=<?php echo (int)$order['id']; ?>">Beställ samma igen</a>
+        <?php if ($osk): ?>
+          <a class="btn primary" href="superklipp.php">Till veckans superklipp</a>
+        <?php else: ?>
+          <a class="btn primary" href="bestall.php?igen=<?php echo (int)$order['id']; ?>">Beställ samma igen</a>
+        <?php endif; ?>
       </div>
     </div>
 
@@ -36,9 +42,14 @@ require __DIR__ . '/includes/head.php';
         <div class="detail-card">
           <h2>Beställning</h2>
           <dl class="kv">
-            <dt>Leveransdag</dt><dd><?php echo e($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']); ?></dd>
-            <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
+            <dt>Leveransdag</dt><dd><?php echo e(($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']) . ($osk ? ' ' . date('j/n', strtotime($osk['leveransdatum'])) : '')); ?></dd>
+            <?php if ($osk): ?>
+              <dt>Från</dt><dd><?php echo e($osk['etikett']); ?></dd>
+            <?php else: ?>
+              <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
+            <?php endif; ?>
           </dl>
+          <?php if ($osk) echo sk_order_tabell(order_rader((int)$order['id'])); ?>
           <?php if ($order['meddelande'] !== ''): ?>
             <div class="order-text" style="margin-top:16px;"><?php echo e($order['meddelande']); ?></div>
           <?php endif; ?>

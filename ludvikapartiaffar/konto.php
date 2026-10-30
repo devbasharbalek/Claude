@@ -3,9 +3,13 @@ require __DIR__ . '/includes/app.php';
 $user = require_login();
 if ($user['role'] === 'admin') redirect('admin.php');
 
-$st = db()->prepare('SELECT id, leveransdag, kategorier, status, created_at FROM orders WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 200');
+superklipp_schema();
+$st = db()->prepare('SELECT o.id, o.leveransdag, o.kategorier, o.status, o.created_at, os.etikett, os.leveransdatum
+                     FROM orders o LEFT JOIN order_superklipp os ON os.order_id = o.id
+                     WHERE o.user_id = ? ORDER BY o.created_at DESC, o.id DESC LIMIT 200');
 $st->execute([$user['id']]);
 $orders = $st->fetchAll();
+$oppnaKlipp = array_values(array_filter(sk_for_kunder(), 'sk_ar_oppen'));
 
 $active = 'konto';
 $pageTitle = 'Mitt konto – Ludvika Partiaffär';
@@ -26,6 +30,13 @@ require __DIR__ . '/includes/head.php';
       </div>
     </div>
 
+    <?php foreach ($oppnaKlipp as $klipp): ?>
+      <div class="sk-notis">
+        <p><strong><?php echo e(sk_etikett($klipp)); ?> är ute!</strong> Veckans bästa priser på frukt och grönt. Beställ senast <?php echo e(sk_deadline_text($klipp['deadline'])); ?>.</p>
+        <div class="actions"><a class="btn primary small" href="superklipp.php?id=<?php echo (int)$klipp['id']; ?>">Se superklippet</a></div>
+      </div>
+    <?php endforeach; ?>
+
     <h2 style="font-size:1.8rem; text-transform:uppercase; margin-bottom:14px;">Mina beställningar</h2>
 
     <?php if (!$orders): ?>
@@ -42,10 +53,10 @@ require __DIR__ . '/includes/head.php';
             <tr>
               <td data-label="Nr"><a class="row-link" href="order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
               <td data-label="Skickad" class="muted"><?php echo e(datum($o['created_at'])); ?></td>
-              <td data-label="Leveransdag"><?php echo e($leveransdagar[$o['leveransdag']] ?? $o['leveransdag']); ?></td>
-              <td data-label="Varugrupper" class="muted"><?php echo e(kategori_namn($o['kategorier'])); ?></td>
+              <td data-label="Leveransdag"><?php echo e(($leveransdagar[$o['leveransdag']] ?? $o['leveransdag']) . ($o['leveransdatum'] ? ' ' . date('j/n', strtotime($o['leveransdatum'])) : '')); ?></td>
+              <td data-label="Varugrupper" class="muted"><?php echo e($o['etikett'] ?? kategori_namn($o['kategorier'])); ?></td>
               <td data-label="Status"><?php echo status_pill($o['status']); ?></td>
-              <td class="actions"><a class="btn ghost small" href="bestall.php?igen=<?php echo (int)$o['id']; ?>">Beställ igen</a></td>
+              <td class="actions"><?php if ($o['etikett'] === null): ?><a class="btn ghost small" href="bestall.php?igen=<?php echo (int)$o['id']; ?>">Beställ igen</a><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
           </tbody>

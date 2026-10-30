@@ -52,8 +52,9 @@ $totalt = (int)$st->fetchColumn();
 $sidor = max(1, (int)ceil($totalt / $perSida));
 $sida = min($sida, $sidor);
 
-$st = db()->prepare("SELECT o.id, o.foretag, o.kontakt, o.leveransdag, o.kategorier, o.status, o.created_at, o.user_id
-                     FROM orders o WHERE $whereSql
+superklipp_schema();
+$st = db()->prepare("SELECT o.id, o.foretag, o.kontakt, o.leveransdag, o.kategorier, o.status, o.created_at, o.user_id, os.etikett, os.leveransdatum
+                     FROM orders o LEFT JOIN order_superklipp os ON os.order_id = o.id WHERE $whereSql
                      ORDER BY o.created_at DESC, o.id DESC LIMIT $perSida OFFSET " . (($sida - 1) * $perSida));
 $st->execute($params);
 $orders = $st->fetchAll();
@@ -84,6 +85,7 @@ require __DIR__ . '/includes/head.php';
         <p>Inloggad som <?php echo e($admin['kontakt']); ?></p>
       </div>
       <div class="portal-actions">
+        <a class="btn primary" href="admin-superklipp.php">Superklipp</a>
         <a class="btn ghost" href="admin-kunder.php">Kunder</a>
         <a class="btn ghost" href="profil.php">Mitt konto</a>
         <form method="post" action="logga-ut.php" style="margin:0;"><?php echo csrf_field(); ?><button class="btn ghost" type="submit">Logga ut</button></form>
@@ -126,8 +128,8 @@ require __DIR__ . '/includes/head.php';
               <td data-label="Nr"><a class="row-link" href="admin-order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
               <td data-label="Inkom" class="muted"><?php echo e(datum($o['created_at'])); ?></td>
               <td data-label="Företag"><div><strong><?php echo e($o['foretag']); ?></strong><br><span class="muted" style="font-size:.85rem;"><?php echo e($o['kontakt']); ?></span></div></td>
-              <td data-label="Leveransdag"><?php echo e($leveransdagar[$o['leveransdag']] ?? $o['leveransdag']); ?></td>
-              <td data-label="Varugrupper" class="muted"><?php echo e(kategori_namn($o['kategorier'])); ?></td>
+              <td data-label="Leveransdag"><?php echo e(($leveransdagar[$o['leveransdag']] ?? $o['leveransdag']) . ($o['leveransdatum'] ? ' ' . date('j/n', strtotime($o['leveransdatum'])) : '')); ?></td>
+              <td data-label="Varugrupper" class="muted"><?php echo e($o['etikett'] ?? kategori_namn($o['kategorier'])); ?></td>
               <td data-label="Konto" class="muted"><?php echo $o['user_id'] ? 'Kund' : 'Gäst'; ?></td>
               <td data-label="Status"><?php echo status_pill($o['status']); ?></td>
             </tr>
