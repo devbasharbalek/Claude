@@ -14,7 +14,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="same-origin">
 <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
-<meta name="description" content="Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för restauranger och pizzerior i hela Dalarna sedan 60-talet.">
+<meta name="description" content="Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för kommuner, restauranger, pizzerior och livsbutiker sedan 60-talet.">
 <script>try{var t=localStorage.getItem('lp-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
   /* Profilfärger: logoblå #032CB9, gul #F7CC11 och vitt */
@@ -35,6 +35,8 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
     --accent-text:#7A5A00;
     --hero:#032CB9;
     --hero-deep:#021F86;
+    --fill:#032CB9;
+    --fill-ink:#FFFFFF;
     --panel:#0A1236;
     --panel-2:#16204D;
     --topbar-bg:#F7CC11;
@@ -48,56 +50,60 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       color-scheme:dark;
-      --bg:#080D22;
-      --bg-alt:#0E1530;
-      --surface:#131B3B;
-      --ink:#EEF1FA;
-      --ink-soft:#A9B1CF;
-      --brand:#7D98FF;
-      --brand-deep:#B9C8FF;
-      --brand-ink:#08102E;
-      --brand-soft:#1B2756;
+      --bg:#121316;
+      --bg-alt:#191A1E;
+      --surface:#1F2126;
+      --ink:#F2F3F5;
+      --ink-soft:#A3A7B1;
+      --brand:#8EA4FF;
+      --brand-deep:#BFCBFF;
+      --brand-ink:#0B0F1F;
+      --brand-soft:#232A45;
       --accent:#F7CC11;
       --accent-ink:#0A1236;
-      --accent-soft:#332C0C;
+      --accent-soft:#2E2A14;
       --accent-text:#F7CC11;
       --hero:#032CB9;
       --hero-deep:#021F86;
-      --panel:#131B3B;
-      --panel-2:#1C2650;
-      --topbar-bg:#0E1530;
+      --fill:#032CB9;
+      --fill-ink:#FFFFFF;
+      --panel:#1F2126;
+      --panel-2:#2A2D33;
+      --topbar-bg:#191A1E;
       --topbar-ink:#F7CC11;
       --green:#5FC77E;
-      --green-soft:#143022;
-      --border:#26305A;
+      --green-soft:#16291C;
+      --border:#2D3036;
       --danger:#FF8A80;
       --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.6);
     }
   }
   :root[data-theme="dark"]{
     color-scheme:dark;
-    --bg:#080D22;
-    --bg-alt:#0E1530;
-    --surface:#131B3B;
-    --ink:#EEF1FA;
-    --ink-soft:#A9B1CF;
-    --brand:#7D98FF;
-    --brand-deep:#B9C8FF;
-    --brand-ink:#08102E;
-    --brand-soft:#1B2756;
+    --bg:#121316;
+    --bg-alt:#191A1E;
+    --surface:#1F2126;
+    --ink:#F2F3F5;
+    --ink-soft:#A3A7B1;
+    --brand:#8EA4FF;
+    --brand-deep:#BFCBFF;
+    --brand-ink:#0B0F1F;
+    --brand-soft:#232A45;
     --accent:#F7CC11;
     --accent-ink:#0A1236;
-    --accent-soft:#332C0C;
+    --accent-soft:#2E2A14;
     --accent-text:#F7CC11;
     --hero:#032CB9;
     --hero-deep:#021F86;
-    --panel:#131B3B;
-    --panel-2:#1C2650;
-    --topbar-bg:#0E1530;
+    --fill:#032CB9;
+    --fill-ink:#FFFFFF;
+    --panel:#1F2126;
+    --panel-2:#2A2D33;
+    --topbar-bg:#191A1E;
     --topbar-ink:#F7CC11;
     --green:#5FC77E;
-    --green-soft:#143022;
-    --border:#26305A;
+    --green-soft:#16291C;
+    --border:#2D3036;
     --danger:#FF8A80;
     --shadow: 0 1px 2px rgba(0,0,0,.35), 0 14px 34px -16px rgba(0,0,0,.6);
   }
@@ -167,7 +173,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .nav-links a.active{color:var(--ink); font-weight:600; border-bottom-color:var(--brand);}
   .call-btn{
     display:inline-flex; align-items:center; gap:8px;
-    background:var(--brand); color:var(--brand-ink);
+    background:var(--fill); color:var(--fill-ink);
     font-weight:600; font-size:.88rem;
     padding:10px 16px; border-radius:999px; text-decoration:none; white-space:nowrap;
   }
@@ -200,7 +206,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   }
   .btn.accent{background:var(--accent); color:var(--accent-ink);}
   .btn.outline{border-color:rgba(255,255,255,.55); color:#fff;}
-  .btn.primary{background:var(--brand); color:var(--brand-ink);}
+  .btn.primary{background:var(--fill); color:var(--fill-ink);}
   .btn.ghost{border-color:var(--border); color:var(--ink); background:var(--surface);}
   .btn svg{width:16px; height:16px;}
 
@@ -264,11 +270,11 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .link-arrow svg{width:16px; height:16px;}
 
   /* customers */
-  .kund-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-  @media (max-width:680px){ .kund-grid{grid-template-columns:1fr;} }
+  .kund-grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px;}
+  @media (max-width:860px){ .kund-grid{grid-template-columns:1fr;} }
   .kund-card{background:var(--bg-alt); border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:12px;}
   section.alt .kund-card{background:var(--surface);}
-  .kund-icon{width:44px; height:44px; border-radius:12px; background:var(--brand); color:var(--brand-ink); display:flex; align-items:center; justify-content:center;}
+  .kund-icon{width:44px; height:44px; border-radius:12px; background:var(--fill); color:var(--fill-ink); display:flex; align-items:center; justify-content:center;}
   .kund-icon svg{width:22px; height:22px;}
   .kund-card h3{font-size:1.6rem; text-transform:uppercase;}
   .kund-card p{color:var(--ink-soft); font-size:.95rem; line-height:1.6;}
@@ -332,6 +338,11 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .field label{font-size:.86rem; font-weight:600;}
   .field label .req{color:var(--accent-text);}
   .field .hint{font-size:.8rem; color:var(--ink-soft);}
+  .field .field-label{font-size:.86rem; font-weight:600;}
+  .kundgrupp-val .check{align-items:flex-start; font-weight:400; font-size:.92rem;}
+  .kundgrupp-val .check input{margin-top:2px;}
+  .kundgrupp-val .check span{display:flex; flex-direction:column; gap:2px; line-height:1.3;}
+  .kundgrupp-val small{font-size:.8rem; color:var(--ink-soft);}
   input[type=text], input[type=email], input[type=tel], input[type=password], input[type=search], input[type=number], input[type=date], input[type=time], select, textarea{
     font:inherit; font-size:.96rem; color:var(--ink);
     background:var(--bg); border:1px solid var(--border); border-radius:10px;
@@ -354,7 +365,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
     border:1px solid var(--border); border-radius:999px; padding:8px 14px; cursor:pointer; background:var(--bg);
   }
   .day-select input{position:absolute; opacity:0; pointer-events:none;}
-  .day-select label:has(input:checked){background:var(--brand); border-color:var(--brand); color:var(--brand-ink);}
+  .day-select label:has(input:checked){background:var(--fill); border-color:var(--fill); color:var(--fill-ink);}
   .day-select label:has(input:focus-visible){outline:2px solid var(--brand); outline-offset:2px;}
   .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;}
   .form-actions{margin-top:26px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
@@ -407,7 +418,7 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 
   .tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;}
   .tabs a{font-family:'IBM Plex Mono',monospace; font-size:.8rem; text-decoration:none; padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface); color:var(--ink-soft);}
-  .tabs a.on{background:var(--brand); border-color:var(--brand); color:var(--brand-ink);}
+  .tabs a.on{background:var(--fill); border-color:var(--fill); color:var(--fill-ink);}
   .tabs a .count{opacity:.75; margin-left:4px;}
 
   .table-wrap{position:relative; overflow-x:auto; background:var(--surface); border:1px solid var(--border); border-radius:14px;}
@@ -437,6 +448,10 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .pill-bekraftad{background:var(--brand-soft); color:var(--brand-deep);}
   .pill-levererad{background:var(--green-soft); color:var(--green);}
   .pill-avbruten{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
+  .pill-grupp{background:var(--brand-soft); color:var(--brand-deep); margin-left:8px; vertical-align:1px;}
+  .grupp-form{display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:flex-end; margin:0; min-width:0;}
+  .grupp-form select{width:auto; min-width:0; max-width:100%; padding:7px 8px; font-size:.86rem;}
+  table.list td.actions .btn{white-space:nowrap;}
   .pill-off{background:color-mix(in srgb, var(--danger) 14%, transparent); color:var(--danger);}
 
   .detail-grid{display:grid; grid-template-columns:1.4fr .9fr; gap:18px; align-items:start;}

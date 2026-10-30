@@ -8,8 +8,8 @@ require __DIR__ . '/includes/head.php';
 <section class="page-hero">
   <div class="wrap">
     <span class="eyebrow">Sortiment</span>
-    <h1>Allt ditt kök behöver</h1>
-    <p>Från färsk frukt och grönt till kylvaror, fryst och non-food. Vi har byggt vårt sortiment för restaurang- och pizzeriakök &mdash; och hittar du inte det du söker, fråga oss.</p>
+    <h1>Vårt sortiment</h1>
+    <p>Från färsk frukt och grönt till kylvaror, fryst och non-food. Vi har byggt vårt sortiment för storkök, restauranger, pizzerior och livsbutiker &mdash; och hittar du inte det du söker, fråga oss.</p>
   </div>
 </section>
 

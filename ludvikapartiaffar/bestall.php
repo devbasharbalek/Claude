@@ -5,6 +5,7 @@ $user = current_user();
 $fel = [];
 $sparfel = false;
 $v = [
+  'kundgrupp' => (string)($user['kundgrupp'] ?? ''),
   'foretag' => $user['foretag'] ?? '', 'kontakt' => $user['kontakt'] ?? '',
   'telefon' => $user['telefon'] ?? '', 'epost' => $user['email'] ?? '',
   'adress' => $user['adress'] ?? '', 'leveransdag' => '', 'kategorier' => [], 'meddelande' => '',
@@ -24,6 +25,7 @@ if ($igen && $_SERVER['REQUEST_METHOD'] !== 'POST') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
 
+  $v['kundgrupp']   = kundgrupp_ur_post();
   $v['foretag']     = enRad($_POST['foretag'] ?? '', 120);
   $v['kontakt']     = enRad($_POST['kontakt'] ?? '', 120);
   $v['telefon']     = enRad($_POST['telefon'] ?? '', 40);
@@ -36,20 +38,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if (looks_like_bot()) redirect('tack.php');
 
-  if ($v['foretag'] === '')  $fel['foretag'] = 'Ange restaurangens eller företagets namn.';
+  if ($v['kundgrupp'] === '') $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
+  if ($v['foretag'] === '')  $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
   if ($v['kontakt'] === '')  $fel['kontakt'] = 'Ange vem vi ska kontakta.';
   if (!preg_match('/^[0-9 +\-()]{6,}$/', $v['telefon'])) $fel['telefon'] = 'Ange ett telefonnummer, t.ex. 070-123 45 67.';
-  if (!filter_var($v['epost'], FILTER_VALIDATE_EMAIL)) $fel['epost'] = 'Ange en giltig e-postadress, t.ex. namn@restaurang.se.';
+  if (!filter_var($v['epost'], FILTER_VALIDATE_EMAIL)) $fel['epost'] = 'Ange en giltig e-postadress, t.ex. namn@foretag.se.';
   if ($v['adress'] === '')   $fel['adress'] = 'Ange leveransadressen.';
   if (!isset($leveransdagar[$v['leveransdag']])) $fel['leveransdag'] = 'Välj önskad leveransdag.';
   if (!$v['kategorier'] && $v['meddelande'] === '') $fel['meddelande'] = 'Kryssa i minst en varugrupp eller skriv vad ni vill beställa.';
 
   if (!$fel) {
     try {
-      db()->prepare('INSERT INTO orders (user_id, foretag, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, \'ny\', ?, ?)')
+      db()->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'ny\', ?, ?)')
           ->execute([
-            $user['id'] ?? null, $v['foretag'], $v['kontakt'], $v['telefon'], $v['epost'], $v['adress'],
+            $user['id'] ?? null, $v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['epost'], $v['adress'],
             $v['leveransdag'], implode(',', $v['kategorier']), $v['meddelande'], now(), now(),
           ]);
       $orderId = (int)db()->lastInsertId();
@@ -63,7 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $body = implode("\n", [
         "Ny beställning #$orderId från ludvikaparti.se" . ($user ? ' (inloggad kund)' : ' (utan konto)'),
         str_repeat('-', 44),
-        'Företag/restaurang: ' . $v['foretag'],
+        'Företag:            ' . $v['foretag'],
+        'Kundgrupp:          ' . kundgrupp_text($v['kundgrupp']),
         'Kontaktperson:      ' . $v['kontakt'],
         'Telefon:            ' . $v['telefon'],
         'E-post:             ' . $v['epost'],
@@ -138,8 +142,12 @@ function faltfel(array $fel, string $k): string {
           <p class="hint" style="margin:-6px 0 14px; font-size:.86rem; color:var(--ink-soft);">Ifyllt från ditt konto. Ändringar här gäller bara den här beställningen, <a href="profil.php" style="color:var(--brand);">ändra kontouppgifterna här</a>.</p>
         <?php endif; ?>
         <div class="field-grid">
+          <div class="field full">
+            <?php echo kundgrupp_falt($v['kundgrupp']); ?>
+            <?php echo faltfel($fel, 'kundgrupp'); ?>
+          </div>
           <div class="field">
-            <label for="foretag">Restaurang / företag <span class="req">*</span></label>
+            <label for="foretag">Företag / verksamhet <span class="req">*</span></label>
             <input type="text" id="foretag" name="foretag" value="<?php echo e($v['foretag']); ?>" autocomplete="organization" required>
             <?php echo faltfel($fel, 'foretag'); ?>
           </div>

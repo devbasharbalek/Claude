@@ -3,7 +3,7 @@ require __DIR__ . '/includes/app.php';
 require_admin();
 
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
-$st = db()->prepare('SELECT o.*, u.email AS kund_email, u.active AS kund_active
+$st = db()->prepare('SELECT o.*, u.email AS kund_email, u.active AS kund_active, u.kundgrupp AS kund_kundgrupp
                      FROM orders o LEFT JOIN users u ON u.id = o.user_id WHERE o.id = ?');
 $st->execute([$id]);
 $order = $st->fetch();
@@ -96,6 +96,7 @@ require __DIR__ . '/includes/head.php';
         <h2>Kund</h2>
         <dl class="kv">
           <dt>Företag</dt><dd><?php echo e($order['foretag']); ?></dd>
+          <dt>Kundgrupp</dt><dd><?php echo e(kundgrupp_text($order['kundgrupp'] ?? $order['kund_kundgrupp'])); ?></dd>
           <dt>Kontakt</dt><dd><?php echo e($order['kontakt']); ?></dd>
           <dt>Telefon</dt><dd><?php echo e($order['telefon']); ?></dd>
           <dt>E-post</dt><dd><?php echo e($order['epost']); ?></dd>

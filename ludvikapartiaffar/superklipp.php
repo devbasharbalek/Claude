@@ -60,9 +60,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $pdo = db();
       $pdo->beginTransaction();
       try {
-        $pdo->prepare('INSERT INTO orders (user_id, foretag, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
-            ->execute([$user['id'], $user['foretag'], $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
+        $pdo->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
+            ->execute([$user['id'], $user['foretag'], $user['kundgrupp'] ?? null, $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
                        $v['leveransdag'], $v['meddelande'], now(), now()]);
         $orderId = (int)$pdo->lastInsertId();
         $pdo->prepare('INSERT INTO order_superklipp (order_id, superklipp_id, etikett, leveransdatum) VALUES (?, ?, ?, ?)')
@@ -94,7 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         send_mail($CONFIG['mail_to'], "$etikett #$orderId: {$user['foretag']} ($dag)", implode("\n", [
           "Ny beställning #$orderId på $etikett från ludvikaparti.se",
           str_repeat('-', 44),
-          'Företag/restaurang: ' . $user['foretag'],
+          'Företag:            ' . $user['foretag'],
+          'Kundgrupp:          ' . kundgrupp_text($user['kundgrupp'] ?? null),
           'Kontaktperson:      ' . $user['kontakt'],
           'Telefon:            ' . $user['telefon'],
           'E-post:             ' . $user['email'],

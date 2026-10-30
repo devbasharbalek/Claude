@@ -9,7 +9,7 @@ $sortiment = [
   ],
   'gront' => [
     'namn' => 'Grönt',
-    'text' => 'Ett brett utbud grönsaker för både à la carte, lunch och pizzakök.',
+    'text' => 'Ett brett utbud grönsaker för storkök, restaurang, pizzakök och butik.',
     'ikon' => '<path d="M5 19c8 0 14-6 14-14 0 0-11-1-14 6-2 4-1 8 0 8Z"/><path d="M5 19c2-4 5-7 9-9"/>',
   ],
   'skalat' => [
@@ -19,7 +19,7 @@ $sortiment = [
   ],
   'lask' => [
     'namn' => 'Läsk & dryck',
-    'text' => 'Läsk och drycker till matsal, take away och leverans.',
+    'text' => 'Läsk och drycker till matsal, restaurang och butik.',
     'ikon' => '<path d="M10 2h4v3l2 2v13a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V7l2-2Z"/><path d="M9 12h6"/>',
   ],
   'kylvaror' => [

@@ -57,7 +57,7 @@ require __DIR__ . '/includes/head.php';
       <div>
         <span class="eyebrow">Leverans</span>
         <h2>Vi kommer till dig</h2>
-        <p>Vi levererar måndag till fredag, så att du kan planera dina beställningar med god marginal. Behöver du en särskild leveransdag för din del av regionen &mdash; ring oss så löser vi det.</p>
+        <p>Vi levererar måndag till fredag, så att ni kan planera era beställningar med god marginal. Behöver ni en särskild leveransdag &mdash; ring oss så löser vi det.</p>
         <div class="leverans-days">
           <span class="day-chip on">MÅN</span>
           <span class="day-chip on">TIS</span>
@@ -69,8 +69,8 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
       <div class="leverans-area">
-        <b>Leveransområde</b>
-        <span>Hela Dalarna, samt delar av angränsande områden norr och söder om länet. Osäker på om vi kör till just din ort? Ring oss så får du besked direkt.</span>
+        <b>Kör vi till er?</b>
+        <span>Vi levererar till kommuner, restauranger och butiker. Ring oss så får ni besked om leveransdagar till just er ort.</span>
       </div>
     </div>
   </div>

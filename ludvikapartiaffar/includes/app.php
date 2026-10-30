@@ -18,6 +18,18 @@ const ORDER_STATUS = [
 ];
 const MIN_PASSWORD = 10;
 
+// Kundgrupper, samma bokstäver som i affärssystemet.
+const KUNDGRUPPER = [
+  'A' => 'Kommun',
+  'L' => 'Restaurang / pizzeria',
+  'B' => 'Livsbutik',
+];
+const KUNDGRUPP_EXEMPEL = [
+  'A' => 'Skola, förskola, äldreboende m.m.',
+  'L' => 'Lunch, à la carte eller pizza',
+  'B' => 'T.ex. ICA eller Coop',
+];
+
 // ---------- helpers ----------
 
 function e($s): string {
@@ -88,8 +100,44 @@ function db(): PDO {
         PDO::ATTR_EMULATE_PREPARES => false,
       ]
     );
+    kundgrupp_kolumner($pdo);
   }
   return $pdo;
+}
+
+// Lägger till kolumnen kundgrupp på sajter som installerades innan den fanns.
+function kundgrupp_kolumner(PDO $pdo): void {
+  foreach (['users', 'orders'] as $tabell) {
+    try {
+      $pdo->query("SELECT kundgrupp FROM $tabell LIMIT 0");
+    } catch (PDOException $e) {
+      try {
+        $pdo->exec("ALTER TABLE $tabell ADD COLUMN kundgrupp CHAR(1) NULL AFTER foretag");
+      } catch (PDOException $e) {
+        // Tabellen finns inte än. setup.php skapar den med kolumnen.
+      }
+    }
+  }
+}
+
+function kundgrupp_text(?string $k): string {
+  return $k !== null && isset(KUNDGRUPPER[$k]) ? $k . ' – ' . KUNDGRUPPER[$k] : 'Ej angiven';
+}
+
+function kundgrupp_ur_post(): string {
+  $k = (string)($_POST['kundgrupp'] ?? '');
+  return isset(KUNDGRUPPER[$k]) ? $k : '';
+}
+
+// Val av kundgrupp i formulär. Kunden ser namnen, bokstäverna visas bara för admin.
+function kundgrupp_falt(string $valt): string {
+  $html = '<span class="field-label" aria-hidden="true">Typ av verksamhet <span class="req">*</span></span>'
+        . '<div class="check-grid kundgrupp-val" role="radiogroup" aria-label="Typ av verksamhet">';
+  foreach (KUNDGRUPPER as $k => $namn) {
+    $html .= '<label class="check"><input type="radio" name="kundgrupp" value="' . $k . '"' . ($valt === $k ? ' checked' : '') . ' required>'
+           . '<span><strong>' . e($namn) . '</strong><small>' . e(KUNDGRUPP_EXEMPEL[$k]) . '</small></span></label>';
+  }
+  return $html . '</div>';
 }
 
 // ---------- session & auth ----------

@@ -4,20 +4,22 @@ $user = require_login();
 
 $fel = [];
 $pwFel = [];
-$v = ['foretag' => $user['foretag'], 'kontakt' => $user['kontakt'], 'telefon' => $user['telefon'], 'email' => $user['email'], 'adress' => $user['adress']];
+$v = ['kundgrupp' => (string)($user['kundgrupp'] ?? ''), 'foretag' => $user['foretag'], 'kontakt' => $user['kontakt'], 'telefon' => $user['telefon'], 'email' => $user['email'], 'adress' => $user['adress']];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
   $action = $_POST['action'] ?? '';
 
   if ($action === 'uppgifter') {
+    $v['kundgrupp'] = kundgrupp_ur_post();
     $v['foretag'] = enRad($_POST['foretag'] ?? '', 120);
     $v['kontakt'] = enRad($_POST['kontakt'] ?? '', 120);
     $v['telefon'] = enRad($_POST['telefon'] ?? '', 40);
     $v['email']   = mb_strtolower(enRad($_POST['email'] ?? '', 160));
     $v['adress']  = enRad($_POST['adress'] ?? '', 200);
 
-    if ($v['foretag'] === '') $fel['foretag'] = 'Ange restaurangens eller företagets namn.';
+    if ($v['kundgrupp'] === '') $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
+    if ($v['foretag'] === '') $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
     if ($v['kontakt'] === '') $fel['kontakt'] = 'Ange ditt namn.';
     if (!preg_match('/^[0-9 +\-()]{6,}$/', $v['telefon'])) $fel['telefon'] = 'Ange ett telefonnummer.';
     if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) $fel['email'] = 'Ange en giltig e-postadress.';
@@ -34,8 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$fel) {
-      db()->prepare('UPDATE users SET foretag = ?, kontakt = ?, telefon = ?, email = ?, adress = ? WHERE id = ?')
-          ->execute([$v['foretag'], $v['kontakt'], $v['telefon'], $v['email'], $v['adress'], $user['id']]);
+      db()->prepare('UPDATE users SET foretag = ?, kundgrupp = ?, kontakt = ?, telefon = ?, email = ?, adress = ? WHERE id = ?')
+          ->execute([$v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['email'], $v['adress'], $user['id']]);
       flash('Dina uppgifter är sparade.');
       redirect('profil.php');
     }
@@ -77,7 +79,8 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
       <p class="lead">Används som förval när du beställer.</p>
       <?php if ($fel): ?><div class="alert error" role="alert" style="margin-top:18px;">Uppgifterna sparades inte, se markeringarna nedan.</div><?php endif; ?>
       <div class="field-grid" style="margin-top:20px;">
-        <div class="field"><label for="foretag">Restaurang / företag</label><input type="text" id="foretag" name="foretag" value="<?php echo e($v['foretag']); ?>" required><?php echo $err('foretag'); ?></div>
+        <div class="field full"><?php echo kundgrupp_falt($v['kundgrupp']); ?><?php echo $err('kundgrupp'); ?></div>
+        <div class="field"><label for="foretag">Företag / verksamhet</label><input type="text" id="foretag" name="foretag" value="<?php echo e($v['foretag']); ?>" required><?php echo $err('foretag'); ?></div>
         <div class="field"><label for="kontakt">Ditt namn</label><input type="text" id="kontakt" name="kontakt" value="<?php echo e($v['kontakt']); ?>" required><?php echo $err('kontakt'); ?></div>
         <div class="field"><label for="telefon">Telefon</label><input type="tel" id="telefon" name="telefon" value="<?php echo e($v['telefon']); ?>" required><?php echo $err('telefon'); ?></div>
         <div class="field"><label for="email">E-post (inloggning)</label><input type="email" id="email" name="email" value="<?php echo e($v['email']); ?>" autocomplete="username" required><?php echo $err('email'); ?></div>

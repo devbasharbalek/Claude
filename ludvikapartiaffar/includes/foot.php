@@ -5,7 +5,7 @@
     <div class="footer-grid">
       <div>
         <a class="logo-chip" href="index.php"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
-        <p class="footer-tag">Grossist inom frukt, grönt och storköksvaror för restauranger och pizzerior i Dalarna sedan 60-talet.</p>
+        <p class="footer-tag">Grossist inom frukt, grönt och storköksvaror för kommuner, restauranger och livsbutiker sedan 60-talet.</p>
       </div>
       <div>
         <h4>Sidor</h4>
@@ -35,7 +35,7 @@
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">&copy; <?php echo date('Y'); ?> Ludvika Partiaffär &middot; Din lokala leverantör</div>
+    <div class="footer-bottom">&copy; <?php echo date('Y'); ?> Ludvika Partiaffär &middot; Partihandel sedan 60-talet</div>
   </div>
 </footer>
 
