@@ -13,6 +13,8 @@ $schema = [
     telefon VARCHAR(40) NOT NULL,
     adress VARCHAR(200) NOT NULL,
     active TINYINT(1) NOT NULL DEFAULT 1,
+    ser_superklipp TINYINT(1) NULL,
+    ser_veckansklipp TINYINT(1) NULL,
     created_at DATETIME NOT NULL,
     last_login DATETIME NULL,
     UNIQUE KEY uq_email (email)

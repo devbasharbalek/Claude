@@ -24,6 +24,12 @@ const KUNDGRUPPER = [
   'L' => 'Restaurang / pizzeria',
   'B' => 'Livsbutik',
 ];
+// Veckans erbjudanden syns bara för inloggade kunder med tillgång. Utan eget val
+// följer tillgången kundgruppen: butiker ser Superklipp, restauranger och pizzerior Veckansklipp.
+const ERBJUDANDEN = [
+  'superklipp'   => ['namn' => 'Superklipp',   'sida' => 'superklipp.php',   'grupper' => ['B']],
+  'veckansklipp' => ['namn' => 'Veckansklipp', 'sida' => 'veckansklipp.php', 'grupper' => ['L']],
+];
 const KUNDGRUPP_EXEMPEL = [
   'A' => 'Skola, förskola, äldreboende m.m.',
   'L' => 'Lunch, à la carte eller pizza',
@@ -107,6 +113,18 @@ function db(): PDO {
 
 // Lägger till kolumnen kundgrupp på sajter som installerades innan den fanns.
 function kundgrupp_kolumner(PDO $pdo): void {
+  // Vem som ser vilket erbjudande. NULL betyder enligt kundgruppen.
+  try {
+    $pdo->query('SELECT ser_superklipp, ser_veckansklipp FROM users LIMIT 0');
+  } catch (PDOException $e) {
+    foreach (['ser_superklipp', 'ser_veckansklipp'] as $kolumn) {
+      try {
+        $pdo->exec("ALTER TABLE users ADD COLUMN $kolumn TINYINT(1) NULL");
+      } catch (PDOException $e) {
+        // Finns redan, eller så finns tabellen inte än.
+      }
+    }
+  }
   foreach (['users', 'orders'] as $tabell) {
     try {
       $pdo->query("SELECT kundgrupp FROM $tabell LIMIT 0");
@@ -118,6 +136,42 @@ function kundgrupp_kolumner(PDO $pdo): void {
       }
     }
   }
+}
+
+function erbjudande_enligt_grupp(string $vilket, ?string $grupp): bool {
+  return in_array($grupp, ERBJUDANDEN[$vilket]['grupper'], true);
+}
+
+// Ser användaren Superklipp eller Veckansklipp? Admin ser allt.
+function ser_erbjudande(?array $user, string $vilket): bool {
+  if (!$user) return false;
+  if ($user['role'] === 'admin') return true;
+  $eget = $user['ser_' . $vilket] ?? null;
+  if ($eget !== null) return (int)$eget === 1;
+  return erbjudande_enligt_grupp($vilket, $user['kundgrupp'] ?? null);
+}
+
+function erbjudanden_text(array $user): string {
+  $ser = array_filter(array_keys(ERBJUDANDEN), fn($v) => ser_erbjudande($user, $v));
+  return $ser ? implode(' och ', array_map(fn($v) => ERBJUDANDEN[$v]['namn'], $ser)) : 'Inga';
+}
+
+// Visas i stället för erbjudandet för gäster och kunder utan tillgång.
+function erbjudande_sparr(string $vilket, ?array $user, string $tillbaka, string $intro): string {
+  $namn = ERBJUDANDEN[$vilket]['namn'];
+  $nasta = rawurlencode($tillbaka);
+  $html = '<section class="page-hero"><div class="wrap"><span class="eyebrow">Veckans erbjudanden</span><h1>' . e($namn) . '</h1>'
+        . '<p>' . e($intro) . '</p></div></section><section><div class="wrap" style="max-width:760px;"><div class="sk-notis">';
+  if (!$user) {
+    $html .= '<p><strong>Logga in för att se ' . e($namn) . '.</strong> Erbjudandena är för våra kunder. Har du inget konto skapar du ett gratis på en minut.</p>'
+           . '<div class="actions"><a class="btn primary small" href="logga-in.php?next=' . e($nasta) . '">Logga in</a>'
+           . '<a class="btn ghost small" href="registrera.php?next=' . e($nasta) . '">Skapa konto</a></div>';
+  } else {
+    $html .= '<p><strong>' . e($namn) . ' ingår inte i ert konto.</strong> Hör av er om ni vill ta del av erbjudandena, så hjälper vi er.</p>'
+           . '<div class="actions"><a class="btn primary small" href="tel:+4624018355">Ring 0240-183 55</a>'
+           . '<a class="btn ghost small" href="bestall.php">Till beställning</a></div>';
+  }
+  return $html . '</div></div></section>';
 }
 
 function kundgrupp_text(?string $k): string {
@@ -152,8 +206,13 @@ session_set_cookie_params([
   'httponly' => true,
   'samesite' => 'Lax',
 ]);
-// Filservern för bilder och PDF behöver ingen session, så att webbläsaren kan cacha filerna.
-if (!defined('LP_UTAN_SESSION')) session_start();
+// Filservern för bladets bilder läser bara sessionen: den låser den inte, startar ingen ny
+// och skickar inga no-cache-rubriker, så att webbläsaren kan spara bilderna.
+if (!defined('LP_SESSION_LAS')) {
+  session_start();
+} elseif (isset($_COOKIE[session_name()])) {
+  session_start(['read_and_close' => true, 'cache_limiter' => '']);
+}
 
 function password_fingerprint(string $hash): string {
   return substr(hash('sha256', $hash), 0, 16);

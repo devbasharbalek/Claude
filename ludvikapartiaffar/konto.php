@@ -9,11 +9,10 @@ $st = db()->prepare('SELECT o.id, o.leveransdag, o.kategorier, o.status, o.creat
                      WHERE o.user_id = ? ORDER BY o.created_at DESC, o.id DESC LIMIT 200');
 $st->execute([$user['id']]);
 $orders = $st->fetchAll();
-$oppnaKlipp = array_values(array_filter(sk_for_kunder(), 'sk_ar_oppen'));
-// Veckansklippet är för restauranger och pizzerior, och för kunder som inte valt grupp.
+$oppnaKlipp = ser_erbjudande($user, 'superklipp') ? array_values(array_filter(sk_for_kunder(), 'sk_ar_oppen')) : [];
 veckansklipp_schema();
 $veckansklipp = vk_senaste();
-if ($veckansklipp && (vk_har_passerat($veckansklipp) || !in_array($user['kundgrupp'] ?? null, [null, '', 'L'], true))) $veckansklipp = null;
+if ($veckansklipp && (vk_har_passerat($veckansklipp) || !ser_erbjudande($user, 'veckansklipp'))) $veckansklipp = null;
 
 $active = 'konto';
 $pageTitle = 'Mitt konto – Ludvika Partiaffär';

@@ -7,11 +7,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $kid = (int)($_POST['id'] ?? 0);
   $action = (string)($_POST['action'] ?? '');
   if ($action === 'grupp') {
-    $grupp = kundgrupp_ur_post();
-    if ($grupp !== '') {
-      $st = db()->prepare("UPDATE users SET kundgrupp = ? WHERE id = ? AND role = 'kund'");
-      $st->execute([$grupp, $kid]);
-      flash('Kundgruppen är ändrad till ' . kundgrupp_text($grupp) . '.');
+    $st = db()->prepare("SELECT * FROM users WHERE id = ? AND role = 'kund'");
+    $st->execute([$kid]);
+    $kund = $st->fetch();
+    if ($kund) {
+      $grupp = kundgrupp_ur_post();
+      $nyGrupp = $grupp !== '' ? $grupp : $kund['kundgrupp'];
+      $bytt = $nyGrupp !== $kund['kundgrupp'];
+      // Ny kundgrupp: tillgången följer gruppen. Annars sparas kryssen, men bara det som skiljer sig från gruppen.
+      $ser = [];
+      foreach (array_keys(ERBJUDANDEN) as $vilket) {
+        $vald = !empty($_POST['ser'][$vilket]);
+        $ser[$vilket] = $bytt || $vald === erbjudande_enligt_grupp($vilket, $nyGrupp) ? null : (int)$vald;
+      }
+      db()->prepare('UPDATE users SET kundgrupp = ?, ser_superklipp = ?, ser_veckansklipp = ? WHERE id = ?')
+          ->execute([$nyGrupp, $ser['superklipp'], $ser['veckansklipp'], $kid]);
+      $uppdaterad = ['role' => 'kund', 'kundgrupp' => $nyGrupp, 'ser_superklipp' => $ser['superklipp'], 'ser_veckansklipp' => $ser['veckansklipp']];
+      flash(($bytt ? 'Kundgruppen är ändrad till ' . kundgrupp_text($nyGrupp) . '.' : 'Sparat för ' . $kund['foretag'] . '.')
+          . ' Ser: ' . erbjudanden_text($uppdaterad) . '.');
     }
   } else {
     $aktiv = $action === 'aktivera' ? 1 : 0;
@@ -32,7 +45,7 @@ if ($sok !== '') {
   $like = '%' . addcslashes($sok, '%_\\') . '%';
   $params = [$like, $like, $like, $like];
 }
-$st = db()->prepare("SELECT u.id, u.foretag, u.kundgrupp, u.kontakt, u.email, u.telefon, u.active, u.created_at, u.last_login,
+$st = db()->prepare("SELECT u.id, u.role, u.foretag, u.kundgrupp, u.ser_superklipp, u.ser_veckansklipp, u.kontakt, u.email, u.telefon, u.active, u.created_at, u.last_login,
                             COUNT(o.id) AS antal, MAX(o.created_at) AS senaste
                      FROM users u LEFT JOIN orders o ON o.user_id = u.id
                      WHERE $where GROUP BY u.id ORDER BY u.created_at DESC LIMIT 500");
@@ -50,7 +63,7 @@ require __DIR__ . '/includes/head.php';
       <div>
         <span class="eyebrow">Admin</span>
         <h1>Kunder</h1>
-        <p><?php echo count($kunder); ?> <?php echo $sok !== '' ? 'träffar' : 'registrerade konton'; ?>. Kundgruppen (A, L, B) är samma som i affärssystemet. Stäng av konton som ser misstänkta ut.</p>
+        <p><?php echo count($kunder); ?> <?php echo $sok !== '' ? 'träffar' : 'registrerade konton'; ?>. Kundgruppen (A, L, B) är samma som i affärssystemet. Butiker ser Superklipp och restauranger Veckansklipp, men du kan kryssa i för varje kund. Stäng av konton som ser misstänkta ut.</p>
       </div>
     </div>
 
@@ -64,7 +77,7 @@ require __DIR__ . '/includes/head.php';
     <?php else: ?>
       <div class="table-wrap stack">
         <table class="list">
-          <thead><tr><th>Företag</th><th>Kundgrupp</th><th>Kontakt</th><th>Registrerad</th><th>Beställningar</th><th>Status</th><th></th></tr></thead>
+          <thead><tr><th>Företag</th><th>Kundgrupp och erbjudanden</th><th>Kontakt</th><th>Registrerad</th><th>Beställningar</th><th>Status</th><th></th></tr></thead>
           <tbody>
           <?php foreach ($kunder as $k): ?>
             <tr>
@@ -81,6 +94,11 @@ require __DIR__ . '/includes/head.php';
                     <?php endforeach; ?>
                   </select>
                   <button class="btn ghost small" type="submit" name="action" value="grupp">Spara</button>
+                  <span class="ser-rad">
+                  <?php foreach (ERBJUDANDEN as $vilket => $erb): $eget = $k['ser_' . $vilket] !== null; ?>
+                    <label class="ser-val<?php echo $eget ? ' eget' : ''; ?>"<?php echo $eget ? ' title="Valt för hand. Annars följer det kundgruppen."' : ''; ?>><input type="checkbox" name="ser[<?php echo $vilket; ?>]" value="1" data-grupper="<?php echo e(implode(',', $erb['grupper'])); ?>"<?php echo ser_erbjudande($k, $vilket) ? ' checked' : ''; ?>> <?php echo e($erb['namn']); ?></label>
+                  <?php endforeach; ?>
+                  </span>
                 </form>
               </td>
               <td data-label="Kontakt"><div><?php echo e($k['kontakt']); ?><br><span class="muted" style="font-size:.85rem;"><?php echo e($k['email']); ?> &middot; <?php echo e($k['telefon']); ?></span></div></td>
@@ -114,4 +132,15 @@ require __DIR__ . '/includes/head.php';
     <?php endif; ?>
   </div>
 </section>
+<script>
+// Byts kundgrupp visas den nya gruppens erbjudanden direkt.
+document.querySelectorAll('.grupp-form select[name=kundgrupp]').forEach(function (sel) {
+  sel.addEventListener('change', function () {
+    sel.form.querySelectorAll('input[data-grupper]').forEach(function (cb) {
+      cb.checked = cb.dataset.grupper.split(',').indexOf(sel.value) !== -1;
+      cb.closest('label').classList.remove('eget');
+    });
+  });
+});
+</script>
 <?php require __DIR__ . '/includes/foot.php'; ?>

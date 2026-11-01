@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       '',
       'Företag:   ' . $v['foretag'],
       'Kundgrupp: ' . kundgrupp_text($v['kundgrupp']),
+      'Ser:       ' . erbjudanden_text(['role' => 'kund', 'kundgrupp' => $v['kundgrupp']]) . ' (enligt kundgruppen, ändra under Kunder)',
       'Kontakt:   ' . $v['kontakt'],
       'Telefon:   ' . $v['telefon'],
       'E-post:    ' . $v['email'],

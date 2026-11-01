@@ -10,7 +10,8 @@ $vk ??= vk_senaste();
 $rader = $vk ? array_map('vk_som_listrad', vk_rader((int)$vk['id'])) : [];
 $dagar = $vk ? vk_leveransdagar($vk) : [];
 $oppen = $rader && $dagar;
-$kanBestalla = $user !== null && $oppen;
+$harTillgang = ser_erbjudande($user, 'veckansklipp');
+$kanBestalla = $harTillgang && $oppen;
 $tillbaka = 'veckansklipp.php' . ($id ? '?id=' . $id : '');
 
 $fel = [];
@@ -21,6 +22,7 @@ $v = ['leveransdag' => '', 'meddelande' => ''];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
   if (!$user) redirect('logga-in.php?next=' . rawurlencode($tillbaka));
+  if (!$harTillgang) redirect($tillbaka);
 
   if (!$kanBestalla) {
     $fel['stangd'] = 'Det går inte längre att beställa från det här bladet på hemsidan. Ring 0240-183 55 så hjälper vi dig.';
@@ -47,13 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $active = 'veckansklipp';
-$pageTitle = ($vk ? vk_etikett($vk) : 'Veckansklipp') . ' – Ludvika Partiaffär';
-if ($vk) {
-  $metaBeskrivning = 'Veckans erbjudanden för restauranger och pizzerior från Ludvika Partiaffär. Gäller ' . vk_period($vk) . '.';
-  // Bilden visas som förhandsvisning när länken skickas i sms.
-  if ((int)$vk['sidor'] > 0) $ogBild = rtrim($CONFIG['site_url'], '/') . '/' . vk_url($vk, 1);
-}
+$pageTitle = ($harTillgang && $vk ? vk_etikett($vk) : 'Veckansklipp') . ' – Ludvika Partiaffär';
+$metaBeskrivning = 'Veckans erbjudanden för restauranger och pizzerior från Ludvika Partiaffär. Logga in med ditt kundkonto för att se bladet.';
 require __DIR__ . '/includes/head.php';
+if (!$harTillgang) {
+  echo erbjudande_sparr('veckansklipp', $user, $tillbaka, 'Veckans erbjudanden för restauranger och pizzerior.');
+  require __DIR__ . '/includes/foot.php';
+  exit;
+}
 $sidor = $vk ? (int)$vk['sidor'] : 0;
 ?>
 <section class="page-hero">

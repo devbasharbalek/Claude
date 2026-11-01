@@ -4,6 +4,7 @@ superklipp_schema();
 
 $user = current_user();
 $admin = $user !== null && $user['role'] === 'admin';
+$harTillgang = ser_erbjudande($user, 'superklipp');
 
 $visade = sk_for_kunder();
 $sk = null;
@@ -16,7 +17,7 @@ $sk ??= $visade[0] ?? null;
 
 $rader = $sk ? sk_rader((int)$sk['id']) : [];
 $oppen = $sk !== null && sk_ar_oppen($sk);
-$kanBestalla = $user !== null && $oppen;
+$kanBestalla = $harTillgang && $oppen;
 $dagar = $sk ? sk_leveransdagar($sk) : [];
 
 $fel = [];
@@ -27,6 +28,7 @@ $v = ['leveransdag' => '', 'meddelande' => ''];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
   if (!$user) redirect('logga-in.php?next=superklipp.php');
+  if (!$harTillgang) redirect('superklipp.php');
 
   if (!$kanBestalla) {
     $fel['stangd'] = 'Beställningen för det här superklippet har stängt. Ring 0240-183 55 så hjälper vi dig.';
@@ -53,8 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $active = 'superklipp';
-$pageTitle = ($sk ? sk_etikett($sk) : 'Superklipp') . ' – Ludvika Partiaffär';
+$pageTitle = ($harTillgang && $sk ? sk_etikett($sk) : 'Superklipp') . ' – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
+if (!$harTillgang) {
+  echo erbjudande_sparr('superklipp', $user, 'superklipp.php', 'Veckans bästa priser på frukt och grönt för våra kunder.');
+  require __DIR__ . '/includes/foot.php';
+  exit;
+}
 ?>
 
 <section class="page-hero">

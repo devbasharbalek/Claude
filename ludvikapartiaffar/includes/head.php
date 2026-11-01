@@ -5,6 +5,8 @@ $pageTitle = $pageTitle ?? 'Ludvika Partiaffär';
 $navUser = current_user();
 $navItems = '';
 foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sortiment'], 'superklipp' => ['superklipp.php', 'Superklipp'], 'veckansklipp' => ['veckansklipp.php', 'Veckansklipp'], 'bestall' => ['bestall.php', 'Beställ'], 'kontakt' => ['kontakt.php', 'Kontakt']] as $key => [$href, $label]) {
+  // Erbjudandena syns bara i menyn för kunder som har dem.
+  if (isset(ERBJUDANDEN[$key]) && !ser_erbjudande($navUser, $key)) continue;
   $navItems .= '<li><a href="' . $href . '"' . ($key === $active ? ' class="active"' : '') . '>' . $label . '</a></li>';
 }
 ?><!DOCTYPE html>
@@ -460,7 +462,12 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .pill-levererad{background:var(--green-soft); color:var(--green);}
   .pill-avbruten{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
   .pill-grupp{background:var(--brand-soft); color:var(--brand-deep); margin-left:8px; vertical-align:1px;}
-  .grupp-form{display:flex; flex-wrap:wrap; gap:6px; align-items:center; justify-content:flex-end; margin:0; min-width:0;}
+  .grupp-form{display:flex; flex-wrap:wrap; gap:8px 6px; align-items:center; justify-content:flex-start; margin:0; min-width:0;}
+  .grupp-form .ser-rad{display:flex; flex-wrap:wrap; gap:4px 14px; flex-basis:100%; justify-content:inherit;}
+  @media (max-width:680px){ .stack .grupp-form{justify-content:flex-end;} }
+  .ser-val{display:inline-flex; align-items:center; gap:5px; font-size:.84rem; white-space:nowrap; cursor:pointer;}
+  .ser-val input{width:16px; height:16px; margin:0; accent-color:var(--brand);}
+  .ser-val.eget{text-decoration:underline dotted; text-underline-offset:3px;}
   .grupp-form select{width:auto; min-width:0; max-width:100%; padding:7px 8px; font-size:.86rem;}
   table.list td.actions .btn{white-space:nowrap;}
   .pill-off{background:color-mix(in srgb, var(--danger) 14%, transparent); color:var(--danger);}

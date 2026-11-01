@@ -1,9 +1,24 @@
 <?php
-// Visar veckansklippets bilder och PDF. Filnamnen byts vid varje uppladdning,
-// så webbläsare och mobiler får spara dem länge.
-define('LP_UTAN_SESSION', true);
+// Visar veckansklippets bilder och PDF för inloggade kunder som ser veckansklippet.
+// Filnamnen byts vid varje uppladdning, så webbläsaren får spara dem länge.
+define('LP_SESSION_LAS', true);
 require __DIR__ . '/includes/app.php';
 veckansklipp_schema();
+
+// Samma kontroll som current_user(), men utan att skriva till sessionen.
+$user = null;
+if (!empty($_SESSION['uid'])) {
+  $st = db()->prepare('SELECT * FROM users WHERE id = ? AND active = 1');
+  $st->execute([(int)$_SESSION['uid']]);
+  $rad = $st->fetch();
+  if ($rad && hash_equals($_SESSION['pwh'] ?? '', password_fingerprint($rad['password_hash']))) $user = $rad;
+}
+if (!ser_erbjudande($user, 'veckansklipp')) {
+  http_response_code(403);
+  header('Content-Type: text/plain; charset=utf-8');
+  header('Cache-Control: no-store');
+  exit('Logga in med ett kundkonto som har veckansklippet för att se bladet.');
+}
 
 $nyckel = (string)($_GET['k'] ?? '');
 $sida = (string)($_GET['s'] ?? '');
@@ -22,7 +37,7 @@ if (!$vk || !is_file($fil)) {
 
 $namn = 'Veckansklipp-v' . (int)$vk['vecka'] . '-' . (int)$vk['ar'];
 header('X-Content-Type-Options: nosniff');
-header('Cache-Control: public, max-age=31536000, immutable');
+header('Cache-Control: private, max-age=31536000, immutable');
 header('Content-Length: ' . filesize($fil));
 if ($sida === 'pdf') {
   header('Content-Type: application/pdf');
