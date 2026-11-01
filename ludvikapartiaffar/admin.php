@@ -87,6 +87,7 @@ require __DIR__ . '/includes/head.php';
       </div>
       <div class="portal-actions">
         <a class="btn primary" href="admin-superklipp.php">Superklipp</a>
+        <a class="btn ghost" href="admin-veckansklipp.php">Veckansklipp</a>
         <a class="btn ghost" href="admin-kunder.php">Kunder</a>
         <a class="btn ghost" href="profil.php">Mitt konto</a>
         <form method="post" action="logga-ut.php" style="margin:0;"><?php echo csrf_field(); ?><button class="btn ghost" type="submit">Logga ut</button></form>

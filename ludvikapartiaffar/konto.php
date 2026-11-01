@@ -10,6 +10,10 @@ $st = db()->prepare('SELECT o.id, o.leveransdag, o.kategorier, o.status, o.creat
 $st->execute([$user['id']]);
 $orders = $st->fetchAll();
 $oppnaKlipp = array_values(array_filter(sk_for_kunder(), 'sk_ar_oppen'));
+// Veckansklippet är för restauranger och pizzerior, och för kunder som inte valt grupp.
+veckansklipp_schema();
+$veckansklipp = vk_senaste();
+if ($veckansklipp && (vk_har_passerat($veckansklipp) || !in_array($user['kundgrupp'] ?? null, [null, '', 'L'], true))) $veckansklipp = null;
 
 $active = 'konto';
 $pageTitle = 'Mitt konto – Ludvika Partiaffär';
@@ -36,6 +40,13 @@ require __DIR__ . '/includes/head.php';
         <div class="actions"><a class="btn primary small" href="superklipp.php?id=<?php echo (int)$klipp['id']; ?>">Se superklippet</a></div>
       </div>
     <?php endforeach; ?>
+
+    <?php if ($veckansklipp): ?>
+      <div class="sk-notis">
+        <p><strong><?php echo e(vk_etikett($veckansklipp)); ?> är ute!</strong> Veckans erbjudanden för restauranger och pizzerior, gäller <?php echo e(vk_period($veckansklipp)); ?>.</p>
+        <div class="actions"><a class="btn primary small" href="veckansklipp.php">Se veckansklippet</a></div>
+      </div>
+    <?php endif; ?>
 
     <h2 style="font-size:1.8rem; text-transform:uppercase; margin-bottom:14px;">Mina beställningar</h2>
 

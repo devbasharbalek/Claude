@@ -152,7 +152,8 @@ session_set_cookie_params([
   'httponly' => true,
   'samesite' => 'Lax',
 ]);
-session_start();
+// Filservern för bilder och PDF behöver ingen session, så att webbläsaren kan cacha filerna.
+if (!defined('LP_UTAN_SESSION')) session_start();
 
 function password_fingerprint(string $hash): string {
   return substr(hash('sha256', $hash), 0, 16);
@@ -296,3 +297,4 @@ function kategori_namn(string $csv): string {
 
 require __DIR__ . '/sortiment-data.php';
 require __DIR__ . '/superklipp.php';
+require __DIR__ . '/veckansklipp.php';

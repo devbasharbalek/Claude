@@ -4,7 +4,7 @@ $active = $active ?? '';
 $pageTitle = $pageTitle ?? 'Ludvika Partiaffär';
 $navUser = current_user();
 $navItems = '';
-foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sortiment'], 'superklipp' => ['superklipp.php', 'Superklipp'], 'bestall' => ['bestall.php', 'Beställ'], 'kontakt' => ['kontakt.php', 'Kontakt']] as $key => [$href, $label]) {
+foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sortiment'], 'superklipp' => ['superklipp.php', 'Superklipp'], 'veckansklipp' => ['veckansklipp.php', 'Veckansklipp'], 'bestall' => ['bestall.php', 'Beställ'], 'kontakt' => ['kontakt.php', 'Kontakt']] as $key => [$href, $label]) {
   $navItems .= '<li><a href="' . $href . '"' . ($key === $active ? ' class="active"' : '') . '>' . $label . '</a></li>';
 }
 ?><!DOCTYPE html>
@@ -14,7 +14,14 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="same-origin">
 <title><?php echo htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
-<meta name="description" content="Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för kommuner, restauranger, pizzerior och livsbutiker sedan 60-talet.">
+<meta name="description" content="<?php echo e($metaBeskrivning ?? 'Ludvika Partiaffär – grossist inom frukt, grönt och storköksvaror för kommuner, restauranger, pizzerior och livsbutiker sedan 60-talet.'); ?>">
+<?php if (!empty($ogBild)): ?>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ludvika Partiaffär">
+<meta property="og:title" content="<?php echo e($pageTitle); ?>">
+<meta property="og:description" content="<?php echo e($metaBeskrivning ?? ''); ?>">
+<meta property="og:image" content="<?php echo e($ogBild); ?>">
+<?php endif; ?>
 <script>try{var t=localStorage.getItem('lp-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <style>
   /* Profilfärger: logoblå #032CB9, gul #F7CC11 och vitt */
@@ -189,12 +196,17 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .mobile-menu a{display:block; padding:12px 0; text-decoration:none; font-size:1rem; border-bottom:1px solid var(--border);}
   .mobile-menu li:last-child a{border-bottom:none;}
   .mobile-menu a.active{color:var(--brand); font-weight:600;}
-  @media (max-width:820px){
+  /* Mellanstora skärmar: knapparna visar bara ikoner så att menyn får plats. */
+  @media (max-width:1100px){
+    .nav-links{gap:18px;}
+    .call-btn .call-label, .account-btn .account-label{display:none;}
+    .call-btn{padding:10px 12px;}
+    .account-btn{padding:9px 11px;}
+  }
+  @media (max-width:900px){
     .nav-links{display:none;}
     .menu-toggle{display:block;}
     .mobile-menu.open{display:block;}
-    .call-btn .call-label{display:none;}
-    .call-btn{padding:10px 12px;}
   }
 
   /* buttons */
@@ -396,7 +408,6 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   }
   .account-btn:hover, .account-btn.active{border-color:var(--brand); color:var(--brand);}
   .account-btn svg{width:15px; height:15px;}
-  @media (max-width:820px){ .account-btn .account-label{display:none;} .account-btn{padding:9px 11px;} }
 
   .flash{margin-top:20px; background:var(--green-soft); color:var(--ink); border:1px solid color-mix(in srgb, var(--green) 40%, transparent); border-radius:12px; padding:13px 16px; font-size:.95rem;}
   .wrap.narrow{max-width:520px;}
@@ -567,7 +578,23 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .theme-switch:hover{border-color:var(--brand);}
   @media (prefers-reduced-motion: reduce){ .theme-switch .knob{transition:none;} }
   .menu-theme{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 0; font-size:1rem;}
-  @media (max-width:820px){ .nav-theme{display:none;} }
+  @media (max-width:900px){ .nav-theme{display:none;} }
+
+  /* veckansklipp */
+  .vk-sidor{display:flex; flex-direction:column; gap:18px; max-width:860px; margin-inline:auto;}
+  .vk-sidor img{width:100%; height:auto; border-radius:12px; box-shadow:var(--shadow); background:#fff;}
+  .vk-pdf{display:block; width:100%; max-width:860px; height:80vh; margin-inline:auto; border:1px solid var(--border); border-radius:12px;}
+  .vk-tumnaglar{display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;}
+  .vk-tumnaglar img{width:96px; height:auto; border-radius:6px; border:1px solid var(--border); background:#fff; display:block;}
+  .vk-status{font-size:.88rem; color:var(--ink-soft); margin-top:8px; line-height:1.5;}
+  .vk-status:empty{display:none;}
+  .vk-status.fel{color:var(--danger);}
+  textarea.sms{min-height:120px; font-size:.95rem;}
+  input[type=file]{font:inherit; font-size:.9rem; color:var(--ink-soft); max-width:100%;}
+  input[type=file]::file-selector-button{font:inherit; font-weight:600; font-size:.88rem; color:var(--ink); background:var(--surface); border:1.5px solid var(--border); border-radius:999px; padding:9px 16px; margin-right:12px; cursor:pointer;}
+  input[type=file]::file-selector-button:hover{border-color:var(--brand); color:var(--brand);}
+  .detail-grid > .detail-card + .detail-card{margin-top:0;}
+  .page-hero .hero-actions{margin-top:22px;}
 
   .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
   .prose{max-width:68ch;}
