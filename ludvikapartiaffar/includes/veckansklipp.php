@@ -147,9 +147,32 @@ function vk_mb(int $bytes): string {
   return number_format($bytes / 1048576, 1, ',', '') . ' MB';
 }
 
+// Den korta länken ludvikaparti.se/veckansklipp är en liten fil i mappen "veckansklipp".
+// Sajten skapar den själv, så att den aldrig behöver laddas upp. En fil som heter
+// index.php är lätt att råka lägga i fel mapp, och då ersätter den startsidan.
+const VK_KORTLANK_KOD = "<?php\n// Kort länk för sms: ludvikaparti.se/veckansklipp. Skapas automatiskt av admin-veckansklipp.php.\nheader('Location: ../veckansklipp.php', true, 302);\n";
+
+function vk_kortlank_fil(): string {
+  return dirname(__DIR__) . '/veckansklipp/index.php';
+}
+
+function vk_skapa_kortlank(): bool {
+  $fil = vk_kortlank_fil();
+  if (is_file($fil)) return true;
+  $mapp = dirname($fil);
+  if (!is_dir($mapp) && !@mkdir($mapp, 0755)) return false;
+  return @file_put_contents($fil, VK_KORTLANK_KOD) !== false;
+}
+
+// Sant om startsidan har ersatts av kortlänkens fil.
+function vk_startsidan_ersatt(): bool {
+  $start = dirname(__DIR__) . '/index.php';
+  return is_file($start) && str_contains((string)file_get_contents($start, false, null, 0, 400), 'Kort länk för sms');
+}
+
 function vk_lank(): string {
   global $CONFIG;
-  return rtrim($CONFIG['site_url'], '/') . '/veckansklipp';
+  return rtrim($CONFIG['site_url'], '/') . (is_file(vk_kortlank_fil()) ? '/veckansklipp' : '/veckansklipp.php');
 }
 
 // Kort sms utan emoji, så att det får plats i ett sms (160 tecken).

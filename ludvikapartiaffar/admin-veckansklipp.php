@@ -2,6 +2,7 @@
 require __DIR__ . '/includes/app.php';
 require_admin();
 veckansklipp_schema();
+vk_skapa_kortlank();
 
 [$maxFil, $maxPost] = vk_servergranser();
 [$stdAr, $stdVecka] = vk_standard_vecka();
@@ -183,6 +184,9 @@ require __DIR__ . '/includes/head.php';
       </div>
     </div>
 
+    <?php if (vk_startsidan_ersatt()): ?>
+      <div class="alert error" role="alert"><strong>Startsidan är ersatt.</strong> Filen index.php i rotmappen är kortlänken för veckansklippet, så den som går till startsidan hamnar här. Ladda upp startsidans index.php igen till public_html. Mappen veckansklipp behöver du inte ladda upp, den skapas automatiskt.</div>
+    <?php endif; ?>
     <?php if ($fel): ?>
       <div class="alert error" role="alert"><?php echo implode('<br>', array_map('e', $fel)); ?></div>
     <?php endif; ?>
