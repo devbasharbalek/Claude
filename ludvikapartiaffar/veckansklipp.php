@@ -53,7 +53,7 @@ $pageTitle = ($harTillgang && $vk ? vk_etikett($vk) : 'Veckansklipp') . ' – Lu
 $metaBeskrivning = 'Veckans erbjudanden för restauranger och pizzerior från Ludvika Partiaffär. Logga in med ditt kundkonto för att se bladet.';
 require __DIR__ . '/includes/head.php';
 if (!$harTillgang) {
-  echo erbjudande_sparr('veckansklipp', $user, $tillbaka, 'Veckans erbjudanden för restauranger och pizzerior.');
+  echo erbjudande_sparr('veckansklipp', $user, 'Veckans erbjudanden för restauranger och pizzerior.');
   require __DIR__ . '/includes/foot.php';
   exit;
 }
@@ -110,15 +110,7 @@ $sidor = $vk ? (int)$vk['sidor'] : 0;
         <div class="vk-bestall" id="bestall">
           <h2 class="vk-bestall-rubrik">Beställ från bladet</h2>
 
-          <?php if (!$user): ?>
-            <div class="sk-notis">
-              <p><strong>Logga in för att beställa direkt.</strong> Fyll i antal, välj leveransdag och skicka. Har du inget konto skapar du ett gratis på en minut.</p>
-              <div class="actions">
-                <a class="btn primary small" href="logga-in.php?next=<?php echo e(rawurlencode($tillbaka . '#bestall')); ?>">Logga in</a>
-                <a class="btn ghost small" href="registrera.php?next=<?php echo e(rawurlencode($tillbaka . '#bestall')); ?>">Skapa konto</a>
-              </div>
-            </div>
-          <?php elseif (!$oppen): ?>
+          <?php if (!$oppen): ?>
             <div class="sk-notis">
               <p><strong>Beställningen via hemsidan är stängd för v.<?php echo (int)$vk['vecka']; ?>.</strong> Ring oss så kollar vi vad vi kan ordna.</p>
               <div class="actions"><a class="btn primary small" href="tel:+4624018355">0240-183 55</a></div>

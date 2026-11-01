@@ -58,7 +58,7 @@ $active = 'superklipp';
 $pageTitle = ($harTillgang && $sk ? sk_etikett($sk) : 'Superklipp') . ' – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 if (!$harTillgang) {
-  echo erbjudande_sparr('superklipp', $user, 'superklipp.php', 'Veckans bästa priser på frukt och grönt för våra kunder.');
+  echo erbjudande_sparr('superklipp', $user, 'Veckans bästa priser på frukt och grönt för våra kunder.');
   require __DIR__ . '/includes/foot.php';
   exit;
 }
@@ -105,15 +105,7 @@ if (!$harTillgang) {
         <div class="alert warn">Förhandsvisning av ett utkast. Kunderna ser det inte förrän du publicerar det i <a href="admin-superklipp-redigera.php?id=<?php echo (int)$sk['id']; ?>" style="color:var(--brand);">admin</a>.</div>
       <?php endif; ?>
 
-      <?php if (!$user): ?>
-        <div class="sk-notis">
-          <p><strong>Priserna visas för inloggade kunder.</strong> Logga in för att se veckans priser och beställa direkt, eller skapa ett konto gratis.</p>
-          <div class="actions">
-            <a class="btn primary small" href="logga-in.php?next=superklipp.php">Logga in</a>
-            <a class="btn ghost small" href="registrera.php?next=superklipp.php">Skapa konto</a>
-          </div>
-        </div>
-      <?php elseif (!$oppen && (int)$sk['publicerad'] === 1): ?>
+      <?php if (!$oppen && (int)$sk['publicerad'] === 1): ?>
         <div class="sk-notis">
           <p><strong>Beställningen för v.<?php echo (int)$sk['vecka']; ?> stängde <?php echo e(sk_deadline_text($sk['deadline'])); ?>.</strong> Ring oss så kollar vi vad vi kan ordna.</p>
           <div class="actions"><a class="btn primary small" href="tel:+4624018355">0240-183 55</a></div>

@@ -113,13 +113,14 @@ function db(): PDO {
 
 // Lägger till kolumnen kundgrupp på sajter som installerades innan den fanns.
 function kundgrupp_kolumner(PDO $pdo): void {
-  // Vem som ser vilket erbjudande. NULL betyder enligt kundgruppen.
+  // Vem som ser vilket erbjudande (NULL betyder enligt kundgruppen) och om kontot är godkänt.
+  // Konton som fanns innan godkännandet infördes räknas som godkända.
   try {
-    $pdo->query('SELECT ser_superklipp, ser_veckansklipp FROM users LIMIT 0');
+    $pdo->query('SELECT ser_superklipp, ser_veckansklipp, godkand FROM users LIMIT 0');
   } catch (PDOException $e) {
-    foreach (['ser_superklipp', 'ser_veckansklipp'] as $kolumn) {
+    foreach (['ser_superklipp TINYINT(1) NULL', 'ser_veckansklipp TINYINT(1) NULL', 'godkand TINYINT(1) NOT NULL DEFAULT 1'] as $kolumn) {
       try {
-        $pdo->exec("ALTER TABLE users ADD COLUMN $kolumn TINYINT(1) NULL");
+        $pdo->exec("ALTER TABLE users ADD COLUMN $kolumn");
       } catch (PDOException $e) {
         // Finns redan, eller så finns tabellen inte än.
       }
@@ -142,30 +143,41 @@ function erbjudande_enligt_grupp(string $vilket, ?string $grupp): bool {
   return in_array($grupp, ERBJUDANDEN[$vilket]['grupper'], true);
 }
 
-// Ser användaren Superklipp eller Veckansklipp? Admin ser allt.
-function ser_erbjudande(?array $user, string $vilket): bool {
-  if (!$user) return false;
-  if ($user['role'] === 'admin') return true;
+function ar_godkand(array $user): bool {
+  return $user['role'] === 'admin' || (int)($user['godkand'] ?? 1) === 1;
+}
+
+// Det kunden får se när kontot är godkänt: eget val, annars enligt kundgruppen.
+function erbjudande_valt(array $user, string $vilket): bool {
   $eget = $user['ser_' . $vilket] ?? null;
   if ($eget !== null) return (int)$eget === 1;
   return erbjudande_enligt_grupp($vilket, $user['kundgrupp'] ?? null);
 }
 
+// Ser användaren Superklipp eller Veckansklipp just nu? Admin ser allt, nya konton inget förrän de är godkända.
+function ser_erbjudande(?array $user, string $vilket): bool {
+  if (!$user) return false;
+  if ($user['role'] === 'admin') return true;
+  return ar_godkand($user) && erbjudande_valt($user, $vilket);
+}
+
+// "Superklipp och Veckansklipp", "Veckansklipp" eller "Inga", enligt valen för kontot.
 function erbjudanden_text(array $user): string {
-  $ser = array_filter(array_keys(ERBJUDANDEN), fn($v) => ser_erbjudande($user, $v));
+  $ser = array_filter(array_keys(ERBJUDANDEN), fn($v) => erbjudande_valt($user, $v));
   return $ser ? implode(' och ', array_map(fn($v) => ERBJUDANDEN[$v]['namn'], $ser)) : 'Inga';
 }
 
-// Visas i stället för erbjudandet för gäster och kunder utan tillgång.
-function erbjudande_sparr(string $vilket, ?array $user, string $tillbaka, string $intro): string {
+// Visas i stället för erbjudandet för gäster och kunder utan tillgång. Gäster får inga knappar.
+function erbjudande_sparr(string $vilket, ?array $user, string $intro): string {
   $namn = ERBJUDANDEN[$vilket]['namn'];
-  $nasta = rawurlencode($tillbaka);
   $html = '<section class="page-hero"><div class="wrap"><span class="eyebrow">Veckans erbjudanden</span><h1>' . e($namn) . '</h1>'
         . '<p>' . e($intro) . '</p></div></section><section><div class="wrap" style="max-width:760px;"><div class="sk-notis">';
   if (!$user) {
-    $html .= '<p><strong>Logga in för att se ' . e($namn) . '.</strong> Erbjudandena är för våra kunder. Har du inget konto skapar du ett gratis på en minut.</p>'
-           . '<div class="actions"><a class="btn primary small" href="logga-in.php?next=' . e($nasta) . '">Logga in</a>'
-           . '<a class="btn ghost small" href="registrera.php?next=' . e($nasta) . '">Skapa konto</a></div>';
+    $html .= '<p><strong>' . e($namn) . ' är för våra kunder.</strong> Erbjudandet visas när du är inloggad med ett godkänt kundkonto.</p>';
+  } elseif (!ar_godkand($user)) {
+    $html .= '<p><strong>Ditt konto väntar på godkännande.</strong> När vi har godkänt kontot ser du veckans erbjudanden här. Under tiden kan du beställa som vanligt.</p>'
+           . '<div class="actions"><a class="btn primary small" href="bestall.php">Till beställning</a>'
+           . '<a class="btn ghost small" href="tel:+4624018355">Ring 0240-183 55</a></div>';
   } else {
     $html .= '<p><strong>' . e($namn) . ' ingår inte i ert konto.</strong> Hör av er om ni vill ta del av erbjudandena, så hjälper vi er.</p>'
            . '<div class="actions"><a class="btn primary small" href="tel:+4624018355">Ring 0240-183 55</a>'

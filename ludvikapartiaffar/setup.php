@@ -15,6 +15,7 @@ $schema = [
     active TINYINT(1) NOT NULL DEFAULT 1,
     ser_superklipp TINYINT(1) NULL,
     ser_veckansklipp TINYINT(1) NULL,
+    godkand TINYINT(1) NOT NULL DEFAULT 1,
     created_at DATETIME NOT NULL,
     last_login DATETIME NULL,
     UNIQUE KEY uq_email (email)

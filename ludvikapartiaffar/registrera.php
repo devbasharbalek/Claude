@@ -41,8 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   if (!$fel) {
-    db()->prepare('INSERT INTO users (role, email, password_hash, foretag, kundgrupp, kontakt, telefon, adress, active, created_at)
-                   VALUES (\'kund\', ?, ?, ?, ?, ?, ?, ?, 1, ?)')
+    // Nya konton ser inga erbjudanden förrän admin har godkänt dem.
+    db()->prepare('INSERT INTO users (role, email, password_hash, foretag, kundgrupp, kontakt, telefon, adress, active, godkand, created_at)
+                   VALUES (\'kund\', ?, ?, ?, ?, ?, ?, ?, 1, 0, ?)')
         ->execute([$v['email'], password_hash($pw, PASSWORD_DEFAULT), $v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['adress'], now()]);
     $id = (int)db()->lastInsertId();
 
@@ -51,20 +52,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       '',
       'Företag:   ' . $v['foretag'],
       'Kundgrupp: ' . kundgrupp_text($v['kundgrupp']),
-      'Ser:       ' . erbjudanden_text(['role' => 'kund', 'kundgrupp' => $v['kundgrupp']]) . ' (enligt kundgruppen, ändra under Kunder)',
+      'Erbjudande: ' . erbjudanden_text(['role' => 'kund', 'kundgrupp' => $v['kundgrupp']]) . ' enligt kundgruppen, när du har godkänt kontot',
       'Kontakt:   ' . $v['kontakt'],
       'Telefon:   ' . $v['telefon'],
       'E-post:    ' . $v['email'],
       'Adress:    ' . $v['adress'],
       '',
-      'Ser kontot misstänkt ut kan du stänga av det i adminpanelen:',
-      $CONFIG['site_url'] . '/admin-kunder.php',
+      'Kunden ser inga erbjudanden förrän du godkänner kontot. Godkänn eller stäng av det här:',
+      $CONFIG['site_url'] . '/admin-kunder.php?visa=nya',
     ]), $v['email']);
 
     $st = db()->prepare('SELECT * FROM users WHERE id = ?');
     $st->execute([$id]);
     login_user($st->fetch());
-    flash('Välkommen! Ditt konto är skapat och du är inloggad.');
+    flash('Välkommen! Ditt konto är skapat och du är inloggad. Vi godkänner nya konton så snart vi kan, sedan ser du veckans erbjudanden här.');
     redirect($next);
   }
 }

@@ -94,6 +94,14 @@ require __DIR__ . '/includes/head.php';
       </div>
     </div>
 
+    <?php $nyaKonton = (int)db()->query("SELECT COUNT(*) FROM users WHERE role = 'kund' AND godkand = 0 AND active = 1")->fetchColumn(); ?>
+    <?php if ($nyaKonton): ?>
+      <div class="sk-notis">
+        <p><strong><?php echo $nyaKonton === 1 ? '1 nytt kundkonto väntar' : $nyaKonton . ' nya kundkonton väntar'; ?> på godkännande.</strong> De ser inga erbjudanden förrän du godkänner dem.</p>
+        <div class="actions"><a class="btn primary small" href="admin-kunder.php?visa=nya">Godkänn konton</a></div>
+      </div>
+    <?php endif; ?>
+
     <div class="stat-row">
       <div class="stat-tile<?php echo $counts['ny'] ? ' warn' : ''; ?>"><b><?php echo $counts['ny']; ?></b><span>Nya, väntar på bekräftelse</span></div>
       <div class="stat-tile"><b><?php echo $counts['bekraftad']; ?></b><span>Bekräftade, ej levererade</span></div>

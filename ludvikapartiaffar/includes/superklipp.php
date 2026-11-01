@@ -460,7 +460,7 @@ function sk_mejl(array $sk, array $rader): array {
     'Se hela listan och beställ direkt på hemsidan:',
     "$url/superklipp.php",
     '',
-    'Logga in med ditt kundkonto för att se priserna. Inget konto än? Skapa ett här:',
+    'Logga in med ditt kundkonto för att se priserna. Inget konto än? Skapa ett här, så godkänner vi det så snart vi kan:',
     "$url/registrera.php",
     '',
     "Beställ senast $deadline, på hemsidan eller på telefon 0240-183 55.",

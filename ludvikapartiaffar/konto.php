@@ -33,6 +33,12 @@ require __DIR__ . '/includes/head.php';
       </div>
     </div>
 
+    <?php if (!ar_godkand($user)): ?>
+      <div class="sk-notis">
+        <p><strong>Ditt konto väntar på godkännande.</strong> Vi går igenom nya konton och skickar ett mejl när ditt är klart. Då ser du veckans erbjudanden här. Under tiden kan du beställa som vanligt.</p>
+      </div>
+    <?php endif; ?>
+
     <?php foreach ($oppnaKlipp as $klipp): ?>
       <div class="sk-notis">
         <p><strong><?php echo e(sk_etikett($klipp)); ?> är ute!</strong> Veckans bästa priser på frukt och grönt. Beställ senast <?php echo e(sk_deadline_text($klipp['deadline'])); ?>.</p>
