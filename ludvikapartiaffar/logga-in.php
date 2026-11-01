@@ -61,7 +61,7 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
       <div class="form-actions"><button class="btn primary" type="submit">Logga in</button></div>
-      <p class="form-foot"><a href="glomt-losenord.php">Glömt lösenordet?</a><br>Inget konto? <a href="registrera.php">Skapa ett här</a></p>
+      <p class="form-foot"><a href="glomt-losenord.php">Glömt lösenordet?</a><br>Inget konto? <a href="registrera.php<?php echo $next !== 'konto.php' ? '?next=' . e(rawurlencode($next)) : ''; ?>">Skapa ett här</a></p>
     </form>
   </div>
 </section>

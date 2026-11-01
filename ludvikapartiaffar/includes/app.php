@@ -66,7 +66,7 @@ function datum(string $dt): string {
 
 function safe_next(?string $next): string {
   $next = (string)$next;
-  return preg_match('/^[a-z0-9\-]+\.php(\?[A-Za-z0-9=&%_\-]*)?$/', $next) ? $next : 'konto.php';
+  return preg_match('/^[a-z0-9\-]+\.php(\?[A-Za-z0-9=&%_\-]*)?(#[a-z0-9\-]+)?$/', $next) ? $next : 'konto.php';
 }
 
 function client_ip(): string {

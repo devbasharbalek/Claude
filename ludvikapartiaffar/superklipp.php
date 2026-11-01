@@ -32,103 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fel['stangd'] = 'Beställningen för det här superklippet har stängt. Ring 0240-183 55 så hjälper vi dig.';
   } else {
     $perId = array_column($rader, null, 'id');
-    $andrad = false;
-    foreach ((array)($_POST['antal'] ?? []) as $radId => $varde) {
-      $varde = is_scalar($varde) ? trim((string)$varde) : '';
-      if ($varde === '' || $varde === '0') continue;
-      if (!isset($perId[(int)$radId])) {
-        $andrad = true;
-        continue;
-      }
-      if (!ctype_digit($varde) || (int)$varde < 1 || (int)$varde > SK_MAX_ANTAL) {
-        $fel['antal'] = 'Antal kolli måste vara ett heltal mellan 1 och ' . SK_MAX_ANTAL . '.';
-        $antal[(int)$radId] = $varde;
-        continue;
-      }
-      $antal[(int)$radId] = (int)$varde;
-    }
+    [$antal, $fel] = lista_antal_fran_post($perId);
     $v['leveransdag'] = (string)($_POST['leveransdag'] ?? '');
     $v['meddelande'] = mb_substr(trim(str_replace("\0", '', (string)($_POST['meddelande'] ?? ''))), 0, 2000, 'UTF-8');
-
-    if ($andrad) $fel['andrad'] = 'Listan uppdaterades medan du fyllde i. Kontrollera antalen och skicka igen.';
-    if (!$antal && !$fel) $fel['antal'] = 'Fyll i antal kolli på minst en vara.';
     if (!isset($dagar[$v['leveransdag']])) $fel['leveransdag'] = 'Välj leveransdag.';
 
     if (!$fel) {
       $dagnr = array_search($v['leveransdag'], array_keys($dagar), true) + 1;
       $leveransdatum = sk_veckodag((int)$sk['ar'], (int)$sk['vecka'], $dagnr)->format('Y-m-d');
-      $pdo = db();
-      $pdo->beginTransaction();
-      try {
-        $pdo->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
-            ->execute([$user['id'], $user['foretag'], $user['kundgrupp'] ?? null, $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
-                       $v['leveransdag'], $v['meddelande'], now(), now()]);
-        $orderId = (int)$pdo->lastInsertId();
-        $pdo->prepare('INSERT INTO order_superklipp (order_id, superklipp_id, etikett, leveransdatum) VALUES (?, ?, ?, ?)')
-            ->execute([$orderId, $sk['id'], sk_etikett($sk), $leveransdatum]);
-        $st = $pdo->prepare('INSERT INTO order_rader (order_id, sortering, produkt, ursprung, vikt, enhet, pris, antal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-        foreach ($antal as $radId => $n) {
-          $r = $perId[$radId];
-          $st->execute([$orderId, $r['sortering'], $r['produkt'], $r['ursprung'], $r['vikt'], $r['enhet'], $r['pris'], $n]);
-        }
-        $pdo->commit();
-      } catch (PDOException $ex) {
-        $pdo->rollBack();
-        $orderId = 0;
-      }
-
+      $etikett = sk_etikett($sk);
+      $orderId = lista_spara_order($user, ['etikett' => $etikett, 'superklipp_id' => (int)$sk['id']], $perId, $antal,
+                                   $v['leveransdag'], $dagar[$v['leveransdag']], $leveransdatum, $v['meddelande']);
       if ($orderId) {
-        $etikett = sk_etikett($sk);
-        $dag = $dagar[$v['leveransdag']];
-        $varor = [];
-        foreach ($antal as $radId => $n) {
-          $r = $perId[$radId];
-          $varor[] = sprintf('%4d × %s', $n, $r['produkt'])
-            . ($r['ursprung'] !== '' ? " ({$r['ursprung']})" : '')
-            . (sk_forpackning($r) !== '' ? ', ' . sk_forpackning($r) : '')
-            . ' – ' . sk_pris_per($r);
-        }
-        $kolli = array_sum($antal);
-
-        send_mail($CONFIG['mail_to'], "$etikett #$orderId: {$user['foretag']} ($dag)", implode("\n", [
-          "Ny beställning #$orderId på $etikett från ludvikaparti.se",
-          str_repeat('-', 44),
-          'Företag:            ' . $user['foretag'],
-          'Kundgrupp:          ' . kundgrupp_text($user['kundgrupp'] ?? null),
-          'Kontaktperson:      ' . $user['kontakt'],
-          'Telefon:            ' . $user['telefon'],
-          'E-post:             ' . $user['email'],
-          'Leveransadress:     ' . $user['adress'],
-          'Leveransdag:        ' . $dag,
-          '',
-          "Varor ($kolli kolli):",
-          ...$varor,
-          '',
-          'Meddelande:',
-          $v['meddelande'] !== '' ? $v['meddelande'] : '(inget meddelande)',
-          '',
-          str_repeat('-', 44),
-          'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order.php?id=' . $orderId,
-          'Svara på det här mejlet för att svara kunden direkt.',
-        ]), $user['email']);
-
-        send_mail($user['email'], "Vi har tagit emot din beställning #$orderId ($etikett)", implode("\n", [
-          "Hej {$user['kontakt']}!",
-          '',
-          "Tack för din beställning #$orderId från $etikett. Vi går igenom den och återkommer med bekräftelse.",
-          '',
-          'Leveransdag: ' . $dag,
-          "Varor ($kolli kolli):",
-          ...$varor,
-          '',
-          'Du kan följa beställningen under Mitt konto:',
-          $CONFIG['site_url'] . '/order.php?id=' . $orderId,
-          '',
-          'Med vänlig hälsning',
-          'Ludvika Partiaffär, 0240-183 55',
-        ]), $CONFIG['mail_to']);
-
         flash("Tack! Beställning #$orderId på $etikett är skickad. Vi återkommer med bekräftelse.");
         redirect('order.php?id=' . $orderId);
       }
@@ -188,7 +103,7 @@ require __DIR__ . '/includes/head.php';
           <p><strong>Priserna visas för inloggade kunder.</strong> Logga in för att se veckans priser och beställa direkt, eller skapa ett konto gratis.</p>
           <div class="actions">
             <a class="btn primary small" href="logga-in.php?next=superklipp.php">Logga in</a>
-            <a class="btn ghost small" href="registrera.php">Skapa konto</a>
+            <a class="btn ghost small" href="registrera.php?next=superklipp.php">Skapa konto</a>
           </div>
         </div>
       <?php elseif (!$oppen && (int)$sk['publicerad'] === 1): ?>

@@ -3,6 +3,7 @@
 // Bilderna görs i adminens webbläsare vid uppladdningen, så servern behöver inga PDF-verktyg.
 
 const VK_MAX_SIDOR = 12;
+const VK_MAX_RADER = 150;
 const VK_MAX_BILD = 5 * 1024 * 1024;
 const VK_MAX_PDF = 40 * 1024 * 1024;
 const VK_PDFJS = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/';
@@ -21,15 +22,46 @@ const VK_SCHEMA = "CREATE TABLE IF NOT EXISTS veckansklipp (
     UNIQUE KEY uq_vk_nyckel (nyckel)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci";
 
+const VK_RADER_SCHEMA = "CREATE TABLE IF NOT EXISTS veckansklipp_rader (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    veckansklipp_id INT UNSIGNED NOT NULL,
+    sortering SMALLINT UNSIGNED NOT NULL,
+    produkt VARCHAR(160) NOT NULL,
+    forpackning VARCHAR(80) NOT NULL DEFAULT '',
+    info VARCHAR(100) NOT NULL DEFAULT '',
+    enhet VARCHAR(20) NOT NULL DEFAULT '',
+    pris DECIMAL(10,2) NOT NULL,
+    KEY idx_vk (veckansklipp_id, sortering),
+    CONSTRAINT fk_vkrader_vk FOREIGN KEY (veckansklipp_id) REFERENCES veckansklipp(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_swedish_ci";
+
+// Skapar tabellerna första gången och uppdaterar äldre installationer.
+// Tabellen veckansklipp_rader skapas sist och visar att allt är klart.
 function veckansklipp_schema(): void {
   static $klar = false;
   if ($klar) return;
-  try {
-    db()->query('SELECT 1 FROM veckansklipp LIMIT 1');
-  } catch (PDOException $ex) {
-    db()->exec(VK_SCHEMA);
-  }
   $klar = true;
+  superklipp_schema();
+  try {
+    db()->query('SELECT 1 FROM veckansklipp_rader LIMIT 1');
+    return;
+  } catch (PDOException $ex) {
+  }
+  db()->exec(VK_SCHEMA);
+  $andringar = [
+    'ALTER TABLE order_superklipp ADD COLUMN veckansklipp_id INT UNSIGNED NULL AFTER superklipp_id',
+    'ALTER TABLE order_superklipp ADD KEY idx_vk (veckansklipp_id)',
+    'ALTER TABLE order_superklipp ADD CONSTRAINT fk_osk_vk FOREIGN KEY (veckansklipp_id) REFERENCES veckansklipp(id) ON DELETE SET NULL',
+    "ALTER TABLE order_rader MODIFY ursprung VARCHAR(100) NOT NULL DEFAULT '', MODIFY vikt VARCHAR(80) NOT NULL DEFAULT ''",
+  ];
+  foreach ($andringar as $sql) {
+    try {
+      db()->exec($sql);
+    } catch (PDOException $ex) {
+      // Redan gjort.
+    }
+  }
+  db()->exec(VK_RADER_SCHEMA);
 }
 
 function vk_mapp(): string {
@@ -124,4 +156,89 @@ function vk_lank(): string {
 function vk_sms(array $vk): string {
   return 'Veckansklipp v.' . (int)$vk['vecka'] . ' är ute! Se veckans erbjudanden: ' . vk_lank()
        . ' Beställ på 0240-183 55. Mvh Ludvika Partiaffär';
+}
+
+// ---------- varor och beställning ----------
+
+function vk_rader(int $id): array {
+  $st = db()->prepare('SELECT * FROM veckansklipp_rader WHERE veckansklipp_id = ? ORDER BY sortering, id');
+  $st->execute([$id]);
+  return $st->fetchAll();
+}
+
+// En rad i samma form som superklippets, så att beställningen sparas och visas likadant.
+function vk_som_listrad(array $r): array {
+  return ['id' => (int)$r['id'], 'sortering' => (int)$r['sortering'], 'produkt' => $r['produkt'], 'ursprung' => $r['info'],
+          'vikt' => $r['forpackning'], 'enhet' => $r['enhet'], 'pris' => $r['pris']];
+}
+
+function vk_spara_rader(int $id, array $rader): void {
+  db()->prepare('DELETE FROM veckansklipp_rader WHERE veckansklipp_id = ?')->execute([$id]);
+  $st = db()->prepare('INSERT INTO veckansklipp_rader (veckansklipp_id, sortering, produkt, forpackning, info, enhet, pris) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  foreach (array_values($rader) as $i => $r) {
+    $st->execute([$id, $i, $r['produkt'], $r['forpackning'], $r['info'], $r['enhet'], $r['pris']]);
+  }
+}
+
+// Varulistan från admins formulär. Tomma rader hoppas över.
+function vk_rader_fran_post(): array {
+  $rader = [];
+  $fel = [];
+  $utanPris = [];
+  foreach ((array)($_POST['varor'] ?? []) as $r) {
+    if (!is_array($r)) continue;
+    $produkt = enRad($r['produkt'] ?? '', 160);
+    $forp = enRad($r['forpackning'] ?? '', 80);
+    $info = enRad($r['info'] ?? '', 100);
+    $enhet = mb_strtolower(trim(enRad($r['enhet'] ?? '', 20), " /."), 'UTF-8');
+    $prisText = enRad($r['pris'] ?? '', 30);
+    if ($produkt === '' && $forp === '' && $info === '' && $prisText === '') continue;
+    $pris = sk_pris($prisText);
+    if ($produkt === '') {
+      $fel['namn'] = 'Varje vara behöver ett namn.';
+    } elseif ($pris === null) {
+      $utanPris[] = $produkt;
+    }
+    $rader[] = ['produkt' => $produkt, 'forpackning' => $forp, 'info' => $info, 'enhet' => $enhet !== '' ? $enhet : 'st',
+                'pris' => $pris, 'pris_text' => $prisText];
+  }
+  if ($utanPris) $fel['pris'] = 'Pris saknas eller är ogiltigt för: ' . implode(', ', array_slice($utanPris, 0, 8)) . (count($utanPris) > 8 ? ' m.fl.' : '') . '.';
+  if (count($rader) > VK_MAX_RADER) $fel['antal'] = 'Högst ' . VK_MAX_RADER . ' varor per blad.';
+  return [$rader, $fel];
+}
+
+// Vardagarna i bladets vecka som går att beställa leverans till: från i morgon och framåt.
+function vk_leveransdagar(array $vk): array {
+  global $leveransdagar;
+  $imorgon = new DateTimeImmutable('tomorrow');
+  $ut = [];
+  $dag = 1;
+  foreach ($leveransdagar as $key => $namn) {
+    $datum = sk_veckodag((int)$vk['ar'], (int)$vk['vecka'], $dag++);
+    if ($datum >= $imorgon) $ut[$key] = $namn . ' ' . $datum->format('j/n');
+  }
+  return $ut;
+}
+
+// Varulistan som redigerbar tabell för admin. $rader har fälten från veckansklipp_rader eller formuläret.
+function vk_varutabell(array $rader, int $extra = 0): string {
+  $html = '<div class="sk-edit-wrap"><table class="sk-edit vk-varor"><thead><tr><th>Vara</th><th>Förpackning</th><th>Märke / info</th>'
+        . '<th>Pris (kr)</th><th>Per</th><th><span class="sr-only">Ta bort</span></th></tr></thead><tbody data-varor>';
+  $n = 0;
+  foreach ($rader as $r) $html .= vk_varurad((string)$n++, $r);
+  for ($i = 0; $i < $extra; $i++) $html .= vk_varurad((string)$n++, []);
+  return $html . '</tbody></table></div>';
+}
+
+function vk_varurad(string $n, array $r): string {
+  $pris = $r['pris_text'] ?? (isset($r['pris']) && $r['pris'] !== null && $r['pris'] !== '' ? number_format((float)$r['pris'], 2, ',', '') : '');
+  $f = fn($falt, $varde, $extra = '') => '<input type="text" name="varor[' . $n . '][' . $falt . ']" value="' . e($varde) . '"' . $extra . '>';
+  return '<tr>'
+    . '<td>' . $f('produkt', $r['produkt'] ?? '', ' aria-label="Vara"') . '</td>'
+    . '<td class="c-forp">' . $f('forpackning', $r['forpackning'] ?? '', ' aria-label="Förpackning"') . '</td>'
+    . '<td class="c-info">' . $f('info', $r['info'] ?? '', ' aria-label="Märke eller info"') . '</td>'
+    . '<td class="c-pris">' . $f('pris', $pris, ' inputmode="decimal" aria-label="Pris"') . '</td>'
+    . '<td class="c-enh">' . $f('enhet', $r['enhet'] ?? '', ' list="vkEnheter" aria-label="Pris per"') . '</td>'
+    . '<td class="c-x"><button type="button" class="ta-bort" aria-label="Ta bort raden">&times;</button></td>'
+    . '</tr>';
 }

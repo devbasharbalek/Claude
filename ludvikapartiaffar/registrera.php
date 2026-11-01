@@ -1,7 +1,9 @@
 <?php
 require __DIR__ . '/includes/app.php';
 
-if (current_user()) redirect('konto.php');
+// Efter kontot skapats går kunden tillbaka dit den var, t.ex. veckansklippet.
+$next = safe_next($_GET['next'] ?? $_POST['next'] ?? '');
+if (current_user()) redirect($next);
 
 $fel = [];
 $v = ['kundgrupp' => '', 'foretag' => '', 'kontakt' => '', 'telefon' => '', 'email' => '', 'adress' => ''];
@@ -62,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $st->execute([$id]);
     login_user($st->fetch());
     flash('Välkommen! Ditt konto är skapat och du är inloggad.');
-    redirect('konto.php');
+    redirect($next);
   }
 }
 
@@ -75,6 +77,7 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
   <div class="wrap" style="max-width:640px;">
     <form class="form-card" method="post" action="registrera.php" novalidate>
       <?php echo csrf_field(); ?>
+      <input type="hidden" name="next" value="<?php echo e($next); ?>">
       <h1 class="card-title">Skapa konto</h1>
       <p class="lead">För kommuner, restauranger, pizzerior och livsbutiker som beställer hos oss. Med ett konto sparas dina uppgifter och du ser alla dina beställningar.</p>
       <?php if ($fel): ?><div class="alert error" role="alert" style="margin-top:18px;"><strong>Några fält behöver kompletteras:</strong> se markeringarna nedan.</div><?php endif; ?>

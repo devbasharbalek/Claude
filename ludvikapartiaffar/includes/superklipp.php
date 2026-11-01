@@ -47,8 +47,8 @@ const SK_SCHEMA = [
     order_id INT UNSIGNED NOT NULL,
     sortering SMALLINT UNSIGNED NOT NULL,
     produkt VARCHAR(160) NOT NULL,
-    ursprung VARCHAR(20) NOT NULL DEFAULT '',
-    vikt VARCHAR(30) NOT NULL DEFAULT '',
+    ursprung VARCHAR(100) NOT NULL DEFAULT '',
+    vikt VARCHAR(80) NOT NULL DEFAULT '',
     enhet VARCHAR(20) NOT NULL DEFAULT '',
     pris DECIMAL(10,2) NOT NULL,
     antal SMALLINT UNSIGNED NOT NULL,
@@ -79,8 +79,11 @@ function sk_pris_per(array $rad): string {
   return kr((float)$rad['pris']) . ($rad['enhet'] !== '' ? '/' . $rad['enhet'] : '');
 }
 
+// "5" + "kg" blir "5 kg". En förpackning som redan står i klartext, t.ex. "6kg/låda", visas som den är.
 function sk_forpackning(array $rad): string {
-  return trim($rad['vikt'] . ' ' . $rad['enhet']);
+  $vikt = trim((string)$rad['vikt']);
+  if ($vikt === '') return '';
+  return preg_match('/^\d+([.,]\d+)?$/', $vikt) ? trim($vikt . ' ' . $rad['enhet']) : $vikt;
 }
 
 function sk_etikett(array $sk): string {
@@ -185,6 +188,117 @@ function sk_order_tabell(array $rader): string {
       . '<td class="pris">' . (int)$r['antal'] . '</td></tr>';
   }
   return $html . '<tr><td colspan="2" style="font-weight:600;">Totalt</td><td class="pris">' . $kolli . '</td></tr></tbody></table></div>';
+}
+
+// ---------- beställning från en veckolista (superklipp eller veckansklipp) ----------
+
+// Läser antal kolli per rad från formuläret. $perId är listans rader per id.
+// Felaktiga värden sparas som text så att kunden ser dem igen.
+function lista_antal_fran_post(array $perId): array {
+  $antal = [];
+  $fel = [];
+  $andrad = false;
+  foreach ((array)($_POST['antal'] ?? []) as $radId => $varde) {
+    $varde = is_scalar($varde) ? trim((string)$varde) : '';
+    if ($varde === '' || $varde === '0') continue;
+    if (!isset($perId[(int)$radId])) {
+      $andrad = true;
+      continue;
+    }
+    if (!ctype_digit($varde) || (int)$varde < 1 || (int)$varde > SK_MAX_ANTAL) {
+      $fel['antal'] = 'Antal kolli måste vara ett heltal mellan 1 och ' . SK_MAX_ANTAL . '.';
+      $antal[(int)$radId] = $varde;
+      continue;
+    }
+    $antal[(int)$radId] = (int)$varde;
+  }
+  if ($andrad) $fel['andrad'] = 'Listan uppdaterades medan du fyllde i. Kontrollera antalen och skicka igen.';
+  if (!$antal && !$fel) $fel['antal'] = 'Fyll i antal kolli på minst en vara.';
+  return [$antal, $fel];
+}
+
+// Sparar beställningen med en kopia av varje rad och skickar mejl till admin och kund.
+// $lista: ['etikett' => 'Superklipp v.46', 'superklipp_id' => 3] eller med 'veckansklipp_id'.
+// Raderna har fälten produkt, ursprung, vikt, enhet, pris och sortering. Returnerar 0 om det inte gick att spara.
+function lista_spara_order(array $user, array $lista, array $perId, array $antal, string $leveransdag, string $dag, string $leveransdatum, string $meddelande): int {
+  global $CONFIG;
+  $pdo = db();
+  $pdo->beginTransaction();
+  try {
+    $pdo->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
+        ->execute([$user['id'], $user['foretag'], $user['kundgrupp'] ?? null, $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
+                   $leveransdag, $meddelande, now(), now()]);
+    $orderId = (int)$pdo->lastInsertId();
+    $kolumner = ['order_id', 'superklipp_id', 'etikett', 'leveransdatum'];
+    $varden = [$orderId, $lista['superklipp_id'] ?? null, $lista['etikett'], $leveransdatum];
+    if (array_key_exists('veckansklipp_id', $lista)) {
+      $kolumner[] = 'veckansklipp_id';
+      $varden[] = $lista['veckansklipp_id'];
+    }
+    $pdo->prepare('INSERT INTO order_superklipp (' . implode(', ', $kolumner) . ') VALUES (' . implode(', ', array_fill(0, count($kolumner), '?')) . ')')
+        ->execute($varden);
+    $st = $pdo->prepare('INSERT INTO order_rader (order_id, sortering, produkt, ursprung, vikt, enhet, pris, antal) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    foreach ($antal as $radId => $n) {
+      $r = $perId[$radId];
+      $st->execute([$orderId, $r['sortering'], $r['produkt'], $r['ursprung'], $r['vikt'], $r['enhet'], $r['pris'], $n]);
+    }
+    $pdo->commit();
+  } catch (PDOException $ex) {
+    $pdo->rollBack();
+    return 0;
+  }
+
+  $etikett = $lista['etikett'];
+  $varor = [];
+  foreach ($antal as $radId => $n) {
+    $r = $perId[$radId];
+    $varor[] = sprintf('%4d × %s', $n, $r['produkt'])
+      . ($r['ursprung'] !== '' ? " ({$r['ursprung']})" : '')
+      . (sk_forpackning($r) !== '' ? ', ' . sk_forpackning($r) : '')
+      . ' – ' . sk_pris_per($r);
+  }
+  $kolli = array_sum($antal);
+
+  send_mail($CONFIG['mail_to'], "$etikett #$orderId: {$user['foretag']} ($dag)", implode("\n", [
+    "Ny beställning #$orderId på $etikett från ludvikaparti.se",
+    str_repeat('-', 44),
+    'Företag:            ' . $user['foretag'],
+    'Kundgrupp:          ' . kundgrupp_text($user['kundgrupp'] ?? null),
+    'Kontaktperson:      ' . $user['kontakt'],
+    'Telefon:            ' . $user['telefon'],
+    'E-post:             ' . $user['email'],
+    'Leveransadress:     ' . $user['adress'],
+    'Leveransdag:        ' . $dag,
+    '',
+    "Varor ($kolli kolli):",
+    ...$varor,
+    '',
+    'Meddelande:',
+    $meddelande !== '' ? $meddelande : '(inget meddelande)',
+    '',
+    str_repeat('-', 44),
+    'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order.php?id=' . $orderId,
+    'Svara på det här mejlet för att svara kunden direkt.',
+  ]), $user['email']);
+
+  send_mail($user['email'], "Vi har tagit emot din beställning #$orderId ($etikett)", implode("\n", [
+    "Hej {$user['kontakt']}!",
+    '',
+    "Tack för din beställning #$orderId från $etikett. Vi går igenom den och återkommer med bekräftelse.",
+    '',
+    'Leveransdag: ' . $dag,
+    "Varor ($kolli kolli):",
+    ...$varor,
+    '',
+    'Du kan följa beställningen under Mitt konto:',
+    $CONFIG['site_url'] . '/order.php?id=' . $orderId,
+    '',
+    'Med vänlig hälsning',
+    'Ludvika Partiaffär, 0240-183 55',
+  ]), $CONFIG['mail_to']);
+
+  return $orderId;
 }
 
 // ---------- inläsning ----------

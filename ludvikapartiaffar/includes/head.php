@@ -590,6 +590,14 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   .vk-status:empty{display:none;}
   .vk-status.fel{color:var(--danger);}
   textarea.sms{min-height:120px; font-size:.95rem;}
+  .vk-bestall{max-width:960px; margin:40px auto 0; scroll-margin-top:90px;}
+  .vk-bestall-rubrik{font-size:clamp(1.8rem,4vw,2.4rem); text-transform:uppercase; margin-bottom:16px;}
+  .sk-table .vk-info{color:var(--ink-soft); font-size:.88rem;}
+  .vk-rubrik{font-family:'Bebas Neue',sans-serif; font-weight:400; font-size:1.5rem; text-transform:uppercase; margin:22px 0 4px;}
+  table.vk-varor{min-width:760px;}
+  .vk-varor .c-forp{width:190px;} .vk-varor .c-info{width:200px;} .vk-varor .c-pris{width:90px;} .vk-varor .c-enh{width:78px;}
+  .sk-edit input.ogiltig{border-color:var(--danger); box-shadow:0 0 0 2px color-mix(in srgb, var(--danger) 25%, transparent);}
+  .detail-grid:has(#vkVarorDel:not([hidden])){grid-template-columns:1fr;}
   input[type=file]{font:inherit; font-size:.9rem; color:var(--ink-soft); max-width:100%;}
   input[type=file]::file-selector-button{font:inherit; font-weight:600; font-size:.88rem; color:var(--ink); background:var(--surface); border:1.5px solid var(--border); border-radius:999px; padding:9px 16px; margin-right:12px; cursor:pointer;}
   input[type=file]::file-selector-button:hover{border-color:var(--brand); color:var(--brand);}

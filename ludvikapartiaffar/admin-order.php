@@ -11,7 +11,7 @@ if (!$order) {
   http_response_code(404);
   exit('Beställningen finns inte.');
 }
-superklipp_schema();
+veckansklipp_schema();
 $osk = order_superklipp($id);
 
 $statusMejl = [
@@ -66,7 +66,7 @@ require __DIR__ . '/includes/head.php';
           <dl class="kv">
             <dt>Leveransdag</dt><dd><?php echo e(($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']) . ($osk ? ' ' . date('j/n', strtotime($osk['leveransdatum'])) : '')); ?></dd>
             <?php if ($osk): ?>
-              <dt>Från</dt><dd><?php if ($osk['superklipp_id']): ?><a href="admin-superklipp-redigera.php?id=<?php echo (int)$osk['superklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php else: ?><?php echo e($osk['etikett']); ?><?php endif; ?></dd>
+              <dt>Från</dt><dd><?php if ($osk['superklipp_id']): ?><a href="admin-superklipp-redigera.php?id=<?php echo (int)$osk['superklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php elseif (!empty($osk['veckansklipp_id'])): ?><a href="admin-veckansklipp.php?id=<?php echo (int)$osk['veckansklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php else: ?><?php echo e($osk['etikett']); ?><?php endif; ?></dd>
             <?php else: ?>
               <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
             <?php endif; ?>

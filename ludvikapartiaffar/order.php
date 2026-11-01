@@ -3,7 +3,7 @@ require __DIR__ . '/includes/app.php';
 $user = require_login();
 
 $order = order_for_user((int)($_GET['id'] ?? 0), (int)$user['id']);
-superklipp_schema();
+veckansklipp_schema();
 $osk = $order ? order_superklipp((int)$order['id']) : null;
 if (!$order) {
   http_response_code(404);
@@ -30,7 +30,11 @@ require __DIR__ . '/includes/head.php';
       </div>
       <div class="portal-actions">
         <?php if ($osk): ?>
-          <a class="btn primary" href="superklipp.php">Till veckans superklipp</a>
+          <?php if (!empty($osk['veckansklipp_id']) || str_starts_with($osk['etikett'], 'Veckansklipp')): ?>
+            <a class="btn primary" href="veckansklipp.php">Till veckansklippet</a>
+          <?php else: ?>
+            <a class="btn primary" href="superklipp.php">Till veckans superklipp</a>
+          <?php endif; ?>
         <?php else: ?>
           <a class="btn primary" href="bestall.php?igen=<?php echo (int)$order['id']; ?>">Beställ samma igen</a>
         <?php endif; ?>
