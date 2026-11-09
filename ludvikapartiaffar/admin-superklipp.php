@@ -50,7 +50,7 @@ require __DIR__ . '/includes/head.php';
       </div>
     </div>
 
-    <h2 style="font-size:1.8rem; text-transform:uppercase; margin:34px 0 14px;">Alla superklipp</h2>
+    <h2 class="list-rubrik">Alla superklipp</h2>
     <?php if (!$listor): ?>
       <div class="empty"><p>Inga superklipp än. Klistra in veckans lista ovan för att komma igång.</p></div>
     <?php else: ?>

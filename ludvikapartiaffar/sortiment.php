@@ -17,7 +17,7 @@ require __DIR__ . '/includes/head.php';
   <div class="wrap">
     <div class="sortiment-grid">
       <?php foreach ($sortiment as $key => $s): ?>
-        <div class="produkt-card">
+        <div class="produkt-card" id="<?php echo $key; ?>">
           <div class="produkt-icon"><?php echo ikon($key); ?></div>
           <h3><?php echo htmlspecialchars($s['namn']); ?></h3>
           <p><?php echo htmlspecialchars($s['text']); ?></p>

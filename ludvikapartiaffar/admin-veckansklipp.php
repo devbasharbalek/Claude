@@ -335,7 +335,7 @@ require __DIR__ . '/includes/head.php';
       </div>
     <?php endif; ?>
 
-    <h2 style="font-size:1.8rem; text-transform:uppercase; margin:34px 0 14px;">Alla veckansklipp</h2>
+    <h2 class="list-rubrik">Alla veckansklipp</h2>
     <?php if (!$alla): ?>
       <div class="empty"><p>Inga veckansklipp än. Ladda upp veckans blad ovan.</p></div>
     <?php else: ?>

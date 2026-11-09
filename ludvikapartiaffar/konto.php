@@ -53,7 +53,7 @@ require __DIR__ . '/includes/head.php';
       </div>
     <?php endif; ?>
 
-    <h2 style="font-size:1.8rem; text-transform:uppercase; margin-bottom:14px;">Mina beställningar</h2>
+    <h2 class="list-rubrik" style="margin-top:0;">Mina beställningar</h2>
 
     <?php if (!$orders): ?>
       <div class="empty">

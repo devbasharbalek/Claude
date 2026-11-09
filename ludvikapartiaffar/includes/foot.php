@@ -2,6 +2,27 @@
 
 <footer class="site-footer">
   <div class="wrap">
+    <div class="footer-info">
+      <div class="info-blk">
+        <span class="info-ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></span>
+        <h4>Beställning</h4>
+        <p>Fyll i vårt beställningsformulär så återkommer vi med bekräftelse, eller ring oss direkt under öppettiderna.</p>
+        <div class="pil-lankar">
+          <a class="pil" href="bestall.php">Till beställningen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="pil" href="integritet.php">Integritet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+      <div class="info-blk">
+        <span class="info-ikon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12Z"/></svg></span>
+        <h4>Kontakt</h4>
+        <p>Ring för att beställa eller prata sortiment, eller skicka en förfrågan via beställningsformuläret. Vi svarar under våra öppettider.</p>
+        <div class="pil-lankar">
+          <a class="pil" href="kontakt.php">Till kontaktsidan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="pil" href="tel:+4624018355">0240-183 55 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </div>
+    </div>
+
     <div class="footer-grid">
       <div>
         <a class="logo-chip" href="index.php"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
@@ -35,7 +56,7 @@
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">&copy; <?php echo date('Y'); ?> Ludvika Partiaffär &middot; Partihandel sedan 60-talet</div>
+    <div class="footer-bottom"><b>&copy; <?php echo date('Y'); ?> Ludvika Partiaffär</b> &middot; Partihandel sedan 60-talet</div>
   </div>
 </footer>
 
@@ -47,6 +68,7 @@
     btn.addEventListener('click', function(){
       var open = menu.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.setAttribute('aria-label', open ? 'Stäng meny' : 'Öppna meny');
     });
   }
 
