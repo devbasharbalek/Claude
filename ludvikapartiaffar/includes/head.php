@@ -9,8 +9,10 @@ foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sorti
   if (isset(ERBJUDANDEN[$key]) && !ser_erbjudande($navUser, $key)) continue;
   $navItems .= '<li><a href="' . $href . '"' . ($key === $active ? ' class="active" aria-current="page"' : '') . '>' . $label . '</a></li>';
 }
-$kontoHref = $navUser ? ($navUser['role'] === 'admin' ? 'admin.php' : 'konto.php') : 'logga-in.php';
-$kontoNamn = $navUser ? ($navUser['role'] === 'admin' ? 'Admin' : 'Mitt konto') : 'Logga in';
+$kontoHref = $navUser ? (ar_personal($navUser) ? 'admin.php' : 'konto.php') : 'logga-in.php';
+$kontoNamn = $navUser ? (ar_personal($navUser) ? 'Admin' : 'Mitt konto') : 'Logga in';
+// Adminportalen har egen sidomeny i stället för hemsidans meny och sidfot. Bara personal får den.
+$adminSida = isset($adminSida) && ar_personal($navUser) ? (string)$adminSida : null;
 $skapaAktiv = basename((string)($_SERVER['SCRIPT_NAME'] ?? '')) === 'registrera.php';
 $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], true);
 ?><!DOCTYPE html>
@@ -775,9 +777,11 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
   .footer-tag{font-size:.95rem; color:var(--footer-soft); line-height:1.65; max-width:32ch;}
   .footer-bottom{padding-block:22px 28px; border-top:1px solid var(--footer-line); font-size:.86rem; color:var(--footer-soft); line-height:1.7;}
   .footer-bottom b{color:var(--footer-ink); text-transform:uppercase; letter-spacing:.02em;}
+<?php if ($adminSida !== null) readfile(__DIR__ . '/admin.css'); ?>
 </style>
 </head>
-<body>
+<body<?php echo $adminSida !== null ? ' class="adm-body"' : ''; ?>>
+<?php if ($adminSida !== null): require __DIR__ . '/admin-meny.php'; else: ?>
 
 <div class="topbar">
   <div class="wrap">
@@ -830,4 +834,5 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 <main>
 <?php if ($flashMsg = flash()): ?>
   <div class="wrap"><div class="flash" role="status"><?php echo e($flashMsg); ?></div></div>
+<?php endif; ?>
 <?php endif; ?>

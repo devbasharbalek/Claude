@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/app.php';
-require_admin();
+require_behorighet('erbjudanden');
 superklipp_schema();
 
 $listor = db()->query("SELECT s.*,
@@ -10,12 +10,12 @@ $listor = db()->query("SELECT s.*,
   FROM superklipp s ORDER BY s.ar DESC, s.vecka DESC LIMIT 60")->fetchAll();
 
 $active = 'admin';
+$adminSida = 'superklipp';
 $pageTitle = 'Superklipp – Admin – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin.php">&larr; Beställningar</a>
     <div class="portal-head">
       <div>
         <span class="eyebrow">Admin</span>

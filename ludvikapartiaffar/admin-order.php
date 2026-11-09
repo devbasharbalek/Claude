@@ -1,10 +1,11 @@
 <?php
 require __DIR__ . '/includes/app.php';
-require_admin();
+$user = require_behorighet('order');
+erp_schema();
 
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
-$st = db()->prepare('SELECT o.*, u.email AS kund_email, u.active AS kund_active, u.kundgrupp AS kund_kundgrupp
-                     FROM orders o LEFT JOIN users u ON u.id = o.user_id WHERE o.id = ?');
+$st = db()->prepare('SELECT o.*, u.email AS kund_email, u.active AS kund_active, u.kundgrupp AS kund_kundgrupp, k.id AS register_id, k.kundnr, k.namn AS register_namn
+                     FROM orders o LEFT JOIN users u ON u.id = o.user_id LEFT JOIN kunder k ON k.id = u.kund_id WHERE o.id = ?');
 $st->execute([$id]);
 $order = $st->fetch();
 if (!$order) {
@@ -41,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $active = 'admin';
+$adminSida = 'order';
 $pageTitle = 'Beställning #' . $id . ' – Admin – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 ?>
@@ -101,6 +103,9 @@ require __DIR__ . '/includes/head.php';
           <dt>Telefon</dt><dd><?php echo e($order['telefon']); ?></dd>
           <dt>E-post</dt><dd><?php echo e($order['epost']); ?></dd>
           <dt>Adress</dt><dd><?php echo e($order['adress']); ?></dd>
+          <?php if ($order['register_id']): ?>
+            <dt>Kundregistret</dt><dd><?php if (far($user, 'kunder')): ?><a href="admin-kund.php?id=<?php echo (int)$order['register_id']; ?>" style="color:var(--brand);"><?php echo e($order['kundnr'] . ' ' . $order['register_namn']); ?></a><?php else: echo e($order['kundnr'] . ' ' . $order['register_namn']); endif; ?></dd>
+          <?php endif; ?>
           <dt>Konto</dt><dd>
             <?php if ($order['user_id']): ?>
               <a href="admin.php?visa=alla&amp;kund=<?php echo (int)$order['user_id']; ?>" style="color:var(--brand);">Alla beställningar från kunden</a>

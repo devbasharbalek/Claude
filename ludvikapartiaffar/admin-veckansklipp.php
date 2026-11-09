@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/app.php';
-require_admin();
+require_behorighet('erbjudanden');
 veckansklipp_schema();
 vk_skapa_kortlank();
 
@@ -167,12 +167,12 @@ if ($visad) {
 $aktivaBestallningar = count(array_filter($bestallningar, fn($o) => $o['status'] !== 'avbruten'));
 
 $active = 'admin';
+$adminSida = 'veckansklipp';
 $pageTitle = 'Veckansklipp – Admin – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin.php">&larr; Beställningar</a>
     <div class="portal-head">
       <div>
         <span class="eyebrow">Admin</span>

@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/includes/app.php';
 $user = require_login();
-if ($user['role'] === 'admin') redirect('admin.php');
+if (ar_personal($user)) redirect('admin.php');
 
 superklipp_schema();
 $st = db()->prepare('SELECT o.id, o.leveransdag, o.kategorier, o.status, o.created_at, os.etikett, os.leveransdatum

@@ -39,7 +39,7 @@ require __DIR__ . '/includes/head.php';
     <?php if (!$reset): ?>
       <div class="form-card">
         <h1 class="card-title">Länken fungerar inte</h1>
-        <p class="lead">Länken har redan använts eller har gått ut (den gäller i en timme). Beställ en ny länk så fixar vi det.</p>
+        <p class="lead">Länken har redan använts eller har gått ut. Beställ en ny länk så fixar vi det.</p>
         <a class="btn primary" href="glomt-losenord.php" style="margin-top:20px;">Skicka ny länk</a>
       </div>
     <?php else: ?>

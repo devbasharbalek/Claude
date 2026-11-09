@@ -71,6 +71,7 @@ try {
   foreach ($schema as $sql) db()->exec($sql);
   superklipp_schema();
   veckansklipp_schema();
+  erp_schema();
   $harAdmin = (bool)db()->query("SELECT 1 FROM users WHERE role = 'admin' LIMIT 1")->fetchColumn();
 } catch (PDOException $ex) {
   http_response_code(500);

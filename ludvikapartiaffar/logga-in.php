@@ -2,7 +2,7 @@
 require __DIR__ . '/includes/app.php';
 
 $next = safe_next($_GET['next'] ?? $_POST['next'] ?? '');
-if ($u = current_user()) redirect($u['role'] === 'admin' && $next === 'konto.php' ? 'admin.php' : $next);
+if ($u = current_user()) redirect(ar_personal($u) && $next === 'konto.php' ? 'admin.php' : $next);
 
 $fel = '';
 $email = '';
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
       clear_failed_logins($email);
       login_user($u);
-      redirect($u['role'] === 'admin' && $next === 'konto.php' ? 'admin.php' : $next);
+      redirect(ar_personal($u) && $next === 'konto.php' ? 'admin.php' : $next);
     }
   }
 }

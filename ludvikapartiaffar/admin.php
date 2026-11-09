@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/app.php';
-$admin = require_admin();
+$admin = require_behorighet('order');
 
 $filters = [
   'aktiva'    => ['Aktiva', "o.status IN ('ny','bekraftad')"],
@@ -74,6 +74,7 @@ function lank(array $andra): string {
 }
 
 $active = 'admin';
+$adminSida = 'order';
 $pageTitle = 'Beställningar – Admin – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 ?>
@@ -82,19 +83,12 @@ require __DIR__ . '/includes/head.php';
     <div class="portal-head">
       <div>
         <span class="eyebrow">Admin</span>
-        <h1>Beställningar</h1>
-        <p>Inloggad som <?php echo e($admin['kontakt']); ?></p>
-      </div>
-      <div class="portal-actions">
-        <a class="btn primary" href="admin-superklipp.php">Superklipp</a>
-        <a class="btn ghost" href="admin-veckansklipp.php">Veckansklipp</a>
-        <a class="btn ghost" href="admin-kunder.php">Kunder</a>
-        <a class="btn ghost" href="profil.php">Mitt konto</a>
-        <form method="post" action="logga-ut.php" style="margin:0;"><?php echo csrf_field(); ?><button class="btn ghost" type="submit">Logga ut</button></form>
+        <h1>Order</h1>
+        <p>Beställningar från hemsidan, Superklipp och Veckansklipp.</p>
       </div>
     </div>
 
-    <?php $nyaKonton = (int)db()->query("SELECT COUNT(*) FROM users WHERE role = 'kund' AND godkand = 0 AND active = 1")->fetchColumn(); ?>
+    <?php $nyaKonton = far($admin, 'webbkonton') ? (int)db()->query("SELECT COUNT(*) FROM users WHERE role = 'kund' AND godkand = 0 AND active = 1")->fetchColumn() : 0; ?>
     <?php if ($nyaKonton): ?>
       <div class="sk-notis">
         <p><strong><?php echo $nyaKonton === 1 ? '1 nytt kundkonto väntar' : $nyaKonton . ' nya kundkonton väntar'; ?> på godkännande.</strong> De ser inga erbjudanden förrän du godkänner dem.</p>

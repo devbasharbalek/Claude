@@ -144,7 +144,7 @@ function erbjudande_enligt_grupp(string $vilket, ?string $grupp): bool {
 }
 
 function ar_godkand(array $user): bool {
-  return $user['role'] === 'admin' || (int)($user['godkand'] ?? 1) === 1;
+  return ar_personal($user) || (int)($user['godkand'] ?? 1) === 1;
 }
 
 // Det kunden får se när kontot är godkänt: eget val, annars enligt kundgruppen.
@@ -154,10 +154,10 @@ function erbjudande_valt(array $user, string $vilket): bool {
   return erbjudande_enligt_grupp($vilket, $user['kundgrupp'] ?? null);
 }
 
-// Ser användaren Superklipp eller Veckansklipp just nu? Admin ser allt, nya konton inget förrän de är godkända.
+// Ser användaren Superklipp eller Veckansklipp just nu? Personalen ser allt, nya konton inget förrän de är godkända.
 function ser_erbjudande(?array $user, string $vilket): bool {
   if (!$user) return false;
-  if ($user['role'] === 'admin') return true;
+  if (ar_personal($user)) return true;
   return ar_godkand($user) && erbjudande_valt($user, $vilket);
 }
 
@@ -369,3 +369,4 @@ function kategori_namn(string $csv): string {
 require __DIR__ . '/sortiment-data.php';
 require __DIR__ . '/superklipp.php';
 require __DIR__ . '/veckansklipp.php';
+require __DIR__ . '/erp.php';

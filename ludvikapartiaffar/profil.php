@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/includes/app.php';
 $user = require_login();
+// Personalen har inget företag, ingen kundgrupp och ingen leveransadress att fylla i.
+$personal = ar_personal($user);
 
 $fel = [];
 $pwFel = [];
@@ -18,12 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $v['email']   = mb_strtolower(enRad($_POST['email'] ?? '', 160));
     $v['adress']  = enRad($_POST['adress'] ?? '', 200);
 
-    if ($v['kundgrupp'] === '') $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
-    if ($v['foretag'] === '') $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
+    if ($personal) {
+      $v['kundgrupp'] = (string)($user['kundgrupp'] ?? '');
+      $v['foretag'] = $user['foretag'];
+      $v['adress'] = $user['adress'];
+    }
+    if ($v['kundgrupp'] === '' && !$personal) $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
+    if ($v['foretag'] === '' && !$personal) $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
     if ($v['kontakt'] === '') $fel['kontakt'] = 'Ange ditt namn.';
-    if (!preg_match('/^[0-9 +\-()]{6,}$/', $v['telefon'])) $fel['telefon'] = 'Ange ett telefonnummer.';
+    if (!preg_match('/^[0-9 +\-()]{6,}$/', $v['telefon']) && !($personal && $v['telefon'] === '')) $fel['telefon'] = 'Ange ett telefonnummer.';
     if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) $fel['email'] = 'Ange en giltig e-postadress.';
-    if ($v['adress'] === '') $fel['adress'] = 'Ange leveransadressen.';
+    if ($v['adress'] === '' && !$personal) $fel['adress'] = 'Ange leveransadressen.';
 
     if (!$fel && $v['email'] !== $user['email']) {
       if (!password_verify((string)($_POST['current_password'] ?? ''), $user['password_hash'])) {
@@ -37,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$fel) {
       db()->prepare('UPDATE users SET foretag = ?, kundgrupp = ?, kontakt = ?, telefon = ?, email = ?, adress = ? WHERE id = ?')
-          ->execute([$v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['email'], $v['adress'], $user['id']]);
+          ->execute([$v['foretag'], $v['kundgrupp'] !== '' ? $v['kundgrupp'] : null, $v['kontakt'], $v['telefon'], $v['email'], $v['adress'], $user['id']]);
       flash('Dina uppgifter är sparade.');
       redirect('profil.php');
     }
@@ -64,27 +71,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $active = 'konto';
+$adminSida = 'profil';
 $pageTitle = 'Mina uppgifter – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>' : '';
 ?>
 <section>
   <div class="wrap" style="max-width:760px;">
-    <a class="back-link" href="<?php echo $user['role'] === 'admin' ? 'admin.php' : 'konto.php'; ?>">&larr; Tillbaka</a>
+    <?php if (!$personal): ?><a class="back-link" href="konto.php">&larr; Tillbaka</a><?php endif; ?>
 
     <form class="form-card" method="post" action="profil.php" novalidate>
       <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="uppgifter">
       <h1 class="card-title">Mina uppgifter</h1>
-      <p class="lead">Används som förval när du beställer.</p>
+      <p class="lead"><?php echo $personal ? 'Ditt namn visas i historiken när du ändrar priser, kunder och artiklar.' : 'Används som förval när du beställer.'; ?></p>
       <?php if ($fel): ?><div class="alert error" role="alert" style="margin-top:18px;">Uppgifterna sparades inte, se markeringarna nedan.</div><?php endif; ?>
       <div class="field-grid" style="margin-top:20px;">
+        <?php if (!$personal): ?>
         <div class="field full"><?php echo kundgrupp_falt($v['kundgrupp']); ?><?php echo $err('kundgrupp'); ?></div>
         <div class="field"><label for="foretag">Företag / verksamhet</label><input type="text" id="foretag" name="foretag" value="<?php echo e($v['foretag']); ?>" required><?php echo $err('foretag'); ?></div>
+        <?php endif; ?>
         <div class="field"><label for="kontakt">Ditt namn</label><input type="text" id="kontakt" name="kontakt" value="<?php echo e($v['kontakt']); ?>" required><?php echo $err('kontakt'); ?></div>
         <div class="field"><label for="telefon">Telefon</label><input type="tel" id="telefon" name="telefon" value="<?php echo e($v['telefon']); ?>" required><?php echo $err('telefon'); ?></div>
         <div class="field"><label for="email">E-post (inloggning)</label><input type="email" id="email" name="email" value="<?php echo e($v['email']); ?>" autocomplete="username" required><?php echo $err('email'); ?></div>
-        <div class="field full"><label for="adress">Leveransadress</label><input type="text" id="adress" name="adress" value="<?php echo e($v['adress']); ?>" required><?php echo $err('adress'); ?></div>
+        <?php if (!$personal): ?><div class="field full"><label for="adress">Leveransadress</label><input type="text" id="adress" name="adress" value="<?php echo e($v['adress']); ?>" required><?php echo $err('adress'); ?></div><?php endif; ?>
         <div class="field full"><label for="current_password_e">Nuvarande lösenord <span class="hint">(krävs bara om du byter e-post)</span></label><input type="password" id="current_password_e" name="current_password" autocomplete="current-password"><?php echo $err('current_password'); ?></div>
       </div>
       <div class="form-actions"><button class="btn primary" type="submit">Spara uppgifter</button></div>

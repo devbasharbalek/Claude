@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/app.php';
-require_admin();
+require_behorighet('erbjudanden');
 superklipp_schema();
 
 $id = (int)($_POST['id'] ?? $_GET['id'] ?? 0);
@@ -222,6 +222,7 @@ if ($visaUtskick) {
 }
 
 $active = 'admin';
+$adminSida = 'superklipp';
 $pageTitle = ($sk ? 'Superklipp v.' . (int)$sk['vecka'] : 'Nytt superklipp') . ' – Admin – Ludvika Partiaffär';
 require __DIR__ . '/includes/head.php';
 ?>

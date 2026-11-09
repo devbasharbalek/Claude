@@ -3,7 +3,7 @@ require __DIR__ . '/includes/app.php';
 superklipp_schema();
 
 $user = current_user();
-$admin = $user !== null && $user['role'] === 'admin';
+$admin = far($user, 'erbjudanden');
 $harTillgang = ser_erbjudande($user, 'superklipp');
 
 $visade = sk_for_kunder();

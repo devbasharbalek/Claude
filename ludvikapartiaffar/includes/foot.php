@@ -1,3 +1,8 @@
+<?php if (!empty($adminSida)): ?>
+    </main>
+  </div>
+</div>
+<?php else: ?>
 </main>
 
 <footer class="site-footer">
@@ -59,9 +64,24 @@
     <div class="footer-bottom"><b>&copy; <?php echo date('Y'); ?> Ludvika Partiaffär</b> &middot; Partihandel sedan 60-talet</div>
   </div>
 </footer>
+<?php endif; ?>
 
 <script>
 (function(){
+  // Adminportalens sidomeny i mobilen.
+  var adm = document.getElementById('adm');
+  var admBtn = document.getElementById('admToggle');
+  if (adm && admBtn) {
+    var admSatt = function (open) {
+      adm.classList.toggle('oppen', open);
+      admBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      admBtn.setAttribute('aria-label', open ? 'Stäng menyn' : 'Öppna menyn');
+    };
+    admBtn.addEventListener('click', function () { admSatt(!adm.classList.contains('oppen')); });
+    document.getElementById('admSkugga').addEventListener('click', function () { admSatt(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') admSatt(false); });
+  }
+
   var btn = document.getElementById('menuToggle');
   var menu = document.getElementById('mobileMenu');
   if(btn && menu){
