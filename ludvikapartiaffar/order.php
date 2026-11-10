@@ -54,6 +54,27 @@ require __DIR__ . '/includes/head.php';
             <?php endif; ?>
           </dl>
           <?php if ($osk) echo sk_order_tabell(order_rader((int)$order['id'])); ?>
+          <?php
+            // Rader som vi har lagt in på ordern, med kundens priser.
+            $artRader = array_values(array_filter(order_rader_alla((int)$order['id']), fn($r) => in_array($r['typ'] ?? 'lista', ['artikel', 'text'], true)));
+            if ($artRader):
+              $sum = order_summor($artRader);
+          ?>
+            <div class="sk-scroll"><table class="sk-table sk-order">
+              <thead><tr><th>Vara</th><th class="num">Antal</th><th class="num">Pris</th><th class="num">Belopp</th></tr></thead>
+              <tbody>
+              <?php foreach ($artRader as $r): ?>
+                <?php if ($r['typ'] === 'text'): ?><tr><td colspan="4" style="font-style:italic;"><?php echo e($r['produkt']); ?></td></tr><?php continue; endif; ?>
+                <tr><td><?php echo e($r['produkt']); ?></td>
+                  <td class="pris" style="font-weight:500;"><?php echo e(($r['kolli'] !== null ? tal_text($r['kolli']) . ' kolli, ' : '') . tal_text($r['enheter']) . ' ' . $r['enhet']); ?></td>
+                  <td class="pris" style="font-weight:500;"><?php echo e(pris_text($r['pris']) . ' kr/' . ((int)$r['per_kolli'] ? 'kolli' : $r['enhet'])); ?></td>
+                  <td class="pris"><?php echo e(pris_text($r['belopp'])); ?></td></tr>
+              <?php endforeach; ?>
+              <tr><td colspan="3" style="font-weight:600;">Summa exkl. moms</td><td class="pris"><?php echo e(pris_text($sum['netto'])); ?></td></tr>
+              <tr><td colspan="3">Moms</td><td class="pris" style="font-weight:500;"><?php echo e(pris_text($sum['moms'])); ?></td></tr>
+              </tbody>
+            </table></div>
+          <?php endif; ?>
           <?php if ($order['meddelande'] !== ''): ?>
             <div class="order-text" style="margin-top:16px;"><?php echo e($order['meddelande']); ?></div>
           <?php endif; ?>

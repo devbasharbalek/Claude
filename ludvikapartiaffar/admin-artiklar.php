@@ -3,6 +3,9 @@ require __DIR__ . '/includes/app.php';
 $user = require_behorighet('artiklar');
 erp_schema();
 $kanPriser = far($user, 'priser');
+$seInpris = far($user, 'inpris_se');
+$andraInpris = far($user, 'inpris_andra');
+$kanRedigera = $kanPriser || $andraInpris;
 
 $f = [
   'sok' => enRad($_GET['sok'] ?? $_POST['sok'] ?? '', 80),
@@ -11,7 +14,7 @@ $f = [
   'status' => in_array($_GET['status'] ?? $_POST['status'] ?? '', ['inaktiva', 'alla'], true) ? ($_GET['status'] ?? $_POST['status']) : '',
   'sort' => in_array($_GET['sort'] ?? $_POST['sort'] ?? '', ['nr', 'grupp'], true) ? ($_GET['sort'] ?? $_POST['sort']) : '',
   'kund' => (int)($_GET['kund'] ?? $_POST['kund'] ?? 0),
-  'redigera' => $kanPriser && !empty($_GET['redigera'] ?? $_POST['redigera'] ?? '') ? 1 : 0,
+  'redigera' => $kanRedigera && !empty($_GET['redigera'] ?? $_POST['redigera'] ?? '') ? 1 : 0,
 ];
 $kund = $f['kund'] ? kund_hamta($f['kund']) : null;
 if (!$kund) $f['kund'] = 0;
@@ -19,7 +22,7 @@ if (!$kund) $f['kund'] = 0;
 // Sparar de priser som ändrats i tabellen. Bara ändrade fält skickas, så två personer skriver inte över varandra.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
-  if (!$kanPriser) {
+  if (!$kanRedigera) {
     http_response_code(403);
     exit('Du har inte behörighet att ändra priser.');
   }
@@ -29,8 +32,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   db()->beginTransaction();
   foreach ((array)($_POST['p'] ?? []) as $id => $falt) {
     $a = artikel_hamta((int)$id);
-    if (!$a || !is_array($falt)) continue;
+    if (!$a || !is_array($falt) || !far_grupp($user, $a['artikelgrupp'], 'artikelgrupper')) continue;
     foreach ($falt as $namn => $text) {
+      // Inpris kräver sin egen behörighet, försäljningspriser sin.
+      if ($namn === 'inpris' ? !$andraInpris : !$kanPriser) continue;
       $pris = pris_ur_text((string)$text);
       if ($pris === false) {
         $fel[] = $a['artikelnr'] . ': "' . enRad($text, 20) . '" är inget pris';
@@ -52,6 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $where = [];
 $params = [];
+[$gv, $gp] = grupp_villkor($user, 'a.artikelgrupp', 'artikelgrupper');
+$where[] = $gv;
+$params = $gp;
 if ($f['status'] === '') $where[] = 'a.aktiv = 1';
 elseif ($f['status'] === 'inaktiva') $where[] = 'a.aktiv = 0';
 if ($f['pg'] !== '') {
@@ -99,6 +107,7 @@ if (($_GET['export'] ?? '') === 'csv') {
   $ut = fopen('php://output', 'w');
   fwrite($ut, "\xEF\xBB\xBF");
   $rubriker = ['Art. Nr', 'Artikelnamn', 'Kollistorlek', 'Enhet', 'Produktgrupp', 'Artikelgrupp', 'Gällande inpris', 'Gällande utpris', 'Grupp 1', 'Grupp 2', 'Grupp 3', 'Moms'];
+  if (!$seInpris) unset($rubriker[6]);
   if ($kund) $rubriker[] = 'Pris ' . $kund['kundnr'];
   fputcsv($ut, $rubriker, ';', '"', '');
   foreach ($st as $a) {
@@ -106,6 +115,7 @@ if (($_GET['export'] ?? '') === 'csv') {
     $cell = fn($t) => preg_match('/^[=+\-@\t\r]/', (string)$t) ? "'" . $t : (string)$t;
     $rad = [$cell($a['artikelnr']), $cell($a['namn']), kolli_text($a), $cell($a['enhet']), $cell($a['produktgrupp']), $cell($a['artikelgrupp']), pris_text($a['inpris']), pris_text($a['utpris']),
             pris_text($a['g1']), pris_text($a['g2']), pris_text($a['g3']), tal_text($a['moms'])];
+    if (!$seInpris) unset($rad[6]);
     if ($kund) $rad[] = pris_text($a['kundens_pris']);
     fputcsv($ut, $rad, ';', '"', '');
   }
@@ -149,7 +159,7 @@ require __DIR__ . '/includes/head.php';
       <div class="portal-actions">
         <?php if (!$registretTomt): ?>
           <a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', array_merge($f, ['redigera' => 0]), ['export' => 'csv'])); ?>">Ladda ner för Excel</a>
-          <?php if ($kanPriser && !$f['redigera']): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', $f, ['redigera' => 1])); ?>">Ändra priser</a><?php endif; ?>
+          <?php if ($kanRedigera && !$f['redigera']): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', $f, ['redigera' => 1])); ?>">Ändra priser</a><?php endif; ?>
         <?php endif; ?>
         <a class="btn primary small" href="admin-artikel.php?ny=1">Ny artikel</a>
       </div>
@@ -204,7 +214,7 @@ require __DIR__ . '/includes/head.php';
         <table class="erp">
           <thead><tr>
             <th><?php echo $sortLank('nr', 'Art.nr'); ?></th><th><?php echo $sortLank('', 'Artikelnamn'); ?></th><th class="num">Kolli</th><th>Enhet</th>
-            <th><?php echo $sortLank('grupp', 'Produktgrupp'); ?></th><th>Grp</th><th class="num">Inpris</th><th class="num">Grundpris</th>
+            <th><?php echo $sortLank('grupp', 'Produktgrupp'); ?></th><th>Grp</th><?php if ($seInpris): ?><th class="num">Inpris</th><?php endif; ?><th class="num">Grundpris</th>
             <?php foreach (PRISGRUPPER as $g => $pg): ?><th class="num" title="<?php echo e($pg['for']); ?>"><?php echo e($pg['namn']); ?></th><?php endforeach; ?>
             <?php if ($kund): ?><th class="num">Kundens pris</th><?php endif; ?>
             <th class="num">Moms</th>
@@ -218,11 +228,11 @@ require __DIR__ . '/includes/head.php';
               <td><?php echo e($a['enhet']); ?></td>
               <td class="muted"><?php echo e($a['produktgrupp']); ?></td>
               <td class="muted"><?php echo e($a['artikelgrupp']); ?></td>
-              <?php echo pris_cell($a['inpris'], (bool)$f['redigera'], $id, 'inpris'); ?>
-              <?php echo pris_cell($a['utpris'], (bool)$f['redigera'], $id, 'utpris'); ?>
-              <?php foreach (PRISGRUPPER as $g => $_) echo pris_cell($a['g' . $g], (bool)$f['redigera'], $id, 'g' . $g, pris_text($a['utpris'])); ?>
+              <?php if ($seInpris) echo pris_cell($a['inpris'], $f['redigera'] && $andraInpris, $id, 'inpris'); ?>
+              <?php echo pris_cell($a['utpris'], $f['redigera'] && $kanPriser, $id, 'utpris'); ?>
+              <?php foreach (PRISGRUPPER as $g => $_) echo pris_cell($a['g' . $g], $f['redigera'] && $kanPriser, $id, 'g' . $g, pris_text($a['utpris'])); ?>
               <?php if ($kund): ?>
-                <?php if ($f['redigera']): ?>
+                <?php if ($f['redigera'] && $kanPriser): ?>
                   <td class="num kund-pris"><input class="pris" type="text" inputmode="decimal" name="p[<?php echo $id; ?>][kund]" value="<?php echo e(pris_text($a['kundpris'])); ?>" placeholder="<?php echo e(pris_text($a['kundgrupppris'] ?? $a['utpris'])); ?>" aria-label="Kundpris" autocomplete="off"></td>
                 <?php else: ?>
                   <td class="num kund-pris"><strong><?php echo e(pris_text($a['kundens_pris'])); ?></strong><span class="kalla"><?php echo e(priskalla_text($a['priskalla'], $kund['prisgrupp'] === null ? null : (int)$kund['prisgrupp'])); ?></span></td>

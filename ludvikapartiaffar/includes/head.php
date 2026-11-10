@@ -594,6 +594,8 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
   .pill-ny{background:var(--accent-soft); color:var(--accent-text);}
   .pill-bekraftad{background:var(--brand-soft); color:var(--brand-deep);}
   .pill-levererad{background:var(--green-soft); color:var(--green);}
+  .pill-plockad{background:color-mix(in srgb, var(--green) 14%, transparent); color:var(--green);}
+  .pill-fakturerad{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink);}
   .pill-avbruten{background:color-mix(in srgb, var(--ink-soft) 16%, transparent); color:var(--ink-soft);}
   .pill-grupp{background:var(--brand-soft); color:var(--brand-deep); margin-left:8px; vertical-align:1px;}
   .grupp-form{display:flex; flex-wrap:wrap; gap:8px 6px; align-items:center; justify-content:flex-start; margin:0; min-width:0;}

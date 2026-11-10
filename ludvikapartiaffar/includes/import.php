@@ -128,7 +128,7 @@ const IMPORT_MAX_EXEMPEL = 60;
 function import_rapport(string $typ): array {
   return ['typ' => $typ, 'rader' => 0, 'nya' => 0, 'andrade' => 0, 'oforandrade' => 0, 'overhoppade' => 0,
           'priser' => 0, 'saknas' => 0, 'inaktiveras' => 0, 'kolumner' => [], 'varningar' => [], 'antal_varningar' => 0,
-          'exempel' => [], 'okanda' => [], 'moms_misstanke' => 0, 'fel' => null];
+          'exempel' => [], 'okanda' => [], 'moms_misstanke' => 0, 'info' => [], 'prislista' => false, 'grupp_bort' => 0, 'fel' => null];
 }
 
 function import_varna(array &$r, string $text): void {
@@ -228,16 +228,28 @@ function import_artiklar(array $rader, array $val, ?array $user, array &$r): voi
     $r['fel'] = 'Hittar ingen kolumn med artikelnummer. Rubriken ska heta till exempel "Art. Nr", "Artikelnummer" eller "articleNumber".';
     return;
   }
-  // En ensam priskolumn gäller grundpriset eller den prisgrupp som valdes.
+  // En ensam priskolumn gäller den prisgrupp som valdes, eller som står i filnamnet
+  // ("Prislista_2026-11-09_grupp_1.xlsx"), annars grundpriset.
   if (isset($kol['pris'])) {
-    $mal = ($val['prismal'] ?? '') !== '' && isset(PRISGRUPPER[(int)$val['prismal']]) ? 'grupp' . (int)$val['prismal'] : 'utpris';
+    $valdGrupp = isset(PRISGRUPPER[(int)($val['prismal'] ?? 0)]) ? (int)$val['prismal'] : 0;
+    if (!$valdGrupp && preg_match('/grupp[\s_-]*([1-9])/iu', (string)($val['filnamn'] ?? ''), $m) && isset(PRISGRUPPER[(int)$m[1]])) {
+      $valdGrupp = (int)$m[1];
+      $r['info'][] = 'Kolumnen Pris läses som ' . PRISGRUPPER[$valdGrupp]['namn'] . ' (' . mb_strtolower(PRISGRUPPER[$valdGrupp]['for'], 'UTF-8') . '), enligt filnamnet.';
+    }
+    $mal = $valdGrupp ? 'grupp' . $valdGrupp : 'utpris';
     if (!isset($kol[$mal])) $kol[$mal] = $kol['pris'];
     unset($kol['pris']);
+  }
+  // Utan momskolumn är filen en prislista. Den ändrar bara priser, inte namn, enhet eller grupper.
+  $baraPriser = !isset($kol['moms']);
+  if ($baraPriser) {
+    $kol = array_intersect_key($kol, array_flip(['artikelnr', 'inpris', 'utpris', 'grupp1', 'grupp2', 'grupp3']));
+    $r['prislista'] = true;
   }
   $r['kolumner'] = array_values(array_map(fn($f) => FALT_NAMN[$f] ?? $f, array_keys($kol)));
   $harPris = (bool)array_intersect(['inpris', 'utpris', 'grupp1', 'grupp2', 'grupp3'], array_keys($kol));
   if (count($kol) === 1) {
-    $r['fel'] = 'Filen har artikelnummer men inga andra kolumner som känns igen, till exempel Artikelnamn, Gällande utpris eller Grupp 1.';
+    $r['fel'] = 'Filen har artikelnummer men inga priser eller andra kolumner som känns igen, till exempel Gällande utpris, Pris, Grupp 1 eller Moms.';
     return;
   }
 
@@ -260,6 +272,9 @@ function import_artiklar(array $rader, array $val, ?array $user, array &$r): voi
       }
       continue;
     }
+    // En rad med bara text i första kolumnen, som "Prislista: 2026-11-09" sist i Partihandels export, är ingen artikel.
+    $ovriga = array_diff_key($kol, ['artikelnr' => 1]);
+    if (implode('', array_map(fn($k) => trim((string)($rad[$k] ?? '')), $ovriga)) === '') continue;
     $r['rader']++;
     $nyckel = mb_strtolower($nr, 'UTF-8');
     if (isset($sedda[$nyckel])) {
@@ -387,6 +402,20 @@ function import_artiklar(array $rader, array $val, ?array $user, array &$r): voi
   // Artiklar som finns här men inte i filen.
   $saknade = array_filter(array_diff_key($befintliga, $sedda), fn($a) => (int)$a['aktiv'] === 1);
   $r['saknas'] = count($saknade);
+  if ($baraPriser) {
+    // En hel prislista: grupppriser för artiklar som inte finns i filen tas bort, så gäller grundpriset.
+    $r['saknas'] = 0;
+    if (!empty($val['synka'])) {
+      foreach (array_diff_key($befintliga, $sedda) as $a) {
+        foreach (PRISGRUPPER as $g => $_) {
+          if (!isset($kol['grupp' . $g]) || !isset($grupp[(int)$a['id']][$g])) continue;
+          $r['grupp_bort']++;
+          if ($skarp) satt_grupppris((int)$a['id'], $g, null, $av, 'import');
+        }
+      }
+    }
+    return;
+  }
   if (!empty($val['synka']) && isset($kol['namn']) && $saknade) {
     $r['inaktiveras'] = count($saknade);
     if ($skarp) {

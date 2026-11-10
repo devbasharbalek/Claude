@@ -79,7 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       } elseif ($sistaAdmin) {
         flash('Det måste finnas minst en administratör.');
       } else {
-        db()->prepare('UPDATE users SET role = ? WHERE id = ?')->execute([$roll, $u['id']]);
+        // Ny roll börjar från rollens mall. Egna kryss sätts på personens sida.
+        db()->prepare('UPDATE users SET role = ?, behorigheter = NULL WHERE id = ?')->execute([$roll, $u['id']]);
         flash($u['kontakt'] . ' är nu ' . mb_strtolower(roll_namn($roll), 'UTF-8') . '.');
       }
     } elseif ($action === 'stang' || $action === 'aktivera') {
@@ -99,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $inbjudan = $_SESSION['inbjudan'] ?? null;
 unset($_SESSION['inbjudan']);
-$personal = db()->query("SELECT id, role, email, kontakt, telefon, active, last_login, created_at FROM users WHERE role <> 'kund' ORDER BY active DESC, kontakt")->fetchAll();
+$personal = db()->query("SELECT id, role, email, kontakt, telefon, active, last_login, created_at, behorigheter, kundgrupper, artikelgrupper FROM users WHERE role <> 'kund' ORDER BY active DESC, kontakt")->fetchAll();
 $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>' : '';
 
 $active = 'admin';
@@ -112,7 +113,7 @@ require __DIR__ . '/includes/head.php';
     <div class="portal-head">
       <div>
         <h1>Personal</h1>
-        <p>Konton för alla som jobbar i systemet. Rollen bestämmer vad personen ser och kan ändra.</p>
+        <p>Konton för alla som jobbar i systemet. Rollen är en mall. Klicka på namnet för att kryssa i exakt vad personen får göra och vilka kundgrupper personen jobbar med.</p>
       </div>
     </div>
 
@@ -131,10 +132,12 @@ require __DIR__ . '/includes/head.php';
             <tbody>
             <?php foreach ($personal as $p): $sjalv = (int)$p['id'] === (int)$admin['id']; ?>
               <tr>
-                <td data-label="Namn"><div><strong><?php echo e($p['kontakt']); ?></strong><?php echo $sjalv ? ' <span class="muted">(du)</span>' : ''; ?><br><span class="muted" style="font-size:.85rem;"><?php echo e($p['email']); ?></span></div></td>
+                <td data-label="Namn"><div><a class="row-link" href="admin-person.php?id=<?php echo (int)$p['id']; ?>"><?php echo e($p['kontakt']); ?></a><?php echo $sjalv ? ' <span class="muted">(du)</span>' : ''; ?><br><span class="muted" style="font-size:.85rem;"><?php echo e($p['email']); ?></span>
+                  <?php $grp = array_filter([($g = anv_grupper($p, 'kundgrupper')) ? 'Kundgrupp ' . implode(', ', $g) : '', ($g = anv_grupper($p, 'artikelgrupper')) ? 'Artikelgrupp ' . implode(', ', $g) : '', $p['role'] !== 'admin' && $p['behorigheter'] !== null ? 'Egna behörigheter' : '']); ?>
+                  <?php if ($grp): ?><br><span class="muted" style="font-size:.8rem;"><?php echo e(implode(' · ', $grp)); ?></span><?php endif; ?></div></td>
                 <td data-label="Roll">
                   <?php if ($sjalv): ?>
-                    <?php echo e(roll_namn($p['role'])); ?>
+                    <?php echo e(roll_text($p)); ?>
                   <?php else: ?>
                     <form class="grupp-form" method="post" action="admin-personal.php">
                       <?php echo csrf_field(); ?>

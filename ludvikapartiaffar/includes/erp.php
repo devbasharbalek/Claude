@@ -12,14 +12,45 @@ const REGISTER_KUNDGRUPPER = KUNDGRUPPER + ['Z' => 'Grupp Z', 'T' => 'Grupp T'];
 const MOMSSATSER = [6, 12, 25, 0];
 const ENHETER = ['st', 'kg', 'förp', 'ask', 'hink', 'låda', 'kolli', 'fl', 'pkt'];
 
-// Personalens roller. Kunderna har rollen 'kund' och kommer aldrig åt adminportalen.
+// Allt man kan ge en person behörighet till, grupperat som på personalsidan.
+// Personal och behörigheter ingår inte: det har bara administratörer.
+const BEHORIGHETER = [
+  'Försäljning' => [
+    'order' => 'Se order',
+    'order_andra' => 'Lägga och ändra order',
+    'plock' => 'Plocka order',
+    'plock_alla' => 'Se alla order på plocksidan, inte bara sina egna',
+  ],
+  'Kunder' => [
+    'kunder' => 'Kundregistret',
+    'webbkonton' => 'Webbkonton och godkännande av nya kunder',
+  ],
+  'Sortiment och priser' => [
+    'artiklar' => 'Artiklar och prislista',
+    'priser' => 'Ändra försäljningspriser',
+    'inpris_se' => 'Se inköpspriser och vinst',
+    'inpris_andra' => 'Ändra inköpspriser',
+  ],
+  'Erbjudanden' => [
+    'erbjudanden' => 'Superklipp och Veckansklipp',
+  ],
+  'Administration' => [
+    'import' => 'Import av artiklar, priser och kunder',
+  ],
+];
+
+// Personalens roller är mallar: varje person kan få egna kryss. Kunderna har rollen 'kund' och kommer aldrig åt adminportalen.
 const ROLLER = [
-  'admin'  => ['namn' => 'Administratör', 'text' => 'Allt, även personal och import av register.',
-               'kan' => ['order', 'kunder', 'artiklar', 'priser', 'erbjudanden', 'webbkonton', 'import', 'personal']],
-  'kontor' => ['namn' => 'Kontor och sälj', 'text' => 'Order, kundregister, artiklar, priser, erbjudanden och webbkonton.',
-               'kan' => ['order', 'kunder', 'artiklar', 'priser', 'erbjudanden', 'webbkonton']],
-  'lager'  => ['namn' => 'Lager och plock', 'text' => 'Ser och hanterar order och plocklistor.',
-               'kan' => ['order']],
+  'admin'   => ['namn' => 'Administratör', 'text' => 'Allt, även personal, behörigheter och import.',
+                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden', 'import', 'personal']],
+  'kontor'  => ['namn' => 'Kontor och sälj', 'text' => 'Order, kundregister, artiklar och priser, erbjudanden och webbkonton.',
+                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden']],
+  'saljare' => ['namn' => 'Säljare', 'text' => 'Lägger order och ser kunder och prislistan, men ändrar inte priser och ser inte inköpspriser.',
+                'kan' => ['order', 'order_andra', 'kunder', 'artiklar']],
+  'ekonomi' => ['namn' => 'Ekonomi', 'text' => 'Ser order, kunder, priser och vinst. Ändrar inget i order eller priser.',
+                'kan' => ['order', 'kunder', 'artiklar', 'inpris_se']],
+  'lager'   => ['namn' => 'Lager och plock', 'text' => 'Ser order, plockar och skriver ut plocksedlar och följesedlar.',
+                'kan' => ['order', 'plock', 'plock_alla']],
 ];
 
 const ERP_SCHEMA = [
@@ -161,6 +192,9 @@ function erp_schema(): void {
   try {
     $pdo->query('SELECT 1 FROM importlogg LIMIT 0');
     $pdo->query('SELECT kund_id FROM users LIMIT 0');
+    $pdo->query('SELECT kalla FROM orders LIMIT 0');
+    $pdo->query('SELECT behorigheter FROM users LIMIT 0');
+    $pdo->query('SELECT belopp FROM order_rader LIMIT 0');
     return;
   } catch (PDOException $e) {
     // Något saknas, skapas nedan.
@@ -173,6 +207,16 @@ function erp_schema(): void {
     $pdo->exec('ALTER TABLE users ADD COLUMN kund_id INT UNSIGNED NULL, ADD KEY idx_kund (kund_id),
                 ADD CONSTRAINT fk_users_kund FOREIGN KEY (kund_id) REFERENCES kunder(id) ON DELETE SET NULL');
   }
+  try {
+    $pdo->query('SELECT behorigheter FROM users LIMIT 0');
+  } catch (PDOException $e) {
+    // Egna behörigheter och grupper per person. Null betyder enligt rollen och alla grupper.
+    $pdo->exec('ALTER TABLE users ADD COLUMN behorigheter VARCHAR(500) NULL, ADD COLUMN kundgrupper VARCHAR(20) NULL, ADD COLUMN artikelgrupper VARCHAR(60) NULL');
+  }
+  // Order och orderrader får kolumnerna för kund, artiklar, priser och plock.
+  superklipp_schema();
+  veckansklipp_schema();
+  order_kolumner($pdo);
 }
 
 // ---------- roller ----------
@@ -181,8 +225,37 @@ function ar_personal(?array $u): bool {
   return $u !== null && isset(ROLLER[$u['role'] ?? '']);
 }
 
+// Det personen får göra: rollens mall, eller egna kryss om administratören har ändrat dem.
+// Administratörer har alltid allt, så att ingen kan låsa ute sig.
+function behorigheter(?array $u): array {
+  if (!ar_personal($u)) return [];
+  $egna = $u['behorigheter'] ?? null;
+  if ($u['role'] === 'admin' || $egna === null) return ROLLER[$u['role']]['kan'];
+  $giltiga = array_keys(array_merge(...array_values(BEHORIGHETER)));
+  return array_values(array_intersect($giltiga, explode(',', $egna)));
+}
+
 function far(?array $u, string $vad): bool {
-  return ar_personal($u) && in_array($vad, ROLLER[$u['role']]['kan'], true);
+  return in_array($vad, behorigheter($u), true);
+}
+
+// Kundgrupper och artikelgrupper personen jobbar med. Null betyder alla.
+function anv_grupper(?array $u, string $vilka): ?array {
+  if (!ar_personal($u) || $u['role'] === 'admin') return null;
+  $v = trim((string)($u[$vilka] ?? ''));
+  return $v === '' ? null : array_values(array_filter(explode(',', $v), fn($g) => $g !== ''));
+}
+
+// SQL-villkor som begränsar till personens kundgrupper. $uttryck är kolumnen med kundgruppen.
+function grupp_villkor(?array $u, string $uttryck, string $vilka = 'kundgrupper'): array {
+  $g = anv_grupper($u, $vilka);
+  if ($g === null) return ['1=1', []];
+  return ["$uttryck IN (" . implode(',', array_fill(0, count($g), '?')) . ')', $g];
+}
+
+function far_grupp(?array $u, ?string $grupp, string $vilka = 'kundgrupper'): bool {
+  $g = anv_grupper($u, $vilka);
+  return $g === null || ($grupp !== null && in_array($grupp, $g, true));
 }
 
 function require_behorighet(string $vad): array {
@@ -196,6 +269,11 @@ function require_behorighet(string $vad): array {
 
 function roll_namn(string $roll): string {
   return ROLLER[$roll]['namn'] ?? $roll;
+}
+
+// "Kontor och sälj" eller "Kontor och sälj, anpassad" när personen har egna kryss.
+function roll_text(array $u): string {
+  return roll_namn($u['role']) . ($u['role'] !== 'admin' && ($u['behorigheter'] ?? null) !== null ? ', anpassad' : '');
 }
 
 // Namnet som sparas i historiken när någon ändrar något.

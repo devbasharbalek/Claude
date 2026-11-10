@@ -2,6 +2,7 @@
 // Sidomenyn i adminportalen. Varje roll ser bara det den har behörighet till.
 $admIkon = [
   'order' => '<path d="M9 5h10M9 12h10M9 19h10"/><path d="M4.5 5h.01M4.5 12h.01M4.5 19h.01"/>',
+  'plock' => '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
   'kunder' => '<path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="12" cy="7.5" r="3.5"/>',
   'webbkonton' => '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
   'artiklar' => '<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
@@ -15,6 +16,7 @@ $admVantar = far($navUser, 'webbkonton') ? (int)db()->query("SELECT COUNT(*) FRO
 $admMeny = [
   'Försäljning' => [
     'order' => ['admin.php', 'Order', 'order', $admNyaOrder],
+    'plock' => ['admin-plock.php', 'Plock', 'plock', 0],
     'kunder' => ['admin-kundregister.php', 'Kunder', 'kunder', 0],
     'webbkonton' => ['admin-kunder.php', 'Webbkonton', 'webbkonton', $admVantar],
   ],
@@ -48,7 +50,7 @@ $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1
     <div class="adm-side-fot">
       <div class="adm-anvandare">
         <span class="adm-avatar" aria-hidden="true"><?php echo e($admInitialer); ?></span>
-        <div><b><?php echo e($navUser['kontakt'] ?: $navUser['email']); ?></b><small><?php echo e(roll_namn($navUser['role'])); ?></small></div>
+        <div><b><?php echo e($navUser['kontakt'] ?: $navUser['email']); ?></b><small><?php echo e(roll_text($navUser)); ?></small></div>
       </div>
       <div class="adm-fot-rad">
         <a href="profil.php"<?php echo $adminSida === 'profil' ? ' aria-current="page"' : ''; ?>>Mina uppgifter</a>

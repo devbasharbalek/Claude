@@ -4,6 +4,8 @@ require __DIR__ . '/includes/import.php';
 $user = require_behorighet('artiklar');
 erp_schema();
 $kanPriser = far($user, 'priser');
+$seInpris = far($user, 'inpris_se');
+$andraInpris = far($user, 'inpris_andra');
 $av = vem($user);
 
 $id = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
@@ -13,6 +15,10 @@ if ($id && !$artikel) {
   exit('Artikeln finns inte.');
 }
 $ny = !$artikel;
+if ($artikel && !far_grupp($user, $artikel['artikelgrupp'], 'artikelgrupper')) {
+  http_response_code(403);
+  exit('Artikeln hör till en artikelgrupp du inte har behörighet till.');
+}
 
 $fel = [];
 $v = $artikel ?? array_merge(ARTIKEL_STANDARD, ['artikelnr' => '', 'aktiv' => 1]);
@@ -72,8 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($v['enhet'] === '') $fel['enhet'] = 'Ange enhet.';
 
     $priser = [];
-    if ($kanPriser) {
+    if ($kanPriser || $andraInpris) {
       foreach (array_keys($prisV) as $k) {
+        // Inpris och försäljningspriser har var sin behörighet.
+        if ($k === 'inpris' ? !$andraInpris : !$kanPriser) continue;
         $prisV[$k] = enRad($_POST[$k] ?? '', 20);
         $p = pris_ur_text($prisV[$k]);
         if ($p === false) $fel[$k] = 'Skriv ett pris, till exempel 129,95.';
@@ -119,6 +127,7 @@ if ($artikel) {
   $st = db()->prepare('SELECT l.*, k.namn AS kund_namn FROM prislogg l LEFT JOIN kunder k ON k.id = l.kund_id WHERE l.artikel_id = ? ORDER BY l.tid DESC, l.id DESC LIMIT 25');
   $st->execute([$id]);
   $historik = $st->fetchAll();
+  if (!$seInpris) $historik = array_values(array_filter($historik, fn($l) => $l['typ'] !== 'inpris'));
 }
 $produktgrupper = db()->query("SELECT DISTINCT produktgrupp FROM artiklar WHERE produktgrupp <> '' ORDER BY produktgrupp")->fetchAll(PDO::FETCH_COLUMN);
 $artikelgrupper = db()->query("SELECT DISTINCT artikelgrupp FROM artiklar WHERE artikelgrupp <> '' ORDER BY artikelgrupp")->fetchAll(PDO::FETCH_COLUMN);
@@ -126,7 +135,7 @@ $enheter = array_unique(array_merge(ENHETER, db()->query("SELECT DISTINCT enhet 
 
 $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>' : '';
 $ro = $kanPriser ? '' : ' readonly';
-$inpris = pris_ur_text($prisV['inpris']) ?: null;
+$inpris = $seInpris ? (pris_ur_text($prisV['inpris']) ?: null) : null;
 $marg = function (string $k) use ($prisV, $inpris) {
   $p = pris_ur_text($prisV[$k]) ?: null;
   $m = marginal($inpris, $p);
@@ -196,9 +205,9 @@ require __DIR__ . '/includes/head.php';
         </div>
 
         <div class="detail-card">
-          <h2>Priser <span class="h2-text">exkl. moms<?php echo $kanPriser ? '' : ', bara läsbehörighet'; ?></span></h2>
+          <h2>Priser <span class="h2-text">exkl. moms<?php echo $kanPriser ? '' : ', du kan inte ändra försäljningspriser'; ?></span></h2>
           <div class="field-grid fyra">
-            <div class="field"><label for="inpris">Inpris</label><input type="text" inputmode="decimal" id="inpris" name="inpris" value="<?php echo e($prisV['inpris']); ?>"<?php echo $ro; ?>><?php echo $err('inpris'); ?></div>
+            <?php if ($seInpris): ?><div class="field"><label for="inpris">Inpris</label><input type="text" inputmode="decimal" id="inpris" name="inpris" value="<?php echo e($prisV['inpris']); ?>"<?php echo $andraInpris ? '' : ' readonly'; ?>><?php echo $err('inpris'); ?></div><?php endif; ?>
             <div class="field"><label for="utpris">Grundpris</label><input type="text" inputmode="decimal" id="utpris" name="utpris" value="<?php echo e($prisV['utpris']); ?>"<?php echo $ro; ?>><?php echo $marg('utpris'); ?><?php echo $err('utpris'); ?></div>
           </div>
           <div class="field-grid tre" style="margin-top:14px;">
@@ -207,7 +216,7 @@ require __DIR__ . '/includes/head.php';
                 <input type="text" inputmode="decimal" id="g<?php echo $g; ?>" name="g<?php echo $g; ?>" value="<?php echo e($prisV['g' . $g]); ?>" placeholder="<?php echo e($prisV['utpris'] !== '' ? 'Grundpris ' . $prisV['utpris'] : 'Grundpris'); ?>"<?php echo $ro; ?>><?php echo $marg('g' . $g); ?><?php echo $err('g' . $g); ?></div>
             <?php endforeach; ?>
           </div>
-          <p class="form-note" style="margin-top:12px;">En tom grupp betalar grundpriset. TG är täckningsgraden mot inpriset.</p>
+          <p class="form-note" style="margin-top:12px;">En tom grupp betalar grundpriset.<?php echo $seInpris ? ' TG är täckningsgraden mot inpriset.' : ''; ?></p>
         </div>
         <div class="spara-rad"><button class="btn primary" type="submit"><?php echo $ny ? 'Lägg upp artikeln' : 'Spara artikeln'; ?></button><a class="btn ghost" href="admin-artiklar.php">Avbryt</a></div>
       </form>

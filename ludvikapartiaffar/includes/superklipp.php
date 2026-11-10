@@ -169,10 +169,11 @@ function order_superklipp(int $orderId): ?array {
   return $st->fetch() ?: null;
 }
 
+// Raderna kunden beställde från Superklipp eller Veckansklipp. Artikelrader som personalen lagt till hör inte hit.
 function order_rader(int $orderId): array {
   $st = db()->prepare('SELECT * FROM order_rader WHERE order_id = ? ORDER BY sortering, id');
   $st->execute([$orderId]);
-  return $st->fetchAll();
+  return array_values(array_filter($st->fetchAll(), fn($r) => ($r['typ'] ?? 'lista') === 'lista'));
 }
 
 // Varorna i en superklipp-beställning, för kundens och adminens ordersida.
@@ -222,13 +223,15 @@ function lista_antal_fran_post(array $perId): array {
 // Raderna har fälten produkt, ursprung, vikt, enhet, pris och sortering. Returnerar 0 om det inte gick att spara.
 function lista_spara_order(array $user, array $lista, array $perId, array $antal, string $leveransdag, string $dag, string $leveransdatum, string $meddelande): int {
   global $CONFIG;
+  erp_schema();
   $pdo = db();
   $pdo->beginTransaction();
   try {
-    $pdo->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
-        ->execute([$user['id'], $user['foretag'], $user['kundgrupp'] ?? null, $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
-                   $leveransdag, $meddelande, now(), now()]);
+    // Ordern får leveransdatum, källa och kunden i kundregistret om webbkontot är kopplat.
+    $pdo->prepare('INSERT INTO orders (user_id, kund_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, leveransdatum, kalla, kategorier, meddelande, status, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, \'ny\', ?, ?)')
+        ->execute([$user['id'], $user['kund_id'] ?? null, $user['foretag'], $user['kundgrupp'] ?? null, $user['kontakt'], $user['telefon'], $user['email'], $user['adress'],
+                   $leveransdag, $leveransdatum, array_key_exists('veckansklipp_id', $lista) ? 'veckansklipp' : 'superklipp', $meddelande, now(), now()]);
     $orderId = (int)$pdo->lastInsertId();
     $kolumner = ['order_id', 'superklipp_id', 'etikett', 'leveransdatum'];
     $varden = [$orderId, $lista['superklipp_id'] ?? null, $lista['etikett'], $leveransdatum];

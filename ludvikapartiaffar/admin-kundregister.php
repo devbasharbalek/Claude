@@ -10,8 +10,9 @@ $f = [
   'status' => in_array($_GET['status'] ?? '', ['inaktiva', 'alla'], true) ? $_GET['status'] : '',
 ];
 
-$where = [];
-$params = [];
+// Personal som bara jobbar med vissa kundgrupper ser bara de kunderna.
+[$gv, $params] = grupp_villkor($user, 'k.kundgrupp');
+$where = [$gv];
 if ($f['status'] === '') $where[] = 'k.aktiv = 1';
 elseif ($f['status'] === 'inaktiva') $where[] = 'k.aktiv = 0';
 if ($f['pg'] === 'ingen') $where[] = 'k.prisgrupp IS NULL';

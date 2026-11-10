@@ -49,11 +49,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if (!$fel) {
     try {
-      db()->prepare('INSERT INTO orders (user_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, kategorier, meddelande, status, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'ny\', ?, ?)')
+      erp_schema();
+      // Önskad leveransdag blir nästa sådan dag efter idag, så att ordern kommer med på plocksidan.
+      $levDatum = new DateTimeImmutable('tomorrow');
+      $dagNr = array_search($v['leveransdag'], VECKODAG_KOD, true);
+      if ($dagNr !== false) while ((int)$levDatum->format('N') !== $dagNr) $levDatum = $levDatum->modify('+1 day');
+      db()->prepare('INSERT INTO orders (user_id, kund_id, foretag, kundgrupp, kontakt, telefon, epost, adress, leveransdag, leveransdatum, kategorier, meddelande, status, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, \'ny\', ?, ?)')
           ->execute([
-            $user['id'] ?? null, $v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['epost'], $v['adress'],
-            $v['leveransdag'], implode(',', $v['kategorier']), $v['meddelande'], now(), now(),
+            $user['id'] ?? null, $user['kund_id'] ?? null, $v['foretag'], $v['kundgrupp'], $v['kontakt'], $v['telefon'], $v['epost'], $v['adress'],
+            $v['leveransdag'], $dagNr !== false ? $levDatum->format('Y-m-d') : null, implode(',', $v['kategorier']), $v['meddelande'], now(), now(),
           ]);
       $orderId = (int)db()->lastInsertId();
     } catch (PDOException $ex) {

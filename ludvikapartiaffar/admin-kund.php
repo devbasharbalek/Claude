@@ -13,6 +13,10 @@ if ($id && !$kund) {
   exit('Kunden finns inte.');
 }
 $ny = !$kund;
+if ($kund && !far_grupp($user, $kund['kundgrupp'])) {
+  http_response_code(403);
+  exit('Kunden hör till en kundgrupp du inte har behörighet till.');
+}
 
 // Fälten i formuläret, grupperade som på kundkortet i Partihandel.
 $delar = [
@@ -180,7 +184,11 @@ require __DIR__ . '/includes/head.php';
         <h1><?php echo e($ny ? 'Ny kund' : $kund['namn']); ?></h1>
         <?php if (!$ny): ?><p>Kundnr <?php echo e($kund['kundnr']); ?> &middot; <?php echo e(register_grupp_text($kund['kundgrupp'])); ?> &middot; <?php echo e($kund['prisgrupp'] === null ? 'Grundpris' : prisgrupp_text((int)$kund['prisgrupp']) . ', ' . mb_strtolower(PRISGRUPPER[(int)$kund['prisgrupp']]['for'], 'UTF-8')); ?><?php echo (int)$kund['aktiv'] ? '' : ' &middot; <strong>Inaktiv</strong>'; ?></p><?php endif; ?>
       </div>
-      <?php if (!$ny && far($user, 'artiklar')): ?><div class="portal-actions"><a class="btn ghost small" href="admin-artiklar.php?kund=<?php echo $id; ?>">Kundens prislista</a></div><?php endif; ?>
+      <?php if (!$ny): ?><div class="portal-actions">
+        <?php if (far($user, 'order')): ?><a class="btn ghost small" href="admin.php?visa=alla&amp;kid=<?php echo $id; ?>">Kundens order</a><?php endif; ?>
+        <?php if (far($user, 'artiklar')): ?><a class="btn ghost small" href="admin-artiklar.php?kund=<?php echo $id; ?>">Kundens prislista</a><?php endif; ?>
+        <?php if (far($user, 'order_andra') && (int)$kund['aktiv']): ?><form method="post" action="admin-order.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="action" value="skapa"><input type="hidden" name="kund_id" value="<?php echo $id; ?>"><button class="btn primary small" type="submit">Ny order</button></form><?php endif; ?>
+      </div><?php endif; ?>
     </div>
     <?php if ($fel): ?><div class="alert error" role="alert">Kunden sparades inte, se markeringarna nedan.</div><?php endif; ?>
 

@@ -11,10 +11,12 @@ if (!is_file($configFile)) {
 $CONFIG = require $configFile;
 
 const ORDER_STATUS = [
-  'ny'        => 'Ny',
-  'bekraftad' => 'Bekräftad',
-  'levererad' => 'Levererad',
-  'avbruten'  => 'Avbruten',
+  'ny'         => 'Ny',
+  'bekraftad'  => 'Bekräftad',
+  'plockad'    => 'Plockad',
+  'levererad'  => 'Levererad',
+  'fakturerad' => 'Fakturerad',
+  'avbruten'   => 'Avbruten',
 ];
 const MIN_PASSWORD = 10;
 
@@ -370,3 +372,4 @@ require __DIR__ . '/sortiment-data.php';
 require __DIR__ . '/superklipp.php';
 require __DIR__ . '/veckansklipp.php';
 require __DIR__ . '/erp.php';
+require __DIR__ . '/order.php';

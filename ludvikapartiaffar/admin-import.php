@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
       $rader = tabell_las($fil, $imp['namn']);
       db()->beginTransaction();
-      $r = import_kor($imp['typ'], $rader, $imp['val'], $user);
+      $r = import_kor($imp['typ'], $rader, $imp['val'] + ['filnamn' => $imp['namn']], $user);
       if ($r['fel'] !== null) throw new RuntimeException($r['fel']);
       import_logga($r, $imp['namn'], $user);
       db()->commit();
@@ -49,6 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($r['nya']) $delar[] = $r['nya'] . ' nya';
     if ($r['andrade']) $delar[] = $r['andrade'] . ' ändrade';
     if ($r['inaktiveras']) $delar[] = $r['inaktiveras'] . ' markerade som inaktiva';
+    if ($r['grupp_bort']) $delar[] = $r['grupp_bort'] . ' grupppriser borttagna';
     flash('Importen är klar: ' . ($delar ? implode(', ', $delar) : 'inga ändringar') . '. ' . $r['oforandrade'] . ' var redan aktuella.');
     redirect('admin-import.php');
   }
@@ -99,7 +100,7 @@ if ($imp && !$fel) {
     $imp = null;
   } else {
     try {
-      $rapport = import_kor($imp['typ'], tabell_las($fil, $imp['namn']), $imp['val'], null);
+      $rapport = import_kor($imp['typ'], tabell_las($fil, $imp['namn']), $imp['val'] + ['filnamn' => $imp['namn']], null);
     } catch (RuntimeException $ex) {
       import_rensa($imp);
       $imp = null;
@@ -148,6 +149,8 @@ require __DIR__ . '/includes/head.php';
             <div class="stat-tile"><b><?php echo $rapport['oforandrade']; ?></b><span>Redan aktuella</span></div>
             <div class="stat-tile"><b><?php echo $rapport['overhoppade']; ?></b><span>Hoppas över</span></div>
           </div>
+          <?php foreach ($rapport['info'] as $info): ?><div class="alert info" style="margin-bottom:12px;"><?php echo e($info); ?></div><?php endforeach; ?>
+          <?php if ($rapport['prislista']): ?><p class="form-note" style="margin-bottom:6px;"><strong>Filen är en prislista.</strong> Den ändrar bara priser. Namn, enheter och grupper på artiklarna lämnas som de är.</p><?php endif; ?>
           <p class="form-note">Filen har <?php echo $rapport['rader']; ?> rader. Kolumner som läses: <?php echo e(implode(', ', $rapport['kolumner'])); ?>.<?php if ($rapport['priser']): ?> <strong><?php echo $rapport['priser']; ?> priser</strong> sätts eller ändras, och alla prisändringar sparas i prishistoriken.<?php endif; ?></p>
 
           <?php if ($rapport['moms_misstanke']): ?>
@@ -160,6 +163,9 @@ require __DIR__ . '/includes/head.php';
           <?php endif; ?>
           <?php if ($rapport['saknas'] && $imp['typ'] !== 'kundpriser'): ?>
             <div class="alert <?php echo $rapport['inaktiveras'] ? 'warn' : 'info'; ?>" style="margin-top:14px;"><?php echo $rapport['saknas']; ?> aktiva <?php echo $enhet[$imp['typ']]; ?> i registret finns inte i filen. <?php echo $rapport['inaktiveras'] ? '<strong>De markeras som inaktiva.</strong>' : 'De lämnas som de är.'; ?></div>
+          <?php endif; ?>
+          <?php if ($rapport['grupp_bort']): ?>
+            <div class="alert warn" style="margin-top:14px;"><strong><?php echo $rapport['grupp_bort']; ?> grupppriser tas bort</strong> för artiklar som inte finns i filen. De artiklarna får grundpriset i den gruppen.</div>
           <?php endif; ?>
           <?php if ($rapport['varningar']): ?>
             <div class="alert warn" style="margin-top:14px;"><strong><?php echo $rapport['antal_varningar']; ?> saker att kontrollera</strong>
@@ -190,7 +196,7 @@ require __DIR__ . '/includes/head.php';
           <form class="spara-rad" method="post" action="admin-import.php">
             <?php echo csrf_field(); ?>
             <input type="hidden" name="token" value="<?php echo e($imp['token']); ?>">
-            <?php if ($rapport['nya'] + $rapport['andrade'] + $rapport['inaktiveras'] > 0): ?>
+            <?php if ($rapport['nya'] + $rapport['andrade'] + $rapport['inaktiveras'] + $rapport['grupp_bort'] > 0): ?>
               <button class="btn primary" type="submit" name="action" value="genomfor">Genomför importen</button>
             <?php else: ?>
               <span class="form-note"><strong>Inget att ändra.</strong> Registret stämmer redan med filen.</span>
@@ -225,7 +231,7 @@ require __DIR__ . '/includes/head.php';
                 <option value="">Grundpriset (utpris)</option>
                 <?php foreach (PRISGRUPPER as $g => $pg): ?><option value="<?php echo $g; ?>"<?php echo $v['prismal'] === (string)$g ? ' selected' : ''; ?>><?php echo e($pg['namn'] . ' – ' . $pg['for']); ?></option><?php endforeach; ?>
               </select>
-              <span class="hint">Kolumnerna Grupp 1, 2 och 3 känns igen automatiskt.</span>
+              <span class="hint">Kolumnerna Grupp 1, 2 och 3 känns igen automatiskt. Står "grupp_1" i filnamnet används Grupp 1.</span>
             </div>
           </div>
           <div class="field" style="margin-top:16px; max-width:280px;" data-for="kundpriser">
@@ -234,7 +240,7 @@ require __DIR__ . '/includes/head.php';
             <span class="hint">Bara om filen gäller en enda kund och saknar kolumn med kundnummer.</span>
           </div>
           <label class="check inline" style="margin-top:16px;" data-for="artiklar kunder"><input type="checkbox" name="synka" value="1"<?php echo $v['synka'] ? ' checked' : ''; ?>>
-            <span>Filen är hela registret: markera det som saknas i filen som inaktivt</span></label>
+            <span>Filen är hela registret eller hela prislistan: artiklar och kunder som saknas blir inaktiva, och grupppriser som saknas i en prislista tas bort</span></label>
 
           <div class="form-actions"><button class="btn primary" type="submit">Ladda upp och förhandsgranska</button></div>
         </form>
@@ -244,7 +250,7 @@ require __DIR__ . '/includes/head.php';
             <h3>Ordning första gången</h3>
             <ol>
               <li>Artiklar (all-articles.xlsx)</li>
-              <li>Prislistan med Grupp 1, 2 och 3. Exportera den från Priser i Partihandel med <strong>Exkl. moms</strong> och Excel.</li>
+              <li>Prislistorna för Grupp 1, 2 och 3. Exportera dem från Priser i Partihandel med <strong>Exkl. moms</strong> och Excel. Filnamnet talar om vilken grupp det är.</li>
               <li>Kunder (customer-register.xlsx)</li>
               <li>Kundpriser, om ni har dem i en fil</li>
             </ol>
