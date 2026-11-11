@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ->execute([$v['kontakt'], $v['email'], $v['telefon'], $v['role'], $egna, $kg, $ag, $id]);
     }
     flash($v['kontakt'] . ' är sparad.');
-    redirect('admin-person.php?id=' . $id);
+    redirect('admin-person?id=' . $id);
   }
 }
 
@@ -68,7 +68,7 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin-personal.php">&larr; Personal</a>
+    <a class="back-link" href="admin-personal">&larr; Personal</a>
     <div class="portal-head">
       <div>
         <h1><?php echo e($p['kontakt']); ?></h1>
@@ -78,7 +78,7 @@ require __DIR__ . '/includes/head.php';
     <?php if ($fel): ?><div class="alert error" role="alert">Inget sparades, se markeringarna nedan.</div><?php endif; ?>
     <?php if ($sjalv): ?><div class="alert info">Det här är du. Din egen roll och dina behörigheter ändras av en annan administratör.</div><?php endif; ?>
 
-    <form method="post" action="admin-person.php" id="personForm" novalidate>
+    <form method="post" action="admin-person" id="personForm" novalidate>
       <?php echo csrf_field(); ?>
       <input type="hidden" name="id" value="<?php echo $id; ?>">
       <div class="detail-card">
@@ -143,7 +143,7 @@ require __DIR__ . '/includes/head.php';
           </fieldset>
         </div>
       </div>
-      <div class="spara-rad"><button class="btn primary" type="submit">Spara</button><a class="btn ghost" href="admin-personal.php">Tillbaka</a></div>
+      <div class="spara-rad"><button class="btn primary" type="submit">Spara</button><a class="btn ghost" href="admin-personal">Tillbaka</a></div>
     </form>
   </div>
 </section>

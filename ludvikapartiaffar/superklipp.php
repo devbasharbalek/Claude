@@ -27,8 +27,8 @@ $v = ['leveransdag' => '', 'meddelande' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
-  if (!$user) redirect('logga-in.php?next=superklipp.php');
-  if (!$harTillgang) redirect('superklipp.php');
+  if (!$user) redirect('logga-in?next=superklipp');
+  if (!$harTillgang) redirect('superklipp');
 
   if (!$kanBestalla) {
     $fel['stangd'] = 'Beställningen för det här superklippet har stängt. Ring 0240-183 55 så hjälper vi dig.';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                    $v['leveransdag'], $dagar[$v['leveransdag']], $leveransdatum, $v['meddelande']);
       if ($orderId) {
         flash("Tack! Beställning #$orderId på $etikett är skickad. Vi återkommer med bekräftelse.");
-        redirect('order.php?id=' . $orderId);
+        redirect('order?id=' . $orderId);
       }
       $sparfel = true;
     }
@@ -80,7 +80,7 @@ if (!$harTillgang) {
       <?php if (count($visade) > 1): ?>
         <nav class="sk-veckor" aria-label="Välj vecka">
           <?php foreach ($visade as $l): ?>
-            <a href="superklipp.php?id=<?php echo (int)$l['id']; ?>"<?php echo (int)$l['id'] === (int)$sk['id'] ? ' class="on" aria-current="page"' : ''; ?>>v.<?php echo (int)$l['vecka']; ?></a>
+            <a href="superklipp?id=<?php echo (int)$l['id']; ?>"<?php echo (int)$l['id'] === (int)$sk['id'] ? ' class="on" aria-current="page"' : ''; ?>>v.<?php echo (int)$l['vecka']; ?></a>
           <?php endforeach; ?>
         </nav>
       <?php endif; ?>
@@ -94,15 +94,15 @@ if (!$harTillgang) {
       <div class="empty">
         <p>Det finns inget superklipp ute just nu.<?php echo $admin ? '' : ' Du kan alltid beställa som vanligt eller ringa oss.'; ?></p>
         <?php if ($admin): ?>
-          <a class="btn primary" href="admin-superklipp.php">Lägg in veckans superklipp</a>
+          <a class="btn primary" href="admin-superklipp">Lägg in veckans superklipp</a>
         <?php else: ?>
-          <a class="btn primary" href="bestall.php">Till beställning</a>
+          <a class="btn primary" href="bestall">Till beställning</a>
         <?php endif; ?>
       </div>
     <?php else: ?>
 
       <?php if ($admin && (int)$sk['publicerad'] !== 1): ?>
-        <div class="alert warn">Förhandsvisning av ett utkast. Kunderna ser det inte förrän du publicerar det i <a href="admin-superklipp-redigera.php?id=<?php echo (int)$sk['id']; ?>" style="color:var(--brand);">admin</a>.</div>
+        <div class="alert warn">Förhandsvisning av ett utkast. Kunderna ser det inte förrän du publicerar det i <a href="admin-superklipp-redigera?id=<?php echo (int)$sk['id']; ?>" style="color:var(--brand);">admin</a>.</div>
       <?php endif; ?>
 
       <?php if (!$oppen && (int)$sk['publicerad'] === 1): ?>
@@ -119,7 +119,7 @@ if (!$harTillgang) {
       <?php endif; ?>
 
       <?php if ($kanBestalla): ?>
-      <form method="post" action="superklipp.php?id=<?php echo (int)$sk['id']; ?>" id="skForm" novalidate>
+      <form method="post" action="superklipp?id=<?php echo (int)$sk['id']; ?>" id="skForm" novalidate>
         <?php echo csrf_field(); ?>
         <input type="hidden" name="id" value="<?php echo (int)$sk['id']; ?>">
       <?php endif; ?>
@@ -183,7 +183,7 @@ if (!$harTillgang) {
               <textarea id="meddelande" name="meddelande" maxlength="2000" placeholder="Valfritt. T.ex. önskad leveranstid eller andra varor ni vill ha med." style="min-height:90px;"><?php echo e($v['meddelande']); ?></textarea>
             </div>
           </fieldset>
-          <p class="form-note" style="margin-top:16px;">Levereras till <?php echo e($user['foretag']); ?>, <?php echo e($user['adress']); ?>. <a href="profil.php" style="color:var(--brand);">Ändra uppgifter</a></p>
+          <p class="form-note" style="margin-top:16px;">Levereras till <?php echo e($user['foretag']); ?>, <?php echo e($user['adress']); ?>. <a href="profil" style="color:var(--brand);">Ändra uppgifter</a></p>
         </div>
 
         <div class="sk-bar">

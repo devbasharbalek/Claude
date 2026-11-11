@@ -13,8 +13,8 @@ require __DIR__ . '/includes/head.php';
       <p>Vi har tagit emot din förfrågan och återkommer med bekräftelse så snart vi kan under våra öppettider, mån&ndash;fre 06:00&ndash;14:30.</p>
       <p>Har det bråttom? Ring oss på <a href="tel:+4624018355"><strong>0240-183 55</strong></a>.</p>
       <div class="actions">
-        <a class="btn primary" href="index.php">Till startsidan</a>
-        <a class="btn ghost" href="bestall.php">Skicka en till beställning</a>
+        <a class="btn primary" href="./">Till startsidan</a>
+        <a class="btn ghost" href="bestall">Skicka en till beställning</a>
       </div>
     </div>
   </div>

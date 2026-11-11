@@ -281,7 +281,7 @@ function lista_spara_order(array $user, array $lista, array $perId, array $antal
     $meddelande !== '' ? $meddelande : '(inget meddelande)',
     '',
     str_repeat('-', 44),
-    'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order.php?id=' . $orderId,
+    'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order?id=' . $orderId,
     'Svara på det här mejlet för att svara kunden direkt.',
   ]), $user['email']);
 
@@ -295,7 +295,7 @@ function lista_spara_order(array $user, array $lista, array $perId, array $antal
     ...$varor,
     '',
     'Du kan följa beställningen under Mitt konto:',
-    $CONFIG['site_url'] . '/order.php?id=' . $orderId,
+    $CONFIG['site_url'] . '/order?id=' . $orderId,
     '',
     'Med vänlig hälsning',
     'Ludvika Partiaffär, 0240-183 55',
@@ -461,10 +461,10 @@ function sk_mejl(array $sk, array $rader): array {
   }
   array_push($text,
     'Se hela listan och beställ direkt på hemsidan:',
-    "$url/superklipp.php",
+    "$url/superklipp",
     '',
     'Logga in med ditt kundkonto för att se priserna. Inget konto än? Skapa ett här, så godkänner vi det så snart vi kan:',
-    "$url/registrera.php",
+    "$url/registrera",
     '',
     "Beställ senast $deadline, på hemsidan eller på telefon 0240-183 55.",
     '',

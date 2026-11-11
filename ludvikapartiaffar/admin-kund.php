@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $a = artikel_hamta((int)($_POST['artikel_id'] ?? 0));
       if ($a && satt_kundpris($id, (int)$a['id'], null, $av)) flash('Kundpriset på ' . $a['namn'] . ' är borttaget. Kunden betalar ' . betalar_text($kund) . '.');
     }
-    redirect("admin-kund.php?id=$id#kundpriser");
+    redirect("admin-kund?id=$id#kundpriser");
   }
 
   if (in_array($action, ['koppla', 'koppla_bort'], true) && $kund) {
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $st->execute([(int)($_POST['user_id'] ?? 0), $id]);
       if ($st->rowCount()) flash('Webbkontot är inte längre kopplat till kunden.');
     }
-    redirect("admin-kund.php?id=$id#webbkonton");
+    redirect("admin-kund?id=$id#webbkonton");
   }
 
   if ($action === 'spara') {
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ->execute(array_merge(array_map(fn($k) => $v[$k], $kolumner), [now(), $av, $id]));
       }
       flash($ny ? 'Kunden ' . $v['namn'] . ' är upplagd.' : 'Kunden är sparad.');
-      redirect("admin-kund.php?id=$id");
+      redirect("admin-kund?id=$id");
     }
   }
 }
@@ -178,22 +178,22 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin-kundregister.php">&larr; Kunder</a>
+    <a class="back-link" href="admin-kundregister">&larr; Kunder</a>
     <div class="portal-head">
       <div>
         <h1><?php echo e($ny ? 'Ny kund' : $kund['namn']); ?></h1>
         <?php if (!$ny): ?><p>Kundnr <?php echo e($kund['kundnr']); ?> &middot; <?php echo e(register_grupp_text($kund['kundgrupp'])); ?> &middot; <?php echo e($kund['prisgrupp'] === null ? 'Grundpris' : prisgrupp_text((int)$kund['prisgrupp']) . ', ' . mb_strtolower(PRISGRUPPER[(int)$kund['prisgrupp']]['for'], 'UTF-8')); ?><?php echo (int)$kund['aktiv'] ? '' : ' &middot; <strong>Inaktiv</strong>'; ?></p><?php endif; ?>
       </div>
       <?php if (!$ny): ?><div class="portal-actions">
-        <?php if (far($user, 'order')): ?><a class="btn ghost small" href="admin.php?visa=alla&amp;kid=<?php echo $id; ?>">Kundens order</a><?php endif; ?>
-        <?php if (far($user, 'artiklar')): ?><a class="btn ghost small" href="admin-artiklar.php?kund=<?php echo $id; ?>">Kundens prislista</a><?php endif; ?>
-        <?php if (far($user, 'order_andra') && (int)$kund['aktiv']): ?><form method="post" action="admin-order.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="action" value="skapa"><input type="hidden" name="kund_id" value="<?php echo $id; ?>"><button class="btn primary small" type="submit">Ny order</button></form><?php endif; ?>
+        <?php if (far($user, 'order')): ?><a class="btn ghost small" href="admin?visa=alla&amp;kid=<?php echo $id; ?>">Kundens order</a><?php endif; ?>
+        <?php if (far($user, 'artiklar')): ?><a class="btn ghost small" href="admin-artiklar?kund=<?php echo $id; ?>">Kundens prislista</a><?php endif; ?>
+        <?php if (far($user, 'order_andra') && (int)$kund['aktiv']): ?><form method="post" action="admin-order" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="action" value="skapa"><input type="hidden" name="kund_id" value="<?php echo $id; ?>"><button class="btn primary small" type="submit">Ny order</button></form><?php endif; ?>
       </div><?php endif; ?>
     </div>
     <?php if ($fel): ?><div class="alert error" role="alert">Kunden sparades inte, se markeringarna nedan.</div><?php endif; ?>
 
     <div class="detail-grid">
-      <form method="post" action="admin-kund.php" novalidate>
+      <form method="post" action="admin-kund" novalidate>
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="spara">
         <?php if (!$ny): ?><input type="hidden" name="id" value="<?php echo $id; ?>"><?php endif; ?>
@@ -230,7 +230,7 @@ require __DIR__ . '/includes/head.php';
           <h2>Anteckning</h2>
           <div class="field"><label class="sr-only" for="anteckning">Anteckning</label><textarea id="anteckning" name="anteckning" style="min-height:100px;" placeholder="Bara för personalen, syns inte för kunden."><?php echo e((string)$v['anteckning']); ?></textarea></div>
         </div>
-        <div class="spara-rad"><button class="btn primary" type="submit"><?php echo $ny ? 'Lägg upp kunden' : 'Spara kunden'; ?></button><a class="btn ghost" href="admin-kundregister.php">Avbryt</a></div>
+        <div class="spara-rad"><button class="btn primary" type="submit"><?php echo $ny ? 'Lägg upp kunden' : 'Spara kunden'; ?></button><a class="btn ghost" href="admin-kundregister">Avbryt</a></div>
       </form>
 
       <?php if (!$ny): ?>
@@ -243,18 +243,18 @@ require __DIR__ . '/includes/head.php';
             <ul class="logg">
               <?php foreach ($kundpriser as $kp): ?>
                 <li>
-                  <span><?php if (far($user, 'artiklar')): ?><a style="color:var(--brand); font-weight:700; text-decoration:none;" href="admin-artikel.php?id=<?php echo (int)$kp['id']; ?>"><?php echo e($kp['namn']); ?></a><?php else: echo e($kp['namn']); endif; ?><br>
+                  <span><?php if (far($user, 'artiklar')): ?><a style="color:var(--brand); font-weight:700; text-decoration:none;" href="admin-artikel?id=<?php echo (int)$kp['id']; ?>"><?php echo e($kp['namn']); ?></a><?php else: echo e($kp['namn']); endif; ?><br>
                     <span class="muted" style="font-size:.82rem;"><?php echo e($kp['artikelnr']); ?> &middot; annars <?php echo e(pris_text($kp['kundgrupppris'] ?? $kp['utpris'])); ?></span></span>
                   <span style="display:flex; gap:8px; align-items:center;"><strong><?php echo e(pris_text($kp['kundpris'])); ?></strong>
                   <?php if ($kanPriser): ?>
-                    <form method="post" action="admin-kund.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="artikel_id" value="<?php echo (int)$kp['id']; ?>"><button class="btn ghost small" type="submit" name="action" value="kundpris_bort" aria-label="Ta bort kundpriset på <?php echo e($kp['namn']); ?>">&times;</button></form>
+                    <form method="post" action="admin-kund" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="artikel_id" value="<?php echo (int)$kp['id']; ?>"><button class="btn ghost small" type="submit" name="action" value="kundpris_bort" aria-label="Ta bort kundpriset på <?php echo e($kp['namn']); ?>">&times;</button></form>
                   <?php endif; ?></span>
                 </li>
               <?php endforeach; ?>
             </ul>
           <?php endif; ?>
           <?php if ($kanPriser): ?>
-            <form class="liten-form" method="post" action="admin-kund.php">
+            <form class="liten-form" method="post" action="admin-kund">
               <?php echo csrf_field(); ?>
               <input type="hidden" name="id" value="<?php echo $id; ?>">
               <div class="field"><label for="kp_artikelnr">Artikelnr</label><input type="text" id="kp_artikelnr" name="artikelnr" required></div>
@@ -273,13 +273,13 @@ require __DIR__ . '/includes/head.php';
               <?php foreach ($konton as $u): ?>
                 <li><span><?php echo e($u['email']); ?><br><span class="muted" style="font-size:.82rem;"><?php echo e($u['kontakt']); ?> &middot; <?php echo !(int)$u['active'] ? 'Avstängt' : ((int)$u['godkand'] ? 'Godkänt' : 'Väntar på godkännande'); ?></span></span>
                   <?php if (far($user, 'webbkonton')): ?>
-                    <form method="post" action="admin-kund.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>"><button class="btn ghost small" type="submit" name="action" value="koppla_bort" aria-label="Koppla bort <?php echo e($u['email']); ?>">&times;</button></form>
+                    <form method="post" action="admin-kund" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="user_id" value="<?php echo (int)$u['id']; ?>"><button class="btn ghost small" type="submit" name="action" value="koppla_bort" aria-label="Koppla bort <?php echo e($u['email']); ?>">&times;</button></form>
                   <?php endif; ?></li>
               <?php endforeach; ?>
             </ul>
           <?php endif; ?>
           <?php if (far($user, 'webbkonton')): ?>
-            <form class="liten-form" method="post" action="admin-kund.php">
+            <form class="liten-form" method="post" action="admin-kund">
               <?php echo csrf_field(); ?>
               <input type="hidden" name="id" value="<?php echo $id; ?>">
               <div class="field"><label for="koppla_epost">E-post för webbkontot</label><input type="text" inputmode="email" id="koppla_epost" name="epost" value="<?php echo e($forslag[0] ?? ''); ?>" required list="forslagLista"></div>
@@ -295,7 +295,7 @@ require __DIR__ . '/includes/head.php';
             <h2>Senaste order från hemsidan</h2>
             <ul class="logg">
               <?php foreach ($order as $o): ?>
-                <li><span><?php if (far($user, 'order')): ?><a style="color:var(--brand); font-weight:700; text-decoration:none;" href="admin-order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a><?php else: ?>#<?php echo (int)$o['id']; endif; ?> <?php echo status_pill($o['status']); ?></span><span class="tid"><?php echo e(datum($o['created_at'])); ?></span></li>
+                <li><span><?php if (far($user, 'order')): ?><a style="color:var(--brand); font-weight:700; text-decoration:none;" href="admin-order?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a><?php else: ?>#<?php echo (int)$o['id']; endif; ?> <?php echo status_pill($o['status']); ?></span><span class="tid"><?php echo e(datum($o['created_at'])); ?></span></li>
               <?php endforeach; ?>
             </ul>
           </div>

@@ -29,7 +29,7 @@ require __DIR__ . '/includes/head.php';
     <p>Sajten använder en enda cookie som håller dig inloggad och skyddar formulären mot missbruk. Den försvinner när du stänger webbläsaren. Vi använder inga cookies för statistik eller reklam.</p>
 
     <h2>Dina rättigheter</h2>
-    <p>Du kan när som helst se och ändra dina kontouppgifter under <a href="profil.php">Mina uppgifter</a>. Vill du ha ut en kopia av allt vi sparat om dig, eller att vi raderar ditt konto, kontakta oss så hjälper vi dig. Beställningar kan vi behöva spara så länge bokföringsreglerna kräver det.</p>
+    <p>Du kan när som helst se och ändra dina kontouppgifter under <a href="profil">Mina uppgifter</a>. Vill du ha ut en kopia av allt vi sparat om dig, eller att vi raderar ditt konto, kontakta oss så hjälper vi dig. Beställningar kan vi behöva spara så länge bokföringsreglerna kräver det.</p>
   </div>
 </section>
 <?php require __DIR__ . '/includes/foot.php'; ?>

@@ -2,7 +2,7 @@
 require __DIR__ . '/includes/app.php';
 require_behorighet('erbjudanden');
 veckansklipp_schema();
-vk_skapa_kortlank();
+vk_ta_bort_gammal_kortlank();
 
 [$maxFil, $maxPost] = vk_servergranser();
 [$stdAr, $stdVecka] = vk_standard_vecka();
@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         vk_radera_filer($vk);
         flash(vk_etikett($vk) . ' är borttaget. Beställningar som redan kommit in finns kvar.');
       }
-      redirect('admin-veckansklipp.php');
+      redirect('admin-veckansklipp');
     }
 
     if ($action === 'spara_varor') {
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
           vk_spara_rader((int)$vk['id'], $varor);
           flash($varor ? 'Varorna är sparade (' . count($varor) . ' st).' : 'Varulistan är tömd. Kunderna kan bara se bladet.');
-          redirect('admin-veckansklipp.php?id=' . (int)$vk['id']);
+          redirect('admin-veckansklipp?id=' . (int)$vk['id']);
         }
       }
     }
@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           flash('Veckansklipp v.' . $f['vecka'] . ($gammal ? ' är ersatt med det nya bladet.' : ' är publicerat.')
               . ($varor ? ' Kunderna kan beställa ' . count($varor) . ' varor.' : ' Inga varor att beställa, kunderna ser bara bladet.')
               . ($pdfForStor ? ' PDF:en var för stor för servern, så bara bilderna sparades.' : ''));
-          redirect('admin-veckansklipp.php?id=' . $id);
+          redirect('admin-veckansklipp?id=' . $id);
         }
       }
       $uppladdningsVaror = $varor;
@@ -177,10 +177,10 @@ require __DIR__ . '/includes/head.php';
       <div>
         <span class="eyebrow">Admin</span>
         <h1>Veckansklipp</h1>
-        <p>Ladda upp bladet från Canva. Kunderna ser det och kan beställa direkt på <a href="veckansklipp.php" style="color:var(--brand);"><?php echo e(preg_replace('~^https?://~', '', vk_lank())); ?></a>.</p>
+        <p>Ladda upp bladet från Canva. Kunderna ser det och kan beställa direkt på <a href="veckansklipp" style="color:var(--brand);"><?php echo e(preg_replace('~^https?://~', '', vk_lank())); ?></a>.</p>
       </div>
       <div class="portal-actions">
-        <a class="btn ghost" href="veckansklipp.php">Visa som kund</a>
+        <a class="btn ghost" href="veckansklipp">Visa som kund</a>
       </div>
     </div>
 
@@ -192,7 +192,7 @@ require __DIR__ . '/includes/head.php';
     <?php endif; ?>
 
     <div class="detail-grid">
-      <form class="detail-card" id="vkForm" method="post" action="admin-veckansklipp.php" enctype="multipart/form-data"
+      <form class="detail-card" id="vkForm" method="post" action="admin-veckansklipp" enctype="multipart/form-data"
             data-max-fil="<?php echo min($maxFil, VK_MAX_PDF); ?>" data-max-post="<?php echo $maxPost; ?>"
             data-max-sidor="<?php echo VK_MAX_SIDOR; ?>" data-worker="<?php echo e(VK_PDFJS . 'pdf.worker.min.js'); ?>">
         <?php echo csrf_field(); ?>
@@ -236,7 +236,7 @@ require __DIR__ . '/includes/head.php';
           <li>Kontrollera veckan och varorna, och tryck <strong>Publicera</strong>.</li>
           <li>Kopiera sms-texten och skicka den till kunderna. Länken är densamma varje vecka.</li>
         </ol>
-        <p style="margin-top:12px; color:var(--ink-soft); line-height:1.6;">Inloggade kunder beställer i kolli med leverans måndag&ndash;fredag samma vecka. Beställningarna kommer in under <a href="admin.php" style="color:var(--brand);">Beställningar</a>.</p>
+        <p style="margin-top:12px; color:var(--ink-soft); line-height:1.6;">Inloggade kunder beställer i kolli med leverans måndag&ndash;fredag samma vecka. Beställningarna kommer in under <a href="admin" style="color:var(--brand);">Beställningar</a>.</p>
       </div>
     </div>
 
@@ -259,9 +259,9 @@ require __DIR__ . '/includes/head.php';
             &middot; uppladdat <?php echo e(datum($visad['created_at'])); ?>
           </p>
           <div class="form-actions" style="margin-top:14px;">
-            <a class="btn ghost small" href="veckansklipp.php?id=<?php echo (int)$visad['id']; ?>">Visa som kund</a>
+            <a class="btn ghost small" href="veckansklipp?id=<?php echo (int)$visad['id']; ?>">Visa som kund</a>
             <?php if ((int)$visad['pdf_storlek'] > 0): ?><a class="btn ghost small" href="<?php echo e(vk_url($visad, 'pdf')); ?>" target="_blank" rel="noopener">Öppna PDF</a><?php endif; ?>
-            <form method="post" action="admin-veckansklipp.php" style="margin:0;" onsubmit="return confirm('Ta bort <?php echo e(vk_etikett($visad)); ?>? Kunderna ser det inte längre. Beställningar som redan kommit in finns kvar.');">
+            <form method="post" action="admin-veckansklipp" style="margin:0;" onsubmit="return confirm('Ta bort <?php echo e(vk_etikett($visad)); ?>? Kunderna ser det inte längre. Beställningar som redan kommit in finns kvar.');">
               <?php echo csrf_field(); ?>
               <input type="hidden" name="action" value="radera">
               <input type="hidden" name="id" value="<?php echo (int)$visad['id']; ?>">
@@ -282,7 +282,7 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
 
-      <form class="detail-card" method="post" action="admin-veckansklipp.php" style="margin-top:18px;" id="vkVarorForm">
+      <form class="detail-card" method="post" action="admin-veckansklipp" style="margin-top:18px;" id="vkVarorForm">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="spara_varor">
         <input type="hidden" name="id" value="<?php echo (int)$visad['id']; ?>">
@@ -324,7 +324,7 @@ require __DIR__ . '/includes/head.php';
               <tbody>
               <?php foreach ($bestallningar as $o): ?>
                 <tr>
-                  <td><a style="font-weight:600; color:var(--brand); text-decoration:none;" href="admin-order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a> <?php echo e($o['foretag']); ?><br><span style="color:var(--ink-soft); font-size:.82rem;"><?php echo (int)$o['kolli']; ?> kolli &middot; leverans <?php echo e(date('j/n', strtotime($o['leveransdatum']))); ?></span></td>
+                  <td><a style="font-weight:600; color:var(--brand); text-decoration:none;" href="admin-order?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a> <?php echo e($o['foretag']); ?><br><span style="color:var(--ink-soft); font-size:.82rem;"><?php echo (int)$o['kolli']; ?> kolli &middot; leverans <?php echo e(date('j/n', strtotime($o['leveransdatum']))); ?></span></td>
                   <td style="text-align:right;"><?php echo status_pill($o['status']); ?></td>
                 </tr>
               <?php endforeach; ?>
@@ -345,7 +345,7 @@ require __DIR__ . '/includes/head.php';
           <tbody>
           <?php foreach ($alla as $v): ?>
             <tr>
-              <td data-label="Vecka"><a class="row-link" href="admin-veckansklipp.php?id=<?php echo (int)$v['id']; ?>">v.<?php echo (int)$v['vecka']; ?> <?php echo (int)$v['ar']; ?></a></td>
+              <td data-label="Vecka"><a class="row-link" href="admin-veckansklipp?id=<?php echo (int)$v['id']; ?>">v.<?php echo (int)$v['vecka']; ?> <?php echo (int)$v['ar']; ?></a></td>
               <td data-label="Gäller" class="muted"><?php echo e(vk_period($v)); ?></td>
               <td data-label="Sidor"><?php echo (int)$v['sidor']; ?></td>
               <td data-label="Varor"><?php echo (int)$v['varor']; ?></td>

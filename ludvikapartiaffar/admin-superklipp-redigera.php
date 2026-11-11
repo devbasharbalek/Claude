@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if ($action === 'radera' && $sk) {
     db()->prepare('DELETE FROM superklipp WHERE id = ?')->execute([$id]);
     flash('Superklipp v.' . (int)$sk['vecka'] . ' är borttaget. Beställningar som redan kommit in finns kvar.');
-    redirect('admin-superklipp.php');
+    redirect('admin-superklipp');
   }
 
   if ($action === 'import') {
@@ -191,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
           flash("Superklipp v.{$f['vecka']} är sparat och publicerat. Inloggade kunder kan beställa fram till " . sk_deadline_text($sparat['deadline']) . '.');
         }
-        redirect('admin-superklipp-redigera.php?id=' . $id);
+        redirect('admin-superklipp-redigera?id=' . $id);
       }
     }
   }
@@ -228,7 +228,7 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin-superklipp.php">&larr; Alla superklipp</a>
+    <a class="back-link" href="admin-superklipp">&larr; Alla superklipp</a>
     <div class="portal-head">
       <div>
         <span class="eyebrow">Superklipp</span>
@@ -237,7 +237,7 @@ require __DIR__ . '/includes/head.php';
       </div>
       <?php if ($sk): ?>
         <div class="portal-actions">
-          <a class="btn ghost" href="superklipp.php?id=<?php echo $id; ?>">Visa som kund</a>
+          <a class="btn ghost" href="superklipp?id=<?php echo $id; ?>">Visa som kund</a>
         </div>
       <?php endif; ?>
     </div>
@@ -250,7 +250,7 @@ require __DIR__ . '/includes/head.php';
       <div class="alert warn"><strong>Kontrollera:</strong><ul><?php foreach ($varningar as $m): ?><li><?php echo e($m); ?></li><?php endforeach; ?></ul></div>
     <?php endif; ?>
 
-    <form class="form-card" method="post" action="admin-superklipp-redigera.php">
+    <form class="form-card" method="post" action="admin-superklipp-redigera">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="spara">
       <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -297,7 +297,7 @@ require __DIR__ . '/includes/head.php';
 
     <details class="detail-card sk-import" style="margin-top:16px;"<?php echo !$rader || ($fel && ($_POST['action'] ?? '') === 'import') ? ' open' : ''; ?>>
       <summary><?php echo $rader ? 'Klistra in en ny version från Google Sheets' : 'Klistra in listan från Google Sheets'; ?></summary>
-      <form method="post" action="admin-superklipp-redigera.php" enctype="multipart/form-data" style="margin-top:16px;">
+      <form method="post" action="admin-superklipp-redigera" enctype="multipart/form-data" style="margin-top:16px;">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="import">
         <input type="hidden" name="id" value="<?php echo $id; ?>">
@@ -356,7 +356,7 @@ require __DIR__ . '/includes/head.php';
                 <tbody>
                 <?php foreach ($bestallningar as $o): ?>
                   <tr>
-                    <td><a class="row-link" style="font-weight:600; color:var(--brand); text-decoration:none;" href="admin-order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a> <?php echo e($o['foretag']); ?><br><span style="color:var(--ink-soft); font-size:.82rem;"><?php echo (int)$o['kolli']; ?> kolli &middot; leverans <?php echo e(date('j/n', strtotime($o['leveransdatum']))); ?></span></td>
+                    <td><a class="row-link" style="font-weight:600; color:var(--brand); text-decoration:none;" href="admin-order?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a> <?php echo e($o['foretag']); ?><br><span style="color:var(--ink-soft); font-size:.82rem;"><?php echo (int)$o['kolli']; ?> kolli &middot; leverans <?php echo e(date('j/n', strtotime($o['leveransdatum']))); ?></span></td>
                     <td style="text-align:right;"><?php echo status_pill($o['status']); ?></td>
                   </tr>
                 <?php endforeach; ?>
@@ -367,7 +367,7 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
 
-      <form method="post" action="admin-superklipp-redigera.php" style="margin-top:28px;">
+      <form method="post" action="admin-superklipp-redigera" style="margin-top:28px;">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="radera">
         <input type="hidden" name="id" value="<?php echo $id; ?>">

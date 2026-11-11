@@ -29,12 +29,12 @@ function plock_kort(array $o, array $rader, array $user, bool $seAlla, array $pl
   $csrf = csrf_field();
   $h = '<article class="plock-kort' . ($klara && $klara === count($varor) ? ' klar' : '') . '" id="order-' . $id . '" data-id="' . $id . '">';
   $h .= '<header><span class="plock-datum">' . e(leverans_text($o['leveransdatum'], $o['leveransdag'])) . '</span>' . status_pill($o['status']) . '</header>';
-  $h .= '<h3>' . (far($user, 'order') ? '<a href="admin-order.php?id=' . $id . '">Order #' . $id . '</a>' : 'Order #' . $id) . '</h3>';
+  $h .= '<h3>' . (far($user, 'order') ? '<a href="admin-order?id=' . $id . '">Order #' . $id . '</a>' : 'Order #' . $id) . '</h3>';
   $h .= '<p class="plock-kund"><strong>' . e(trim(($o['kundnr'] ?? '') . ' ' . $o['foretag'])) . '</strong>' . grupp_pill(order_grupp($o))
       . ($o['lev_namn'] && $o['lev_namn'] !== $o['foretag'] ? '<br>' . e($o['lev_namn']) : '')
       . ($o['kundens_ordernr'] !== '' ? '<br><span class="muted">Kundens ordernr ' . e($o['kundens_ordernr']) . '</span>' : '') . '</p>';
   // Plockare och kontroll.
-  $h .= '<div class="plock-knappar"><form method="post" action="admin-plock.php" data-ajax>' . $csrf . '<input type="hidden" name="action" value="plockare"><input type="hidden" name="order_id" value="' . $id . '">';
+  $h .= '<div class="plock-knappar"><form method="post" action="admin-plock" data-ajax>' . $csrf . '<input type="hidden" name="action" value="plockare"><input type="hidden" name="order_id" value="' . $id . '">';
   if ($seAlla) {
     $h .= '<select name="plockare_id" aria-label="Plockare för order ' . $id . '" data-auto><option value="0">Ej tilldelad</option>';
     foreach ($plockare as $pid => $namn) $h .= '<option value="' . (int)$pid . '"' . ((int)$o['plockare_id'] === (int)$pid ? ' selected' : '') . '>' . e($namn) . '</option>';
@@ -43,7 +43,7 @@ function plock_kort(array $o, array $rader, array $user, bool $seAlla, array $pl
     $min = (int)$o['plockare_id'] === (int)$user['id'];
     $h .= '<input type="hidden" name="plockare_id" value="' . ($min ? 0 : (int)$user['id']) . '"><button class="btn ghost small" type="submit">' . ($min ? 'Släpp ordern' : 'Ta ordern') . '</button>';
   }
-  $h .= '</form><form method="post" action="admin-plock.php" data-ajax>' . $csrf . '<input type="hidden" name="action" value="kontroll"><input type="hidden" name="order_id" value="' . $id . '">'
+  $h .= '</form><form method="post" action="admin-plock" data-ajax>' . $csrf . '<input type="hidden" name="action" value="kontroll"><input type="hidden" name="order_id" value="' . $id . '">'
       . '<button class="btn small ' . ($o['kontrollerad_at'] ? 'kontroll-ok' : 'kontroll-ej') . '" type="submit" title="' . ($o['kontrollerad_at'] ? 'Kontrollerad av ' . e($o['kontrollerad_av']) : 'Markera som kontrollerad') . '">'
       . ($o['kontrollerad_at'] ? 'Kontrollerad' : 'Ej kontrollerad') . '</button></form></div>';
   if ($o['plocktext'] !== '') $h .= '<p class="plock-text">' . e($o['plocktext']) . '</p>';
@@ -68,7 +68,7 @@ function plock_kort(array $o, array $rader, array $user, bool $seAlla, array $pl
         . '<span class="plock-vara">' . e($r['produkt']) . ((int)$r['viktvara'] ? ' <span class="vikt-markering" title="Viktvara: väg och skriv vikten">!</span>' : '')
         . ($under !== '' ? '<small>' . e($under) . ((int)$r['viktvara'] && $r['plockvikt'] !== null ? ', vägt ' . e(tal_text($r['plockvikt'])) . ' kg' : '') . '</small>' : '')
         . ($r['plockkommentar'] !== '' ? '<small class="plock-kommentar">' . e($r['plockkommentar']) . '</small>' : '') . '</span>';
-    $h .= '<form method="post" action="admin-plock.php" data-ajax class="plock-form">' . $csrf . '<input type="hidden" name="action" value="rad"><input type="hidden" name="rad_id" value="' . (int)$r['id'] . '">';
+    $h .= '<form method="post" action="admin-plock" data-ajax class="plock-form">' . $csrf . '<input type="hidden" name="action" value="rad"><input type="hidden" name="rad_id" value="' . (int)$r['id'] . '">';
     if ($plockat === null) {
       $h .= '<details class="plock-annat"><summary aria-label="Annat antal">±</summary><span>'
           . '<input type="text" inputmode="decimal" name="antal" placeholder="' . e(tal_text($mal)) . '" aria-label="Plockat antal">'
@@ -83,10 +83,10 @@ function plock_kort(array $o, array $rader, array $user, bool $seAlla, array $pl
   $h .= '</ul><footer><span>' . $klara . ' av ' . count($varor) . ' plockade' . ($vikt > 0 ? ' &middot; netto ' . e(tal_text(round($vikt, 1))) . ' kg' : '') . '</span>'
       . '<span class="plock-lankar">';
   if ($klara < count($varor)) {
-    $h .= '<form method="post" action="admin-plock.php" data-ajax>' . $csrf . '<input type="hidden" name="action" value="allt"><input type="hidden" name="order_id" value="' . $id . '"><button class="btn ghost small" type="submit">Plocka allt</button></form>';
+    $h .= '<form method="post" action="admin-plock" data-ajax>' . $csrf . '<input type="hidden" name="action" value="allt"><input type="hidden" name="order_id" value="' . $id . '"><button class="btn ghost small" type="submit">Plocka allt</button></form>';
   }
-  $h .= '<a class="btn ghost small" href="admin-utskrift.php?typ=plocksedel&amp;id=' . $id . '" target="_blank">Plocksedel</a>'
-      . '<a class="btn ghost small" href="admin-utskrift.php?typ=foljesedel&amp;id=' . $id . '" target="_blank">Följesedel</a></span></footer></article>';
+  $h .= '<a class="btn ghost small" href="admin-utskrift?typ=plocksedel&amp;id=' . $id . '" target="_blank">Plocksedel</a>'
+      . '<a class="btn ghost small" href="admin-utskrift?typ=foljesedel&amp;id=' . $id . '" target="_blank">Följesedel</a></span></footer></article>';
   return $h;
 }
 
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   if ($meddelande !== '') flash($meddelande);
   $tillbaka = array_filter(['datum' => giltigt_datum((string)($_POST['datum'] ?? '')), 'visa' => (string)($_POST['visa'] ?? ''), 'seg' => (string)($_POST['seg'] ?? '')]);
-  redirect('admin-plock.php' . ($tillbaka ? '?' . http_build_query($tillbaka) : '') . ($orderId ? '#order-' . $orderId : ''));
+  redirect('admin-plock' . ($tillbaka ? '?' . http_build_query($tillbaka) : '') . ($orderId ? '#order-' . $orderId : ''));
 }
 
 // Dagarna med order att plocka. Utan val visas första dagen från idag som har något kvar att plocka.
@@ -210,11 +210,11 @@ require __DIR__ . '/includes/head.php';
         <p><?php echo e(leverans_text($datum)); ?>. Tryck på rutan när en rad är plockad. Viktvaror (!) vägs och vikten skrivs in under ±.</p>
       </div>
       <div class="portal-actions">
-        <?php if ($kort): ?><a class="btn ghost small" href="admin-utskrift.php?typ=plocksedel&amp;datum=<?php echo e($datum); ?>" target="_blank">Skriv ut alla plocksedlar</a><?php endif; ?>
+        <?php if ($kort): ?><a class="btn ghost small" href="admin-utskrift?typ=plocksedel&amp;datum=<?php echo e($datum); ?>" target="_blank">Skriv ut alla plocksedlar</a><?php endif; ?>
       </div>
     </div>
 
-    <form class="verktyg" method="get" action="admin-plock.php">
+    <form class="verktyg" method="get" action="admin-plock">
       <select name="datum" aria-label="Leveransdag" onchange="this.form.submit()">
         <?php $finns = false; foreach ($dagar as $d): $finns = $finns || $d['d'] === $datum; ?>
           <option value="<?php echo e($d['d']); ?>"<?php echo $d['d'] === $datum ? ' selected' : ''; ?>><?php echo e(leverans_text($d['d']) . ' (' . $d['n'] . ' order, ' . $d['kvar'] . ' kvar)'); ?></option>
@@ -267,7 +267,7 @@ require __DIR__ . '/includes/head.php';
     if (e.submitter && e.submitter.name) data.append(e.submitter.name, e.submitter.value);
     var kort = form.closest('.plock-kort');
     kort.classList.add('sparar');
-    fetch('admin-plock.php', {method: 'POST', body: data, credentials: 'same-origin', headers: {'X-Requested-With': 'fetch'}})
+    fetch('admin-plock', {method: 'POST', body: data, credentials: 'same-origin', headers: {'X-Requested-With': 'fetch'}})
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (svar) {
         if (svar.meddelande) alert(svar.meddelande);

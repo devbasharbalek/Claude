@@ -4,12 +4,12 @@ $active = $active ?? '';
 $pageTitle = $pageTitle ?? 'Ludvika Partiaffär';
 $navUser = current_user();
 $navItems = '';
-foreach (['hem' => ['index.php', 'Hem'], 'sortiment' => ['sortiment.php', 'Sortiment'], 'superklipp' => ['superklipp.php', 'Superklipp'], 'veckansklipp' => ['veckansklipp.php', 'Veckansklipp'], 'bestall' => ['bestall.php', 'Beställ'], 'kontakt' => ['kontakt.php', 'Kontakt']] as $key => [$href, $label]) {
+foreach (['hem' => ['./', 'Hem'], 'sortiment' => ['sortiment', 'Sortiment'], 'superklipp' => ['superklipp', 'Superklipp'], 'veckansklipp' => ['veckansklipp', 'Veckansklipp'], 'bestall' => ['bestall', 'Beställ'], 'kontakt' => ['kontakt', 'Kontakt']] as $key => [$href, $label]) {
   // Erbjudandena syns bara i menyn för kunder som har dem.
   if (isset(ERBJUDANDEN[$key]) && !ser_erbjudande($navUser, $key)) continue;
   $navItems .= '<li><a href="' . $href . '"' . ($key === $active ? ' class="active" aria-current="page"' : '') . '>' . $label . '</a></li>';
 }
-$kontoHref = $navUser ? (ar_personal($navUser) ? 'admin.php' : 'konto.php') : 'logga-in.php';
+$kontoHref = $navUser ? (ar_personal($navUser) ? 'admin' : 'konto') : 'logga-in';
 $kontoNamn = $navUser ? (ar_personal($navUser) ? 'Admin' : 'Mitt konto') : 'Logga in';
 // Adminportalen har egen sidomeny i stället för hemsidans meny och sidfot. Bara personal får den.
 $adminSida = isset($adminSida) && ar_personal($navUser) ? (string)$adminSida : null;
@@ -795,14 +795,14 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 
 <header class="nav">
   <div class="nav-inner">
-    <a class="logo-chip" href="index.php" aria-label="Ludvika Partiaffär – till startsidan"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
+    <a class="logo-chip" href="./" aria-label="Ludvika Partiaffär – till startsidan"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
     <div class="nav-actions">
       <button type="button" class="theme-switch nav-theme" data-tema role="switch" aria-checked="false" aria-label="Mörkt läge" title="Byt till mörkt läge"><span class="knob" aria-hidden="true"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></span></button>
       <a class="nav-text<?php echo $kontoAktiv ? ' active' : ''; ?>" href="<?php echo $kontoHref; ?>"><?php echo $kontoNamn; ?></a>
       <?php if ($navUser): ?>
-        <a class="nav-text" href="logga-ut.php">Logga ut</a>
+        <a class="nav-text" href="logga-ut">Logga ut</a>
       <?php else: ?>
-        <a class="nav-text<?php echo $skapaAktiv ? ' active' : ''; ?>" href="registrera.php">Skapa konto</a>
+        <a class="nav-text<?php echo $skapaAktiv ? ' active' : ''; ?>" href="registrera">Skapa konto</a>
       <?php endif; ?>
       <a class="icon-btn account-btn<?php echo $kontoAktiv ? ' active' : ''; ?>" href="<?php echo $kontoHref; ?>" aria-label="<?php echo $kontoNamn; ?>" title="<?php echo $kontoNamn; ?>">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
@@ -823,10 +823,10 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
       <?php echo $navItems; ?>
       <?php if ($navUser): ?>
         <li><a href="<?php echo $kontoHref; ?>"<?php echo $kontoAktiv ? ' class="active"' : ''; ?>><?php echo $kontoNamn; ?></a></li>
-        <li><a href="logga-ut.php">Logga ut</a></li>
+        <li><a href="logga-ut">Logga ut</a></li>
       <?php else: ?>
-        <li><a href="logga-in.php"<?php echo $kontoAktiv ? ' class="active"' : ''; ?>>Logga in</a></li>
-        <li><a href="registrera.php"<?php echo $skapaAktiv ? ' class="active"' : ''; ?>>Skapa konto</a></li>
+        <li><a href="logga-in"<?php echo $kontoAktiv ? ' class="active"' : ''; ?>>Logga in</a></li>
+        <li><a href="registrera"<?php echo $skapaAktiv ? ' class="active"' : ''; ?>>Skapa konto</a></li>
       <?php endif; ?>
       <li class="menu-theme"><span>Mörkt läge</span><button type="button" class="theme-switch" data-tema role="switch" aria-checked="false" aria-label="Mörkt läge" title="Byt till mörkt läge"><span class="knob" aria-hidden="true"><svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg><svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg></span></button></li>
     </ul>

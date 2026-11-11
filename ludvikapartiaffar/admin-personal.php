@@ -11,7 +11,7 @@ function skicka_inbjudan(array $u, bool $ny): string {
   $token = bin2hex(random_bytes(32));
   db()->prepare('INSERT INTO password_resets (user_id, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?)')
       ->execute([$u['id'], hash('sha256', $token), now(), date('Y-m-d H:i:s', time() + INBJUDAN_DAGAR * 86400)]);
-  $lank = $CONFIG['site_url'] . '/aterstall-losenord.php?token=' . $token;
+  $lank = $CONFIG['site_url'] . '/aterstall-losenord?token=' . $token;
   send_mail($u['email'], $ny ? 'Ditt konto i Ludvika Partiaffärs affärssystem' : 'Ny länk till affärssystemet', implode("\n", [
     "Hej {$u['kontakt']}!",
     '',
@@ -20,7 +20,7 @@ function skicka_inbjudan(array $u, bool $ny): string {
     '',
     $lank,
     '',
-    'Sedan loggar du in här med din e-postadress: ' . $CONFIG['site_url'] . '/logga-in.php',
+    'Sedan loggar du in här med din e-postadress: ' . $CONFIG['site_url'] . '/logga-in',
     '',
     'Ludvika Partiaffär',
   ]));
@@ -60,13 +60,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $u = ['id' => (int)db()->lastInsertId(), 'email' => $v['email'], 'kontakt' => $v['kontakt'], 'role' => $v['role']];
       $_SESSION['inbjudan'] = ['namn' => $u['kontakt'], 'lank' => skicka_inbjudan($u, true)];
       flash($u['kontakt'] . ' har fått ett konto och ett mejl med en länk för att välja lösenord.');
-      redirect('admin-personal.php');
+      redirect('admin-personal');
     }
   } else {
     $st = db()->prepare("SELECT * FROM users WHERE id = ? AND role <> 'kund'");
     $st->execute([(int)($_POST['id'] ?? 0)]);
     $u = $st->fetch();
-    if (!$u) redirect('admin-personal.php');
+    if (!$u) redirect('admin-personal');
     $sjalv = (int)$u['id'] === (int)$admin['id'];
     $sistaAdmin = $u['role'] === 'admin' && (int)$u['active'] === 1 && aktiva_admin() <= 1;
 
@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $_SESSION['inbjudan'] = ['namn' => $u['kontakt'], 'lank' => skicka_inbjudan($u, false)];
       flash($u['kontakt'] . ' har fått en ny länk via e-post.');
     }
-    redirect('admin-personal.php');
+    redirect('admin-personal');
   }
 }
 
@@ -132,14 +132,14 @@ require __DIR__ . '/includes/head.php';
             <tbody>
             <?php foreach ($personal as $p): $sjalv = (int)$p['id'] === (int)$admin['id']; ?>
               <tr>
-                <td data-label="Namn"><div><a class="row-link" href="admin-person.php?id=<?php echo (int)$p['id']; ?>"><?php echo e($p['kontakt']); ?></a><?php echo $sjalv ? ' <span class="muted">(du)</span>' : ''; ?><br><span class="muted" style="font-size:.85rem;"><?php echo e($p['email']); ?></span>
+                <td data-label="Namn"><div><a class="row-link" href="admin-person?id=<?php echo (int)$p['id']; ?>"><?php echo e($p['kontakt']); ?></a><?php echo $sjalv ? ' <span class="muted">(du)</span>' : ''; ?><br><span class="muted" style="font-size:.85rem;"><?php echo e($p['email']); ?></span>
                   <?php $grp = array_filter([($g = anv_grupper($p, 'kundgrupper')) ? 'Kundgrupp ' . implode(', ', $g) : '', ($g = anv_grupper($p, 'artikelgrupper')) ? 'Artikelgrupp ' . implode(', ', $g) : '', $p['role'] !== 'admin' && $p['behorigheter'] !== null ? 'Egna behörigheter' : '']); ?>
                   <?php if ($grp): ?><br><span class="muted" style="font-size:.8rem;"><?php echo e(implode(' · ', $grp)); ?></span><?php endif; ?></div></td>
                 <td data-label="Roll">
                   <?php if ($sjalv): ?>
                     <?php echo e(roll_text($p)); ?>
                   <?php else: ?>
-                    <form class="grupp-form" method="post" action="admin-personal.php">
+                    <form class="grupp-form" method="post" action="admin-personal">
                       <?php echo csrf_field(); ?>
                       <input type="hidden" name="id" value="<?php echo (int)$p['id']; ?>">
                       <select name="role" aria-label="Roll för <?php echo e($p['kontakt']); ?>">
@@ -153,7 +153,7 @@ require __DIR__ . '/includes/head.php';
                 <td data-label="Status"><?php echo (int)$p['active'] ? '<span class="pill pill-levererad">Aktiv</span>' : '<span class="pill pill-off">Avstängd</span>'; ?></td>
                 <td class="actions">
                   <?php if (!$sjalv): ?>
-                    <form method="post" action="admin-personal.php" style="margin:0; display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;">
+                    <form method="post" action="admin-personal" style="margin:0; display:flex; gap:6px; justify-content:flex-end; flex-wrap:wrap;">
                       <?php echo csrf_field(); ?>
                       <input type="hidden" name="id" value="<?php echo (int)$p['id']; ?>">
                       <?php if ((int)$p['active']): ?>
@@ -179,7 +179,7 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
 
-      <form class="detail-card" method="post" action="admin-personal.php" novalidate>
+      <form class="detail-card" method="post" action="admin-personal" novalidate>
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="ny">
         <h2>Lägg till personal</h2>

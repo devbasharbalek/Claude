@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           'Någon (förhoppningsvis du) har bett om att återställa lösenordet till ditt konto hos Ludvika Partiaffär.',
           'Klicka på länken nedan för att välja ett nytt lösenord. Länken gäller i en timme.',
           '',
-          $CONFIG['site_url'] . '/aterstall-losenord.php?token=' . $token,
+          $CONFIG['site_url'] . '/aterstall-losenord?token=' . $token,
           '',
           'Har du inte bett om det här kan du bortse från mejlet, lösenordet ändras inte.',
           '',
@@ -48,10 +48,10 @@ require __DIR__ . '/includes/head.php';
       <div class="form-card">
         <h1 class="card-title">Kolla din mejl</h1>
         <p class="lead">Om det finns ett konto med adressen <strong><?php echo e($email); ?></strong> har vi skickat en länk för att välja nytt lösenord. Länken gäller i en timme. Hittar du inget mejl, titta i skräpposten.</p>
-        <a class="btn ghost" href="logga-in.php" style="margin-top:20px;">Tillbaka till inloggningen</a>
+        <a class="btn ghost" href="logga-in" style="margin-top:20px;">Tillbaka till inloggningen</a>
       </div>
     <?php else: ?>
-      <form class="form-card" method="post" action="glomt-losenord.php">
+      <form class="form-card" method="post" action="glomt-losenord">
         <?php echo csrf_field(); ?>
         <h1 class="card-title">Glömt lösenord</h1>
         <p class="lead">Skriv e-postadressen du loggar in med, så skickar vi en länk för att välja ett nytt lösenord.</p>
@@ -61,7 +61,7 @@ require __DIR__ . '/includes/head.php';
         </div>
         <?php echo bot_fields(); ?>
         <div class="form-actions"><button class="btn primary" type="submit">Skicka länk</button></div>
-        <p class="form-foot"><a href="logga-in.php">Tillbaka till inloggningen</a></p>
+        <p class="form-foot"><a href="logga-in">Tillbaka till inloggningen</a></p>
       </form>
     <?php endif; ?>
   </div>

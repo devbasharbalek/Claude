@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/includes/app.php';
 $user = require_login();
-if (ar_personal($user)) redirect('admin.php');
+if (ar_personal($user)) redirect('admin');
 
 superklipp_schema();
 $st = db()->prepare('SELECT o.id, o.leveransdag, o.kategorier, o.status, o.created_at, os.etikett, os.leveransdatum
@@ -27,9 +27,9 @@ require __DIR__ . '/includes/head.php';
         <p>Inloggad som <?php echo e($user['kontakt']); ?> (<?php echo e($user['email']); ?>)</p>
       </div>
       <div class="portal-actions">
-        <a class="btn primary" href="bestall.php">Ny beställning</a>
-        <a class="btn ghost" href="profil.php">Mina uppgifter</a>
-        <form method="post" action="logga-ut.php" style="margin:0;"><?php echo csrf_field(); ?><button class="btn ghost" type="submit">Logga ut</button></form>
+        <a class="btn primary" href="bestall">Ny beställning</a>
+        <a class="btn ghost" href="profil">Mina uppgifter</a>
+        <form method="post" action="logga-ut" style="margin:0;"><?php echo csrf_field(); ?><button class="btn ghost" type="submit">Logga ut</button></form>
       </div>
     </div>
 
@@ -42,14 +42,14 @@ require __DIR__ . '/includes/head.php';
     <?php foreach ($oppnaKlipp as $klipp): ?>
       <div class="sk-notis">
         <p><strong><?php echo e(sk_etikett($klipp)); ?> är ute!</strong> Veckans bästa priser på frukt och grönt. Beställ senast <?php echo e(sk_deadline_text($klipp['deadline'])); ?>.</p>
-        <div class="actions"><a class="btn primary small" href="superklipp.php?id=<?php echo (int)$klipp['id']; ?>">Se superklippet</a></div>
+        <div class="actions"><a class="btn primary small" href="superklipp?id=<?php echo (int)$klipp['id']; ?>">Se superklippet</a></div>
       </div>
     <?php endforeach; ?>
 
     <?php if ($veckansklipp): ?>
       <div class="sk-notis">
         <p><strong><?php echo e(vk_etikett($veckansklipp)); ?> är ute!</strong> Veckans erbjudanden för restauranger och pizzerior, gäller <?php echo e(vk_period($veckansklipp)); ?>.</p>
-        <div class="actions"><a class="btn primary small" href="veckansklipp.php">Se veckansklippet</a></div>
+        <div class="actions"><a class="btn primary small" href="veckansklipp">Se veckansklippet</a></div>
       </div>
     <?php endif; ?>
 
@@ -58,7 +58,7 @@ require __DIR__ . '/includes/head.php';
     <?php if (!$orders): ?>
       <div class="empty">
         <p>Du har inte gjort några beställningar än.</p>
-        <a class="btn primary" href="bestall.php">Gör din första beställning</a>
+        <a class="btn primary" href="bestall">Gör din första beställning</a>
       </div>
     <?php else: ?>
       <div class="table-wrap stack">
@@ -67,12 +67,12 @@ require __DIR__ . '/includes/head.php';
           <tbody>
           <?php foreach ($orders as $o): ?>
             <tr>
-              <td data-label="Nr"><a class="row-link" href="order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
+              <td data-label="Nr"><a class="row-link" href="order?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
               <td data-label="Skickad" class="muted"><?php echo e(datum($o['created_at'])); ?></td>
               <td data-label="Leveransdag"><?php echo e(($leveransdagar[$o['leveransdag']] ?? $o['leveransdag']) . ($o['leveransdatum'] ? ' ' . date('j/n', strtotime($o['leveransdatum'])) : '')); ?></td>
               <td data-label="Varugrupper" class="muted"><?php echo e($o['etikett'] ?? kategori_namn($o['kategorier'])); ?></td>
               <td data-label="Status"><?php echo status_pill($o['status']); ?></td>
-              <td class="actions"><?php if ($o['etikett'] === null): ?><a class="btn ghost small" href="bestall.php?igen=<?php echo (int)$o['id']; ?>">Beställ igen</a><?php endif; ?></td>
+              <td class="actions"><?php if ($o['etikett'] === null): ?><a class="btn ghost small" href="bestall?igen=<?php echo (int)$o['id']; ?>">Beställ igen</a><?php endif; ?></td>
             </tr>
           <?php endforeach; ?>
           </tbody>

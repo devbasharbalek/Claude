@@ -13,8 +13,8 @@
         <h4>Beställning</h4>
         <p>Fyll i vårt beställningsformulär så återkommer vi med bekräftelse, eller ring oss direkt under öppettiderna.</p>
         <div class="pil-lankar">
-          <a class="pil" href="bestall.php">Till beställningen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-          <a class="pil" href="integritet.php">Integritet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="pil" href="bestall">Till beställningen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="pil" href="integritet">Integritet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
       </div>
       <div class="info-blk">
@@ -22,7 +22,7 @@
         <h4>Kontakt</h4>
         <p>Ring för att beställa eller prata sortiment, eller skicka en förfrågan via beställningsformuläret. Vi svarar under våra öppettider.</p>
         <div class="pil-lankar">
-          <a class="pil" href="kontakt.php">Till kontaktsidan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="pil" href="kontakt">Till kontaktsidan <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
           <a class="pil" href="tel:+4624018355">0240-183 55 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
       </div>
@@ -30,18 +30,18 @@
 
     <div class="footer-grid">
       <div>
-        <a class="logo-chip" href="index.php"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
+        <a class="logo-chip" href="./"><img src="<?php echo $logoSrc; ?>" alt="Ludvika Partiaffär"></a>
         <p class="footer-tag">Grossist inom frukt, grönt och storköksvaror för kommuner, restauranger och livsbutiker sedan 60-talet.</p>
       </div>
       <div>
         <h4>Sidor</h4>
         <ul>
-          <li><a href="index.php">Hem</a></li>
-          <li><a href="sortiment.php">Sortiment</a></li>
-          <li><a href="bestall.php">Beställ</a></li>
-          <li><a href="kontakt.php">Kontakt</a></li>
-          <li><a href="<?php echo current_user() ? 'konto.php' : 'logga-in.php'; ?>"><?php echo current_user() ? 'Mitt konto' : 'Logga in'; ?></a></li>
-          <li><a href="integritet.php">Integritet</a></li>
+          <li><a href="./">Hem</a></li>
+          <li><a href="sortiment">Sortiment</a></li>
+          <li><a href="bestall">Beställ</a></li>
+          <li><a href="kontakt">Kontakt</a></li>
+          <li><a href="<?php echo current_user() ? 'konto' : 'logga-in'; ?>"><?php echo current_user() ? 'Mitt konto' : 'Logga in'; ?></a></li>
+          <li><a href="integritet">Integritet</a></li>
         </ul>
       </div>
       <div>

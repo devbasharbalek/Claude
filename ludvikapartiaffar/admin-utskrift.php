@@ -90,7 +90,7 @@ $rubrik = $typ === 'plocksedel' ? 'Plocksedel' : 'Följesedel';
 </head>
 <body>
 <div class="verktyg"><span><?php echo count($sidor) === 1 ? e($rubrik) : count($sidor) . ' ' . mb_strtolower($rubrik === 'Plocksedel' ? 'plocksedlar' : 'följesedlar', 'UTF-8'); ?></span><button type="button" onclick="window.print()">Skriv ut</button>
-  <?php if ($typ === 'foljesedel' && count($sidor) === 1): ?><a href="admin-utskrift.php?typ=foljesedel&amp;id=<?php echo (int)$sidor[0][0]['id']; ?><?php echo $visaPriser ? '' : '&amp;priser=1'; ?>"><?php echo $visaPriser ? 'Utan priser' : 'Med priser'; ?></a><?php endif; ?></div>
+  <?php if ($typ === 'foljesedel' && count($sidor) === 1): ?><a href="admin-utskrift?typ=foljesedel&amp;id=<?php echo (int)$sidor[0][0]['id']; ?><?php echo $visaPriser ? '' : '&amp;priser=1'; ?>"><?php echo $visaPriser ? 'Utan priser' : 'Med priser'; ?></a><?php endif; ?></div>
 <?php foreach ($sidor as [$o, $rader, $kund, $osk]): $varor = array_filter($rader, fn($r) => $r['typ'] !== 'text'); $s = order_summor($rader); ?>
 <div class="sida">
   <div class="huvud">

@@ -10,7 +10,7 @@ if (!$order) {
   $active = 'konto';
   $pageTitle = 'Beställningen hittades inte – Ludvika Partiaffär';
   require __DIR__ . '/includes/head.php';
-  echo '<section><div class="wrap narrow"><div class="form-card"><h1 class="card-title">Hittades inte</h1><p class="lead">Beställningen finns inte, eller tillhör ett annat konto.</p><a class="btn ghost" href="konto.php" style="margin-top:18px;">Till Mitt konto</a></div></div></section>';
+  echo '<section><div class="wrap narrow"><div class="form-card"><h1 class="card-title">Hittades inte</h1><p class="lead">Beställningen finns inte, eller tillhör ett annat konto.</p><a class="btn ghost" href="konto" style="margin-top:18px;">Till Mitt konto</a></div></div></section>';
   require __DIR__ . '/includes/foot.php';
   exit;
 }
@@ -21,7 +21,7 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="konto.php">&larr; Mina beställningar</a>
+    <a class="back-link" href="konto">&larr; Mina beställningar</a>
     <div class="portal-head">
       <div>
         <span class="eyebrow">Beställning</span>
@@ -31,12 +31,12 @@ require __DIR__ . '/includes/head.php';
       <div class="portal-actions">
         <?php if ($osk): ?>
           <?php if (!empty($osk['veckansklipp_id']) || str_starts_with($osk['etikett'], 'Veckansklipp')): ?>
-            <a class="btn primary" href="veckansklipp.php">Till veckansklippet</a>
+            <a class="btn primary" href="veckansklipp">Till veckansklippet</a>
           <?php else: ?>
-            <a class="btn primary" href="superklipp.php">Till veckans superklipp</a>
+            <a class="btn primary" href="superklipp">Till veckans superklipp</a>
           <?php endif; ?>
         <?php else: ?>
-          <a class="btn primary" href="bestall.php?igen=<?php echo (int)$order['id']; ?>">Beställ samma igen</a>
+          <a class="btn primary" href="bestall?igen=<?php echo (int)$order['id']; ?>">Beställ samma igen</a>
         <?php endif; ?>
       </div>
     </div>

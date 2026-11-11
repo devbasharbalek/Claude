@@ -5,7 +5,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
   logout_user();
   flash('Du är utloggad.');
-  redirect('index.php');
+  redirect('./');
 }
 
 $active = '';
@@ -14,10 +14,10 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap narrow">
-    <form class="form-card" method="post" action="logga-ut.php">
+    <form class="form-card" method="post" action="logga-ut">
       <?php echo csrf_field(); ?>
       <h1 class="card-title">Logga ut?</h1>
-      <div class="form-actions"><button class="btn primary" type="submit">Logga ut</button><a class="btn ghost" href="index.php">Avbryt</a></div>
+      <div class="form-actions"><button class="btn primary" type="submit">Logga ut</button><a class="btn ghost" href="./">Avbryt</a></div>
     </form>
   </div>
 </section>

@@ -2,7 +2,7 @@
 require __DIR__ . '/includes/app.php';
 
 $next = safe_next($_GET['next'] ?? $_POST['next'] ?? '');
-if ($u = current_user()) redirect(ar_personal($u) && $next === 'konto.php' ? 'admin.php' : $next);
+if ($u = current_user()) redirect(ar_personal($u) && $next === 'konto' ? 'admin' : $next);
 
 $fel = '';
 $email = '';
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
       clear_failed_logins($email);
       login_user($u);
-      redirect(ar_personal($u) && $next === 'konto.php' ? 'admin.php' : $next);
+      redirect(ar_personal($u) && $next === 'konto' ? 'admin' : $next);
     }
   }
 }
@@ -44,7 +44,7 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap narrow">
-    <form class="form-card" method="post" action="logga-in.php">
+    <form class="form-card" method="post" action="logga-in">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="next" value="<?php echo e($next); ?>">
       <h1 class="card-title">Logga in</h1>
@@ -61,7 +61,7 @@ require __DIR__ . '/includes/head.php';
         </div>
       </div>
       <div class="form-actions"><button class="btn primary" type="submit">Logga in</button></div>
-      <p class="form-foot"><a href="glomt-losenord.php">Glömt lösenordet?</a><br>Inget konto? <a href="registrera.php<?php echo $next !== 'konto.php' ? '?next=' . e(rawurlencode($next)) : ''; ?>">Skapa ett här</a></p>
+      <p class="form-foot"><a href="glomt-losenord">Glömt lösenordet?</a><br>Inget konto? <a href="registrera<?php echo $next !== 'konto' ? '?next=' . e(rawurlencode($next)) : ''; ?>">Skapa ett här</a></p>
     </form>
   </div>
 </section>

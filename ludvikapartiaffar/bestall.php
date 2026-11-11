@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $valda = $_POST['kategorier'] ?? [];
   $v['kategorier']  = is_array($valda) ? array_values(array_intersect(array_keys($sortiment), $valda)) : [];
 
-  if (looks_like_bot()) redirect('tack.php');
+  if (looks_like_bot()) redirect('tack');
 
   if ($v['kundgrupp'] === '') $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
   if ($v['foretag'] === '')  $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $v['meddelande'] !== '' ? $v['meddelande'] : '(inget meddelande)',
         '',
         str_repeat('-', 44),
-        'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order.php?id=' . $orderId,
+        'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order?id=' . $orderId,
         'Svara på det här mejlet för att svara kunden direkt.',
       ]);
       send_mail($CONFIG['mail_to'], "Beställning #$orderId: {$v['foretag']} ($dag)", $body, $v['epost']);
@@ -99,15 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           'Varugrupper: ' . $kategoriNamn,
           '',
           'Du kan följa beställningen under Mitt konto:',
-          $CONFIG['site_url'] . '/order.php?id=' . $orderId,
+          $CONFIG['site_url'] . '/order?id=' . $orderId,
           '',
           'Med vänlig hälsning',
           'Ludvika Partiaffär, 0240-183 55',
         ]), $CONFIG['mail_to']);
         flash("Tack! Beställning #$orderId är skickad. Vi återkommer med bekräftelse.");
-        redirect('order.php?id=' . $orderId);
+        redirect('order?id=' . $orderId);
       }
-      redirect('tack.php');
+      redirect('tack');
     }
     $sparfel = true;
   }
@@ -132,7 +132,7 @@ function faltfel(array $fel, string $k): string {
 
 <section>
   <div class="wrap form-layout">
-    <form class="form-card" method="post" action="bestall.php" novalidate>
+    <form class="form-card" method="post" action="bestall" novalidate>
       <?php echo csrf_field(); ?>
 
       <?php if ($sparfel): ?>
@@ -144,7 +144,7 @@ function faltfel(array $fel, string $k): string {
       <fieldset>
         <legend>Era uppgifter</legend>
         <?php if ($user): ?>
-          <p class="hint" style="margin:-6px 0 14px; font-size:.86rem; color:var(--ink-soft);">Ifyllt från ditt konto. Ändringar här gäller bara den här beställningen, <a href="profil.php" style="color:var(--brand);">ändra kontouppgifterna här</a>.</p>
+          <p class="hint" style="margin:-6px 0 14px; font-size:.86rem; color:var(--ink-soft);">Ifyllt från ditt konto. Ändringar här gäller bara den här beställningen, <a href="profil" style="color:var(--brand);">ändra kontouppgifterna här</a>.</p>
         <?php endif; ?>
         <div class="field-grid">
           <div class="field full">
@@ -218,8 +218,8 @@ function faltfel(array $fel, string $k): string {
           <h3>Beställer du ofta?</h3>
           <p>Med ett konto slipper du fylla i uppgifterna varje gång, ser alla dina beställningar och kan beställa samma sak igen med ett klick.</p>
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;">
-            <a class="btn primary small" href="registrera.php">Skapa konto</a>
-            <a class="btn ghost small" href="logga-in.php?next=bestall.php">Logga in</a>
+            <a class="btn primary small" href="registrera">Skapa konto</a>
+            <a class="btn ghost small" href="logga-in?next=bestall">Logga in</a>
           </div>
         </div>
       <?php endif; ?>

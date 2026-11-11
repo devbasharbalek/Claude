@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $rader[] = 'När du är inloggad ser du veckans erbjudanden här:';
           foreach ($erb as $v) $rader[] = ERBJUDANDEN[$v]['namn'] . ': ' . $CONFIG['site_url'] . '/' . ERBJUDANDEN[$v]['sida'];
         }
-        array_push($rader, '', 'Logga in: ' . $CONFIG['site_url'] . '/logga-in.php', '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
+        array_push($rader, '', 'Logga in: ' . $CONFIG['site_url'] . '/logga-in', '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
         send_mail($kund['email'], 'Ditt konto hos Ludvika Partiaffär är godkänt', implode("\n", $rader), $CONFIG['mail_to']);
         flash($kund['foretag'] . ' är godkänt och har fått ett mejl om det. Ser: ' . erbjudanden_text($uppdaterad) . '.');
       } else {
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
   $tillbaka = array_filter(['sok' => (string)($_POST['sok'] ?? ''), 'visa' => ($_POST['visa'] ?? '') === 'nya' ? 'nya' : '']);
-  redirect('admin-kunder.php' . ($tillbaka ? '?' . http_build_query($tillbaka) : ''));
+  redirect('admin-kunder' . ($tillbaka ? '?' . http_build_query($tillbaka) : ''));
 }
 
 $sok = enRad($_GET['sok'] ?? '', 80);
@@ -115,13 +115,13 @@ require __DIR__ . '/includes/head.php';
     <?php if ($vantar): ?>
       <div class="sk-notis">
         <p><strong><?php echo $vantar === 1 ? '1 nytt konto väntar' : $vantar . ' nya konton väntar'; ?> på godkännande.</strong> Kontrollera kundgrupp och erbjudanden och tryck <strong>Godkänn</strong>. Kunden får ett mejl när kontot är godkänt.</p>
-        <div class="actions"><a class="btn <?php echo $visa ? 'ghost' : 'primary'; ?> small" href="admin-kunder.php<?php echo $visa ? '' : '?visa=nya'; ?>"><?php echo $visa ? 'Visa alla kunder' : 'Visa bara nya'; ?></a></div>
+        <div class="actions"><a class="btn <?php echo $visa ? 'ghost' : 'primary'; ?> small" href="admin-kunder<?php echo $visa ? '' : '?visa=nya'; ?>"><?php echo $visa ? 'Visa alla kunder' : 'Visa bara nya'; ?></a></div>
       </div>
     <?php elseif ($visa): ?>
-      <div class="alert info">Inga konton väntar på godkännande. <a href="admin-kunder.php" style="color:var(--brand);">Visa alla kunder</a></div>
+      <div class="alert info">Inga konton väntar på godkännande. <a href="admin-kunder" style="color:var(--brand);">Visa alla kunder</a></div>
     <?php endif; ?>
 
-    <form class="search" method="get" action="admin-kunder.php">
+    <form class="search" method="get" action="admin-kunder">
       <input type="search" name="sok" value="<?php echo e($sok); ?>" placeholder="Sök företag, namn, e-post eller telefon" aria-label="Sök kunder">
       <button class="btn ghost small" type="submit">Sök</button>
     </form>
@@ -138,17 +138,17 @@ require __DIR__ . '/includes/head.php';
               <td data-label="Företag"><strong><?php echo e($k['foretag']); ?></strong></td>
               <td data-label="Kundregistret">
                 <?php if ($k['kund_id']): ?>
-                  <form class="grupp-form" method="post" action="admin-kunder.php">
+                  <form class="grupp-form" method="post" action="admin-kunder">
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>">
                     <input type="hidden" name="sok" value="<?php echo e($sok); ?>">
                     <input type="hidden" name="visa" value="<?php echo $visa; ?>">
-                    <?php if (far($admin, 'kunder')): ?><a class="row-link" href="admin-kund.php?id=<?php echo (int)$k['kund_id']; ?>"><?php echo e($k['kundnr']); ?></a><?php else: ?><strong><?php echo e($k['kundnr']); ?></strong><?php endif; ?>
+                    <?php if (far($admin, 'kunder')): ?><a class="row-link" href="admin-kund?id=<?php echo (int)$k['kund_id']; ?>"><?php echo e($k['kundnr']); ?></a><?php else: ?><strong><?php echo e($k['kundnr']); ?></strong><?php endif; ?>
                     <span class="muted" style="font-size:.85rem;"><?php echo e($k['kund_namn']); ?></span>
                     <button class="btn ghost small" type="submit" name="action" value="koppla_bort" title="Ta bort kopplingen" aria-label="Ta bort kopplingen till <?php echo e($k['kundnr']); ?>">&times;</button>
                   </form>
                 <?php else: $f = $forslag[$k['email']] ?? null; ?>
-                  <form class="grupp-form" method="post" action="admin-kunder.php">
+                  <form class="grupp-form" method="post" action="admin-kunder">
                     <?php echo csrf_field(); ?>
                     <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>">
                     <input type="hidden" name="sok" value="<?php echo e($sok); ?>">
@@ -160,7 +160,7 @@ require __DIR__ . '/includes/head.php';
                 <?php endif; ?>
               </td>
               <td data-label="Kundgrupp">
-                <form class="grupp-form" method="post" action="admin-kunder.php">
+                <form class="grupp-form" method="post" action="admin-kunder">
                   <?php echo csrf_field(); ?>
                   <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>">
                   <input type="hidden" name="sok" value="<?php echo e($sok); ?>">
@@ -187,7 +187,7 @@ require __DIR__ . '/includes/head.php';
               <td data-label="Registrerad" class="muted"><?php echo e(date('Y-m-d', strtotime($k['created_at']))); ?></td>
               <td data-label="Beställningar"><div>
                 <?php if ((int)$k['antal']): ?>
-                  <a class="row-link" href="admin.php?visa=alla&amp;kund=<?php echo (int)$k['id']; ?>"><?php echo (int)$k['antal']; ?> st</a>
+                  <a class="row-link" href="admin?visa=alla&amp;kund=<?php echo (int)$k['id']; ?>"><?php echo (int)$k['antal']; ?> st</a>
                   <br><span class="muted" style="font-size:.8rem;">senast <?php echo e(date('Y-m-d', strtotime($k['senaste']))); ?></span>
                 <?php else: ?>
                   <span class="muted">Inga</span>
@@ -195,7 +195,7 @@ require __DIR__ . '/includes/head.php';
               </div></td>
               <td data-label="Status"><?php echo !(int)$k['active'] ? '<span class="pill pill-off">Avstängd</span>' : ((int)$k['godkand'] === 1 ? '<span class="pill pill-levererad">Aktiv</span>' : '<span class="pill pill-ny">Ny, väntar</span>'); ?></td>
               <td class="actions">
-                <form method="post" action="admin-kunder.php" style="margin:0;">
+                <form method="post" action="admin-kunder" style="margin:0;">
                   <?php echo csrf_field(); ?>
                   <input type="hidden" name="id" value="<?php echo (int)$k['id']; ?>">
                   <input type="hidden" name="sok" value="<?php echo e($sok); ?>">

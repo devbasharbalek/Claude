@@ -84,7 +84,7 @@ function vk_fil(string $nyckel, $sida): string {
 }
 
 function vk_url(array $vk, $sida, bool $ladda = false): string {
-  return 'veckansklipp-fil.php?k=' . $vk['nyckel'] . '&s=' . ($sida === 'pdf' ? 'pdf' : (int)$sida) . ($ladda ? '&ladda=1' : '');
+  return 'veckansklipp-fil?k=' . $vk['nyckel'] . '&s=' . ($sida === 'pdf' ? 'pdf' : (int)$sida) . ($ladda ? '&ladda=1' : '');
 }
 
 function vk_etikett(array $vk): string {
@@ -149,19 +149,16 @@ function vk_mb(int $bytes): string {
 
 // Den korta länken ludvikaparti.se/veckansklipp är en liten fil i mappen "veckansklipp".
 // Sajten skapar den själv, så att den aldrig behöver laddas upp. En fil som heter
-// index.php är lätt att råka lägga i fel mapp, och då ersätter den startsidan.
-const VK_KORTLANK_KOD = "<?php\n// Kort länk för sms: ludvikaparti.se/veckansklipp. Skapas automatiskt av admin-veckansklipp.php.\nheader('Location: ../veckansklipp.php', true, 302);\n";
+// Förr fanns kortlänken som en fil index.php. Laddades den upp i fel mapp ersatte den startsidan.
 
-function vk_kortlank_fil(): string {
-  return dirname(__DIR__) . '/veckansklipp/index.php';
-}
-
-function vk_skapa_kortlank(): bool {
-  $fil = vk_kortlank_fil();
-  if (is_file($fil)) return true;
-  $mapp = dirname($fil);
-  if (!is_dir($mapp) && !@mkdir($mapp, 0755)) return false;
-  return @file_put_contents($fil, VK_KORTLANK_KOD) !== false;
+// Förr var kortlänken en mapp veckansklipp med en index.php. Nu sköter .htaccess alla korta adresser,
+// så den gamla mappen tas bort om den bara innehåller kortlänken. Annars står den i vägen för /veckansklipp.
+function vk_ta_bort_gammal_kortlank(): void {
+  $fil = dirname(__DIR__) . '/veckansklipp/index.php';
+  if (is_file($fil) && str_contains((string)file_get_contents($fil, false, null, 0, 400), 'Kort länk för sms')) {
+    @unlink($fil);
+    @rmdir(dirname($fil));
+  }
 }
 
 // Sant om startsidan har ersatts av kortlänkens fil.
@@ -172,7 +169,7 @@ function vk_startsidan_ersatt(): bool {
 
 function vk_lank(): string {
   global $CONFIG;
-  return rtrim($CONFIG['site_url'], '/') . (is_file(vk_kortlank_fil()) ? '/veckansklipp' : '/veckansklipp.php');
+  return rtrim($CONFIG['site_url'], '/') . '/veckansklipp';
 }
 
 // Kort sms utan emoji, så att det får plats i ett sms (160 tecken).

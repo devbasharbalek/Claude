@@ -132,8 +132,8 @@ require __DIR__ . '/includes/head.php';
         <p>Alla order: från hemsidan, Superklipp, Veckansklipp och de som personalen lägger.</p>
       </div>
       <div class="portal-actions">
-        <?php if (far($admin, 'plock')): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-plock.php', ['datum' => $f['datum'] !== 'utan' ? $f['datum'] : ''])); ?>">Plock</a><?php endif; ?>
-        <?php if (far($admin, 'order_andra')): ?><a class="btn primary small" href="admin-order.php?ny=1">Ny order</a><?php endif; ?>
+        <?php if (far($admin, 'plock')): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-plock', ['datum' => $f['datum'] !== 'utan' ? $f['datum'] : ''])); ?>">Plock</a><?php endif; ?>
+        <?php if (far($admin, 'order_andra')): ?><a class="btn primary small" href="admin-order?ny=1">Ny order</a><?php endif; ?>
       </div>
     </div>
 
@@ -141,7 +141,7 @@ require __DIR__ . '/includes/head.php';
     <?php if ($nyaKonton): ?>
       <div class="sk-notis">
         <p><strong><?php echo $nyaKonton === 1 ? '1 nytt kundkonto väntar' : $nyaKonton . ' nya kundkonton väntar'; ?> på godkännande.</strong> De ser inga erbjudanden förrän du godkänner dem.</p>
-        <div class="actions"><a class="btn primary small" href="admin-kunder.php?visa=nya">Godkänn konton</a></div>
+        <div class="actions"><a class="btn primary small" href="admin-kunder?visa=nya">Godkänn konton</a></div>
       </div>
     <?php endif; ?>
 
@@ -153,16 +153,16 @@ require __DIR__ . '/includes/head.php';
     </div>
 
     <?php if ($kundNamn !== null): ?>
-      <div class="flash" style="margin:0 0 16px;">Visar order från <strong><?php echo e($kundNamn); ?></strong>. <a href="<?php echo e(adm_lank('admin.php', array_merge($f, ['kund' => 0, 'kid' => 0]))); ?>" style="color:var(--brand);">Visa alla kunder</a></div>
+      <div class="flash" style="margin:0 0 16px;">Visar order från <strong><?php echo e($kundNamn); ?></strong>. <a href="<?php echo e(adm_lank('admin', array_merge($f, ['kund' => 0, 'kid' => 0]))); ?>" style="color:var(--brand);">Visa alla kunder</a></div>
     <?php endif; ?>
 
     <div class="tabs">
       <?php foreach ($flikar as $key => [$label]): ?>
-        <a href="<?php echo e(adm_lank('admin.php', array_merge($f, ['visa' => $key]))); ?>"<?php echo $key === $f['visa'] ? ' class="on"' : ''; ?>><?php echo $label; ?><span class="count"><?php echo $antal[$key]; ?></span></a>
+        <a href="<?php echo e(adm_lank('admin', array_merge($f, ['visa' => $key]))); ?>"<?php echo $key === $f['visa'] ? ' class="on"' : ''; ?>><?php echo $label; ?><span class="count"><?php echo $antal[$key]; ?></span></a>
       <?php endforeach; ?>
     </div>
 
-    <form class="verktyg" method="get" action="admin.php">
+    <form class="verktyg" method="get" action="admin">
       <input type="hidden" name="visa" value="<?php echo e($f['visa']); ?>">
       <?php foreach (['kund', 'kid'] as $dold): if ($f[$dold]): ?><input type="hidden" name="<?php echo $dold; ?>" value="<?php echo $f[$dold]; ?>"><?php endif; endforeach; ?>
       <input type="search" name="sok" value="<?php echo e($f['sok']); ?>" placeholder="Sök kund, kundnr eller ordernr" aria-label="Sök order">
@@ -179,9 +179,9 @@ require __DIR__ . '/includes/head.php';
         <option value="foretag"<?php echo $f['seg'] === 'foretag' ? ' selected' : ''; ?>>Företag och butiker</option>
       </select>
       <button class="btn ghost small" type="submit">Visa</button>
-      <?php if ($f['sok'] !== '' || $f['datum'] !== '' || $f['seg'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin.php', ['visa' => $f['visa'], 'kund' => $f['kund'], 'kid' => $f['kid']])); ?>">Rensa</a><?php endif; ?>
+      <?php if ($f['sok'] !== '' || $f['datum'] !== '' || $f['seg'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin', ['visa' => $f['visa'], 'kund' => $f['kund'], 'kid' => $f['kid']])); ?>">Rensa</a><?php endif; ?>
       <?php if ($f['datum'] !== '' && $f['datum'] !== 'utan' && far($admin, 'plock')): ?>
-        <span class="hoger"><a class="btn ghost small" href="admin-utskrift.php?typ=plocksedel&amp;datum=<?php echo e($f['datum']); ?>" target="_blank">Skriv ut plocksedlar</a></span>
+        <span class="hoger"><a class="btn ghost small" href="admin-utskrift?typ=plocksedel&amp;datum=<?php echo e($f['datum']); ?>" target="_blank">Skriv ut plocksedlar</a></span>
       <?php endif; ?>
     </form>
     <p class="rad-info"><?php echo $totalt; ?> order<?php echo $sidor > 1 ? ', sida ' . $sida . ' av ' . $sidor : ''; ?>.</p>
@@ -195,7 +195,7 @@ require __DIR__ . '/includes/head.php';
           <tbody>
           <?php foreach ($orders as $o): $s = $summa[(int)$o['id']] ?? null; $kommentar = trim($o['plocktext'] !== '' ? $o['plocktext'] : $o['meddelande']); ?>
             <tr>
-              <td class="nr"><a class="row-link" href="admin-order.php?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
+              <td class="nr"><a class="row-link" href="admin-order?id=<?php echo (int)$o['id']; ?>">#<?php echo (int)$o['id']; ?></a></td>
               <td style="white-space:nowrap;"><?php echo e(leverans_text($o['leveransdatum'], $o['leveransdag'])); ?></td>
               <td><strong><?php echo e($o['foretag']); ?></strong><?php echo grupp_pill($o['grupp']); ?><br><span class="muted" style="font-size:.84rem;"><?php echo e(trim(($o['kundnr'] ?? '') . ' ' . ($o['lev_namn'] ?: $o['kontakt']))); ?><?php echo $o['kundens_ordernr'] !== '' ? ' &middot; Er ref. ' . e($o['kundens_ordernr']) : ''; ?></span></td>
               <td class="muted"><?php echo e($o['etikett'] ?? ($o['kalla'] === 'webb' ? 'Hemsidan' . ($o['kategorier'] !== '' ? ': ' . kategori_namn($o['kategorier']) : '') : (ORDER_KALLOR[$o['kalla']] ?? $o['kalla']) . ($o['skapad_av'] !== '' ? ', ' . $o['skapad_av'] : ''))); ?></td>
@@ -210,7 +210,7 @@ require __DIR__ . '/includes/head.php';
           </tbody>
         </table>
       </div>
-      <?php echo sida_navigering('admin.php', $f, $sida, $sidor); ?>
+      <?php echo sida_navigering('admin', $f, $sida, $sidor); ?>
     <?php endif; ?>
   </div>
 </section>

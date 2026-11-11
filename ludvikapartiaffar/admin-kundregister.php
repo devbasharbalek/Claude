@@ -66,25 +66,25 @@ require __DIR__ . '/includes/head.php';
         <h1>Kunder</h1>
         <p>Kundregistret med leverans- och fakturauppgifter, kundgrupp och prisgrupp.</p>
       </div>
-      <div class="portal-actions"><a class="btn primary small" href="admin-kund.php?ny=1">Ny kund</a></div>
+      <div class="portal-actions"><a class="btn primary small" href="admin-kund?ny=1">Ny kund</a></div>
     </div>
 
     <?php if ($registretTomt): ?>
       <div class="detail-card tomt-register">
         <h2>Kundregistret är tomt</h2>
         <p>Läs in kunderna från Partihandel, eller lägg upp dem en och en.</p>
-        <?php if (far($user, 'import')): ?><a class="btn primary" href="admin-import.php">Importera kunder</a><?php else: ?><p>Be en administratör att importera kunderna.</p><?php endif; ?>
+        <?php if (far($user, 'import')): ?><a class="btn primary" href="admin-import">Importera kunder</a><?php else: ?><p>Be en administratör att importera kunderna.</p><?php endif; ?>
       </div>
     <?php else: ?>
 
     <div class="tabs">
-      <a href="<?php echo e(adm_lank('admin-kundregister.php', $f, ['grupp' => ''])); ?>"<?php echo $f['grupp'] === '' ? ' class="on"' : ''; ?>>Alla<span class="count"><?php echo array_sum($perGrupp); ?></span></a>
+      <a href="<?php echo e(adm_lank('admin-kundregister', $f, ['grupp' => ''])); ?>"<?php echo $f['grupp'] === '' ? ' class="on"' : ''; ?>>Alla<span class="count"><?php echo array_sum($perGrupp); ?></span></a>
       <?php foreach (REGISTER_KUNDGRUPPER as $g => $namn): if (!isset($perGrupp[$g]) && $f['grupp'] !== $g) continue; ?>
-        <a href="<?php echo e(adm_lank('admin-kundregister.php', $f, ['grupp' => $g])); ?>"<?php echo $f['grupp'] === $g ? ' class="on"' : ''; ?>><?php echo e($g . ' ' . explode(' / ', $namn)[0]); ?><span class="count"><?php echo $perGrupp[$g] ?? 0; ?></span></a>
+        <a href="<?php echo e(adm_lank('admin-kundregister', $f, ['grupp' => $g])); ?>"<?php echo $f['grupp'] === $g ? ' class="on"' : ''; ?>><?php echo e($g . ' ' . explode(' / ', $namn)[0]); ?><span class="count"><?php echo $perGrupp[$g] ?? 0; ?></span></a>
       <?php endforeach; ?>
     </div>
 
-    <form class="verktyg" method="get" action="admin-kundregister.php">
+    <form class="verktyg" method="get" action="admin-kundregister">
       <?php if ($f['grupp'] !== ''): ?><input type="hidden" name="grupp" value="<?php echo e($f['grupp']); ?>"><?php endif; ?>
       <input type="search" name="sok" value="<?php echo e($f['sok']); ?>" placeholder="Sök namn, kundnr, ort, org.nr eller e-post" aria-label="Sök kunder">
       <select name="pg" aria-label="Prisgrupp">
@@ -98,7 +98,7 @@ require __DIR__ . '/includes/head.php';
         <option value="alla"<?php echo $f['status'] === 'alla' ? ' selected' : ''; ?>>Alla</option>
       </select>
       <button class="btn ghost small" type="submit">Visa</button>
-      <?php if ($f['sok'] !== '' || $f['pg'] !== '' || $f['status'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-kundregister.php', ['grupp' => $f['grupp']])); ?>">Rensa</a><?php endif; ?>
+      <?php if ($f['sok'] !== '' || $f['pg'] !== '' || $f['status'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-kundregister', ['grupp' => $f['grupp']])); ?>">Rensa</a><?php endif; ?>
     </form>
     <p class="rad-info"><?php echo number_format($totalt, 0, ',', ' '); ?> kunder<?php echo $sidor > 1 ? ', sida ' . $sida . ' av ' . $sidor : ''; ?>.</p>
 
@@ -112,7 +112,7 @@ require __DIR__ . '/includes/head.php';
           <?php foreach ($kunder as $k): ?>
             <tr<?php echo (int)$k['aktiv'] ? '' : ' class="inaktiv"'; ?>>
               <td class="nr"><?php echo e($k['kundnr']); ?></td>
-              <td><a class="row-link" href="admin-kund.php?id=<?php echo (int)$k['id']; ?>"><?php echo e($k['namn']); ?></a>
+              <td><a class="row-link" href="admin-kund?id=<?php echo (int)$k['id']; ?>"><?php echo e($k['namn']); ?></a>
                 <?php if ($k['lev_namn'] !== '' && mb_strtolower($k['lev_namn']) !== mb_strtolower($k['namn'])): ?><br><span class="muted" style="font-size:.84rem;"><?php echo e($k['lev_namn']); ?></span><?php endif; ?></td>
               <td><?php if ($k['kundgrupp'] !== null): ?><span class="pill pill-grupp liten" title="<?php echo e(REGISTER_KUNDGRUPPER[$k['kundgrupp']] ?? ''); ?>" style="margin-left:0;"><?php echo e($k['kundgrupp']); ?></span><?php endif; ?></td>
               <td class="<?php echo $k['prisgrupp'] === null ? 'tom' : ''; ?>"><?php echo e($k['prisgrupp'] === null ? 'Grundpris' : prisgrupp_text((int)$k['prisgrupp'])); ?></td>
@@ -125,7 +125,7 @@ require __DIR__ . '/includes/head.php';
           </tbody>
         </table>
       </div>
-      <?php echo sida_navigering('admin-kundregister.php', $f, $sida, $sidor); ?>
+      <?php echo sida_navigering('admin-kundregister', $f, $sida, $sidor); ?>
     <?php endif; ?>
     <?php endif; ?>
   </div>

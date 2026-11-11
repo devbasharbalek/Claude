@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $pw  = (string)($_POST['password'] ?? '');
   $pw2 = (string)($_POST['password2'] ?? '');
 
-  if (looks_like_bot()) redirect('index.php');
+  if (looks_like_bot()) redirect('./');
 
   if ($v['kundgrupp'] === '') $fel['kundgrupp'] = 'Välj vilken typ av verksamhet ni har.';
   if ($v['foretag'] === '') $fel['foretag'] = 'Ange företagets eller verksamhetens namn.';
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       'Adress:    ' . $v['adress'],
       '',
       'Kunden ser inga erbjudanden förrän du godkänner kontot. Godkänn eller stäng av det här:',
-      $CONFIG['site_url'] . '/admin-kunder.php?visa=nya',
+      $CONFIG['site_url'] . '/admin-kunder?visa=nya',
     ]), $v['email']);
 
     $st = db()->prepare('SELECT * FROM users WHERE id = ?');
@@ -77,7 +77,7 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
 ?>
 <section>
   <div class="wrap" style="max-width:640px;">
-    <form class="form-card" method="post" action="registrera.php" novalidate>
+    <form class="form-card" method="post" action="registrera" novalidate>
       <?php echo csrf_field(); ?>
       <input type="hidden" name="next" value="<?php echo e($next); ?>">
       <h1 class="card-title">Skapa konto</h1>
@@ -126,14 +126,14 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
           <?php echo $err('password2'); ?>
         </div>
         <div class="field full">
-          <label class="check inline"><input type="checkbox" name="villkor" value="1"<?php echo !empty($_POST['villkor']) ? ' checked' : ''; ?>> <span>Jag har läst hur Ludvika Partiaffär <a href="integritet.php" target="_blank">hanterar mina uppgifter</a>.</span></label>
+          <label class="check inline"><input type="checkbox" name="villkor" value="1"<?php echo !empty($_POST['villkor']) ? ' checked' : ''; ?>> <span>Jag har läst hur Ludvika Partiaffär <a href="integritet" target="_blank">hanterar mina uppgifter</a>.</span></label>
           <?php echo $err('villkor'); ?>
         </div>
       </div>
 
       <?php echo bot_fields(); ?>
       <div class="form-actions"><button class="btn primary" type="submit">Skapa konto</button></div>
-      <p class="form-foot">Har du redan ett konto? <a href="logga-in.php">Logga in</a></p>
+      <p class="form-foot">Har du redan ett konto? <a href="logga-in">Logga in</a></p>
     </form>
   </div>
 </section>

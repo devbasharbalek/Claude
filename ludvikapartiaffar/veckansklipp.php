@@ -1,5 +1,11 @@
 <?php
 require __DIR__ . '/includes/app.php';
+
+// Den gamla kortlänkens mapp gör att adressen får ett snedstreck på slutet. Mappen tas bort och adressen rättas.
+if (str_ends_with((string)parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/veckansklipp/')) {
+  vk_ta_bort_gammal_kortlank();
+  if (!is_dir(__DIR__ . '/veckansklipp')) redirect('/veckansklipp' . (($_SERVER['QUERY_STRING'] ?? '') !== '' ? '?' . $_SERVER['QUERY_STRING'] : ''));
+}
 veckansklipp_schema();
 
 $user = current_user();
@@ -12,7 +18,7 @@ $dagar = $vk ? vk_leveransdagar($vk) : [];
 $oppen = $rader && $dagar;
 $harTillgang = ser_erbjudande($user, 'veckansklipp');
 $kanBestalla = $harTillgang && $oppen;
-$tillbaka = 'veckansklipp.php' . ($id ? '?id=' . $id : '');
+$tillbaka = 'veckansklipp' . ($id ? '?id=' . $id : '');
 
 $fel = [];
 $sparfel = false;
@@ -21,7 +27,7 @@ $v = ['leveransdag' => '', 'meddelande' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
-  if (!$user) redirect('logga-in.php?next=' . rawurlencode($tillbaka));
+  if (!$user) redirect('logga-in?next=' . rawurlencode($tillbaka));
   if (!$harTillgang) redirect($tillbaka);
 
   if (!$kanBestalla) {
@@ -41,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                    $v['leveransdag'], $dagar[$v['leveransdag']], $leveransdatum, $v['meddelande']);
       if ($orderId) {
         flash("Tack! Beställning #$orderId från $etikett är skickad. Vi återkommer med bekräftelse.");
-        redirect('order.php?id=' . $orderId);
+        redirect('order?id=' . $orderId);
       }
       $sparfel = true;
     }
@@ -70,7 +76,7 @@ $sidor = $vk ? (int)$vk['sidor'] : 0;
         <?php if ($rader): ?>
           <a class="btn accent" href="#bestall">Beställ från bladet</a>
         <?php else: ?>
-          <a class="btn accent" href="bestall.php">Beställ</a>
+          <a class="btn accent" href="bestall">Beställ</a>
         <?php endif; ?>
         <a class="btn outline" href="tel:+4624018355">Ring 0240-183 55</a>
         <?php if ((int)$vk['pdf_storlek'] > 0): ?>
@@ -86,7 +92,7 @@ $sidor = $vk ? (int)$vk['sidor'] : 0;
     <?php if (!$vk): ?>
       <div class="empty">
         <p>Veckansklippet är inte ute just nu. Ett nytt blad kommer varje söndag.</p>
-        <a class="btn primary" href="bestall.php">Till beställning</a>
+        <a class="btn primary" href="bestall">Till beställning</a>
       </div>
     <?php else: ?>
       <?php if (vk_har_passerat($vk)): ?>
@@ -173,7 +179,7 @@ $sidor = $vk ? (int)$vk['sidor'] : 0;
                   <textarea id="meddelande" name="meddelande" maxlength="2000" placeholder="Valfritt. T.ex. vilka sorter läsk ni vill ha, önskad leveranstid eller andra varor." style="min-height:90px;"><?php echo e($v['meddelande']); ?></textarea>
                 </div>
               </fieldset>
-              <p class="form-note" style="margin-top:16px;">Levereras till <?php echo e($user['foretag']); ?>, <?php echo e($user['adress']); ?>. <a href="profil.php" style="color:var(--brand);">Ändra uppgifter</a></p>
+              <p class="form-note" style="margin-top:16px;">Levereras till <?php echo e($user['foretag']); ?>, <?php echo e($user['adress']); ?>. <a href="profil" style="color:var(--brand);">Ändra uppgifter</a></p>
             </div>
 
             <div class="sk-bar">
@@ -190,7 +196,7 @@ $sidor = $vk ? (int)$vk['sidor'] : 0;
             <p>Skicka en beställning via formuläret eller ring oss under öppettiderna, mån&ndash;fre 06:00&ndash;14:30.</p>
           </div>
           <div class="actions">
-            <a class="btn accent" href="bestall.php">Till beställningen</a>
+            <a class="btn accent" href="bestall">Till beställningen</a>
             <a class="btn outline" href="tel:+4624018355">0240-183 55</a>
           </div>
         </div>

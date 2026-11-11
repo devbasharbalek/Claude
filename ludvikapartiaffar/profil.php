@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       db()->prepare('UPDATE users SET foretag = ?, kundgrupp = ?, kontakt = ?, telefon = ?, email = ?, adress = ? WHERE id = ?')
           ->execute([$v['foretag'], $v['kundgrupp'] !== '' ? $v['kundgrupp'] : null, $v['kontakt'], $v['telefon'], $v['email'], $v['adress'], $user['id']]);
       flash('Dina uppgifter är sparade.');
-      redirect('profil.php');
+      redirect('profil');
     }
   }
 
@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $user['password_hash'] = $hash;
       login_user($user);
       flash('Ditt lösenord är ändrat. Andra enheter där du var inloggad har loggats ut.');
-      redirect('profil.php');
+      redirect('profil');
     }
   }
 }
@@ -78,9 +78,9 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
 ?>
 <section>
   <div class="wrap" style="max-width:760px;">
-    <?php if (!$personal): ?><a class="back-link" href="konto.php">&larr; Tillbaka</a><?php endif; ?>
+    <?php if (!$personal): ?><a class="back-link" href="konto">&larr; Tillbaka</a><?php endif; ?>
 
-    <form class="form-card" method="post" action="profil.php" novalidate>
+    <form class="form-card" method="post" action="profil" novalidate>
       <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="uppgifter">
       <h1 class="card-title">Mina uppgifter</h1>
@@ -100,7 +100,7 @@ $err = fn($k) => isset($fel[$k]) ? '<span class="err">' . e($fel[$k]) . '</span>
       <div class="form-actions"><button class="btn primary" type="submit">Spara uppgifter</button></div>
     </form>
 
-    <form class="form-card" method="post" action="profil.php" style="margin-top:18px;">
+    <form class="form-card" method="post" action="profil" style="margin-top:18px;">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="losenord">
       <h2 class="card-title" style="font-size:1.8rem;">Byt lösenord</h2>

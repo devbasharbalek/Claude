@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($action === 'avbryt') {
     import_rensa($imp);
-    redirect('admin-import.php');
+    redirect('admin-import');
   }
 
   if ($action === 'genomfor') {
@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$fil || !hash_equals($imp['token'], (string)($_POST['token'] ?? ''))) {
       import_rensa($imp);
       flash('Importen hade gått ut. Ladda upp filen igen.');
-      redirect('admin-import.php');
+      redirect('admin-import');
     }
     try {
       $rader = tabell_las($fil, $imp['namn']);
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       if (!$ex instanceof RuntimeException) error_log('Import misslyckades: ' . $ex);
       import_rensa($imp);
       flash('Importen gick inte igenom och inget har ändrats: ' . ($ex instanceof RuntimeException ? $ex->getMessage() : 'tekniskt fel.'));
-      redirect('admin-import.php');
+      redirect('admin-import');
     }
     import_rensa($imp);
     $delar = [];
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($r['inaktiveras']) $delar[] = $r['inaktiveras'] . ' markerade som inaktiva';
     if ($r['grupp_bort']) $delar[] = $r['grupp_bort'] . ' grupppriser borttagna';
     flash('Importen är klar: ' . ($delar ? implode(', ', $delar) : 'inga ändringar') . '. ' . $r['oforandrade'] . ' var redan aktuella.');
-    redirect('admin-import.php');
+    redirect('admin-import');
   }
 
   if ($action === 'ladda_upp') {
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!move_uploaded_file($f['tmp_name'], "$mapp/$token.$ext")) throw new RuntimeException('Servern kan inte spara filen.');
         $_SESSION['import'] = ['token' => $token, 'ext' => $ext, 'namn' => enRad($f['name'], 200), 'typ' => $v['typ'],
                                'val' => ['prismal' => $v['prismal'], 'kundnr' => $v['kundnr'], 'synka' => $v['synka']]];
-        redirect('admin-import.php');
+        redirect('admin-import');
       } catch (RuntimeException $ex) {
         $fel = $ex->getMessage();
       }
@@ -141,7 +141,7 @@ require __DIR__ . '/includes/head.php';
 
         <?php if ($rapport['fel'] !== null): ?>
           <div class="alert error" role="alert"><?php echo e($rapport['fel']); ?></div>
-          <form method="post" action="admin-import.php"><?php echo csrf_field(); ?><button class="btn primary" type="submit" name="action" value="avbryt">Välj en annan fil</button></form>
+          <form method="post" action="admin-import"><?php echo csrf_field(); ?><button class="btn primary" type="submit" name="action" value="avbryt">Välj en annan fil</button></form>
         <?php else: ?>
           <div class="stat-row">
             <div class="stat-tile"><b><?php echo $rapport['nya']; ?></b><span>Nya</span></div>
@@ -193,7 +193,7 @@ require __DIR__ . '/includes/head.php';
             </div>
           <?php endif; ?>
 
-          <form class="spara-rad" method="post" action="admin-import.php">
+          <form class="spara-rad" method="post" action="admin-import">
             <?php echo csrf_field(); ?>
             <input type="hidden" name="token" value="<?php echo e($imp['token']); ?>">
             <?php if ($rapport['nya'] + $rapport['andrade'] + $rapport['inaktiveras'] + $rapport['grupp_bort'] > 0): ?>
@@ -208,7 +208,7 @@ require __DIR__ . '/includes/head.php';
 
     <?php else: ?>
       <div class="detail-grid">
-        <form class="detail-card" method="post" action="admin-import.php" enctype="multipart/form-data">
+        <form class="detail-card" method="post" action="admin-import" enctype="multipart/form-data">
           <?php echo csrf_field(); ?>
           <input type="hidden" name="action" value="ladda_upp">
           <h2>Vad vill du importera?</h2>

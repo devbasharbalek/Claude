@@ -15,7 +15,7 @@ $pil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
         <h1 class="headline">Din grossist sedan 60-talet</h1>
         <p class="hero-sub">Ludvika Partiaffär levererar frukt, grönt och ett brett storkökssortiment till kommuner, restauranger, pizzerior och livsbutiker &mdash; snabbt, pålitligt och med personlig service.</p>
         <div class="hero-actions">
-          <a class="btn accent" href="bestall.php">Skicka beställning</a>
+          <a class="btn accent" href="bestall">Skicka beställning</a>
           <a class="btn outline" href="tel:+4624018355">Ring 0240-183 55</a>
         </div>
       </div>
@@ -32,11 +32,11 @@ $pil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
   <div class="wrap">
     <div class="kat-head">
       <h2>Allt ni behöver, från en leverantör</h2>
-      <a class="pil mork" href="sortiment.php">Se hela sortimentet <?php echo $pil; ?></a>
+      <a class="pil mork" href="sortiment">Se hela sortimentet <?php echo $pil; ?></a>
     </div>
     <nav class="kat-rad" aria-label="Varugrupper">
       <?php foreach ($sortiment as $key => $s): ?>
-        <a class="kat" href="sortiment.php#<?php echo $key; ?>"><?php echo ikon($key); ?><span><?php echo e($s['namn']); ?></span></a>
+        <a class="kat" href="sortiment#<?php echo $key; ?>"><?php echo ikon($key); ?><span><?php echo e($s['namn']); ?></span></a>
       <?php endforeach; ?>
     </nav>
   </div>
@@ -60,8 +60,8 @@ $pil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
       <h3><mark class="hl">60+ år</mark> i branschen, leverans <mark class="hl">mån&ndash;fre</mark> och <mark class="hl">tre</mark> kundgrupper: kommuner, restauranger och livsbutiker.</h3>
       <p>Lång erfarenhet av partihandel och snabba leveranser, så att kök och butikshyllor aldrig står tomma.</p>
       <div class="pil-lankar">
-        <a class="pil" href="sortiment.php">Se hela sortimentet <?php echo $pil; ?></a>
-        <a class="pil" href="kontakt.php">Kontakt <?php echo $pil; ?></a>
+        <a class="pil" href="sortiment">Se hela sortimentet <?php echo $pil; ?></a>
+        <a class="pil" href="kontakt">Kontakt <?php echo $pil; ?></a>
       </div>
     </div>
   </div>
@@ -73,7 +73,7 @@ $pil = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width=
       <h2>Redo att beställa?</h2>
       <p>Fyll i vårt beställningsformulär så återkommer vi med bekräftelse, eller ring oss direkt under öppettiderna.</p>
       <div class="hero-actions">
-        <a class="btn accent" href="bestall.php">Till beställningen</a>
+        <a class="btn accent" href="bestall">Till beställningen</a>
         <a class="btn outline" href="tel:+4624018355">0240-183 55</a>
       </div>
     </div>

@@ -37,7 +37,7 @@ if (!empty($_GET['ny']) || ($_POST['action'] ?? '') === 'skapa') {
     $kund = kund_hamta((int)($_POST['kund_id'] ?? 0));
     if (!$kund || !(int)$kund['aktiv'] || !far_grupp($user, $kund['kundgrupp'])) {
       flash('Välj en aktiv kund.');
-      redirect('admin-order.php?ny=1');
+      redirect('admin-order?ny=1');
     }
     $datum = forslag_leveransdatum($kund);
     $k = order_kundfalt($kund);
@@ -47,7 +47,7 @@ if (!empty($_GET['ny']) || ($_POST['action'] ?? '') === 'skapa') {
         ->execute([$k['kund_id'], $k['foretag'], $k['kundgrupp'], $k['kontakt'], $k['telefon'], $k['epost'], $k['adress'],
                    VECKODAG_KOD[(int)date('N', strtotime($datum))], $datum, mb_substr($kund['var_referens'] ?: $av, 0, 80, 'UTF-8'),
                    mb_substr($kund['er_referens'], 0, 120, 'UTF-8'), $kund['betalningsvillkor'], $av, $av, now(), now()]);
-    redirect('admin-order.php?id=' . (int)db()->lastInsertId());
+    redirect('admin-order?id=' . (int)db()->lastInsertId());
   }
   $sok = enRad($_GET['sok'] ?? '', 80);
   $traffar = [];
@@ -70,15 +70,15 @@ if (!empty($_GET['ny']) || ($_POST['action'] ?? '') === 'skapa') {
   ?>
   <section>
     <div class="wrap">
-      <a class="back-link" href="admin.php">&larr; Order</a>
+      <a class="back-link" href="admin">&larr; Order</a>
       <div class="portal-head"><div><h1>Ny order</h1><p>Välj kund. Kundens priser, referenser och betalningsvillkor följer med till ordern.</p></div></div>
-      <form class="verktyg" method="get" action="admin-order.php">
+      <form class="verktyg" method="get" action="admin-order">
         <input type="hidden" name="ny" value="1">
         <input type="search" name="sok" value="<?php echo e($sok); ?>" placeholder="Kundnamn, kundnr eller ort" aria-label="Sök kund" autofocus>
         <button class="btn primary small" type="submit">Sök kund</button>
       </form>
       <?php if ($sok !== '' && !$traffar): ?>
-        <div class="empty"><p>Ingen aktiv kund matchar sökningen.<?php if (far($user, 'kunder')): ?> <a href="admin-kund.php?ny=1" style="color:var(--brand);">Lägg upp en ny kund</a><?php endif; ?></p></div>
+        <div class="empty"><p>Ingen aktiv kund matchar sökningen.<?php if (far($user, 'kunder')): ?> <a href="admin-kund?ny=1" style="color:var(--brand);">Lägg upp en ny kund</a><?php endif; ?></p></div>
       <?php elseif ($traffar): ?>
         <div class="table-wrap">
           <table class="erp">
@@ -92,7 +92,7 @@ if (!empty($_GET['ny']) || ($_POST['action'] ?? '') === 'skapa') {
                 <td class="muted"><?php echo e(prisgrupp_text($k['prisgrupp'] === null ? null : (int)$k['prisgrupp'])); ?></td>
                 <td class="muted"><?php echo e($k['lev_ort']); ?></td>
                 <td class="muted"><?php echo e($k['tur']); ?></td>
-                <td class="num"><form method="post" action="admin-order.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="action" value="skapa"><input type="hidden" name="kund_id" value="<?php echo (int)$k['id']; ?>"><button class="btn primary small" type="submit">Välj</button></form></td>
+                <td class="num"><form method="post" action="admin-order" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="action" value="skapa"><input type="hidden" name="kund_id" value="<?php echo (int)$k['id']; ?>"><button class="btn primary small" type="submit">Välj</button></form></td>
               </tr>
             <?php endforeach; ?>
             </tbody>
@@ -206,14 +206,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $text = ["Hej {$order['kontakt']}!", '', sprintf($statusMejl[$ny], $id)];
         if ($order['user_id']) {
           $text[] = '';
-          $text[] = 'Se beställningen: ' . $CONFIG['site_url'] . '/order.php?id=' . $id;
+          $text[] = 'Se beställningen: ' . $CONFIG['site_url'] . '/order?id=' . $id;
         }
         array_push($text, '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
         $meddelat = send_mail($order['epost'], "Beställning #$id: " . mb_strtolower(ORDER_STATUS[$ny]), implode("\n", $text), $CONFIG['mail_to']);
       }
       flash("Beställning #$id är nu " . mb_strtolower(ORDER_STATUS[$ny]) . ($meddelat ? ', och kunden har fått ett mejl.' : '.'));
     }
-    redirect('admin-order.php?id=' . $id);
+    redirect('admin-order?id=' . $id);
   }
 
   order_krav_andra($kanAndra);
@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           ->execute([$ny['id'], $ny['kundgrupp'], $ny['betalningsvillkor'], now(), $av, $id]);
       flash('Ordern är kopplad till ' . $ny['kundnr'] . ' ' . $ny['namn'] . '. Nya rader får kundens priser.');
     }
-    redirect('admin-order.php?id=' . $id);
+    redirect('admin-order?id=' . $id);
   }
 
   if ($action === 'kopiera') {
@@ -253,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       }
     }
     flash("Order #$nyId är en kopia av #$id med dagens priser. Kontrollera leveransdatum och antal.");
-    redirect('admin-order.php?id=' . $nyId);
+    redirect('admin-order?id=' . $nyId);
   }
 
   if ($action === 'orderbekraftelse') {
@@ -290,13 +290,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('Mejlet kunde inte skickas. Försök igen om en stund.');
       }
     }
-    redirect('admin-order.php?id=' . $id);
+    redirect('admin-order?id=' . $id);
   }
 
   if ($action === 'spara') {
     if ($last) {
       flash('Ordern är ' . mb_strtolower(ORDER_STATUS[$order['status']]) . ' och kan inte ändras.');
-      redirect('admin-order.php?id=' . $id);
+      redirect('admin-order?id=' . $id);
     }
     $befintliga = [];
     foreach ($rader as $r) $befintliga[(int)$r['id']] = $r;
@@ -340,7 +340,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       order_plockstatus($id, $av);
       db()->commit();
       flash('Ordern är sparad.');
-      redirect('admin-order.php?id=' . $id);
+      redirect('admin-order?id=' . $id);
     }
     // Felen visas med det som skrevs, så att inget behöver skrivas om.
     $order = array_merge($order, $huvud, ['leveransdatum' => trim((string)($_POST['leveransdatum'] ?? ''))]);
@@ -364,7 +364,7 @@ require __DIR__ . '/includes/head.php';
 ?>
 <section>
   <div class="wrap">
-    <a class="back-link" href="admin.php">&larr; Alla order</a>
+    <a class="back-link" href="admin">&larr; Alla order</a>
     <div class="portal-head">
       <div>
         <span class="eyebrow">Beställning</span>
@@ -373,12 +373,12 @@ require __DIR__ . '/includes/head.php';
       </div>
       <div class="portal-actions">
         <?php if (far($user, 'plock')): ?>
-          <a class="btn ghost small" href="admin-utskrift.php?typ=plocksedel&amp;id=<?php echo $id; ?>" target="_blank">Plocksedel</a>
+          <a class="btn ghost small" href="admin-utskrift?typ=plocksedel&amp;id=<?php echo $id; ?>" target="_blank">Plocksedel</a>
         <?php endif; ?>
-        <a class="btn ghost small" href="admin-utskrift.php?typ=foljesedel&amp;id=<?php echo $id; ?>" target="_blank">Följesedel</a>
+        <a class="btn ghost small" href="admin-utskrift?typ=foljesedel&amp;id=<?php echo $id; ?>" target="_blank">Följesedel</a>
         <?php if ($kanAndra): ?>
-          <form method="post" action="admin-order.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><button class="btn ghost small" type="submit" name="action" value="orderbekraftelse">Mejla orderbekräftelse</button></form>
-          <form method="post" action="admin-order.php" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><button class="btn ghost small" type="submit" name="action" value="kopiera">Kopiera</button></form>
+          <form method="post" action="admin-order" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><button class="btn ghost small" type="submit" name="action" value="orderbekraftelse">Mejla orderbekräftelse</button></form>
+          <form method="post" action="admin-order" style="margin:0;"><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><button class="btn ghost small" type="submit" name="action" value="kopiera">Kopiera</button></form>
         <?php endif; ?>
         <?php if ($order['telefon'] !== ''): ?><a class="btn ghost small" href="tel:<?php echo e(preg_replace('/[^0-9+]/', '', $order['telefon'])); ?>">Ring kunden</a><?php endif; ?>
         <?php if ($order['epost'] !== ''): ?><a class="btn ghost small" href="mailto:<?php echo e($order['epost']); ?>?subject=<?php echo rawurlencode('Er beställning #' . $id); ?>">Mejla kunden</a><?php endif; ?>
@@ -388,7 +388,7 @@ require __DIR__ . '/includes/head.php';
     <?php if ($fel): ?><div class="alert error" role="alert"><strong>Ordern sparades inte:</strong><ul><?php foreach ($fel as $m): ?><li><?php echo e($m); ?></li><?php endforeach; ?></ul></div><?php endif; ?>
 
     <?php if (!$kund && $kanAndra && !$last): ?>
-      <form class="kund-banner" method="post" action="admin-order.php">
+      <form class="kund-banner" method="post" action="admin-order">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="id" value="<?php echo $id; ?>">
         <span><strong>Ordern är inte kopplad till en kund i kundregistret.</strong> Koppla den med kundnumret, så får artikelraderna kundens priser.</span>
@@ -397,7 +397,7 @@ require __DIR__ . '/includes/head.php';
     <?php endif; ?>
 
     <div class="order-topp">
-        <form class="detail-card" method="post" action="admin-order.php">
+        <form class="detail-card" method="post" action="admin-order">
           <?php echo csrf_field(); ?>
           <input type="hidden" name="id" value="<?php echo $id; ?>">
           <input type="hidden" name="action" value="status">
@@ -425,7 +425,7 @@ require __DIR__ . '/includes/head.php';
           <h2>Kund</h2>
           <dl class="kv">
             <?php if ($kund): ?>
-              <dt>Kundregistret</dt><dd><?php if (far($user, 'kunder')): ?><a href="admin-kund.php?id=<?php echo (int)$kund['id']; ?>" style="color:var(--brand);"><?php echo e($kund['kundnr'] . ' ' . $kund['namn']); ?></a><?php else: echo e($kund['kundnr'] . ' ' . $kund['namn']); endif; ?></dd>
+              <dt>Kundregistret</dt><dd><?php if (far($user, 'kunder')): ?><a href="admin-kund?id=<?php echo (int)$kund['id']; ?>" style="color:var(--brand);"><?php echo e($kund['kundnr'] . ' ' . $kund['namn']); ?></a><?php else: echo e($kund['kundnr'] . ' ' . $kund['namn']); endif; ?></dd>
             <?php endif; ?>
             <dt>Företag</dt><dd><?php echo e($order['foretag']); ?></dd>
             <dt>Kundgrupp</dt><dd><?php echo e(register_grupp_text(order_grupp($order))); ?></dd>
@@ -436,7 +436,7 @@ require __DIR__ . '/includes/head.php';
             <dt>Adress</dt><dd><?php echo e($order['adress']); ?></dd>
             <dt>Konto</dt><dd>
               <?php if ($order['user_id']): ?>
-                <a href="admin.php?visa=alla&amp;kund=<?php echo (int)$order['user_id']; ?>" style="color:var(--brand);">Alla beställningar från kontot</a>
+                <a href="admin?visa=alla&amp;kund=<?php echo (int)$order['user_id']; ?>" style="color:var(--brand);">Alla beställningar från kontot</a>
                 <?php if (!(int)$order['kund_active']): ?><br><span class="pill pill-off">Avstängt konto</span><?php endif; ?>
               <?php elseif ($order['kalla'] === 'personal'): ?>
                 Lagd av personalen
@@ -450,7 +450,7 @@ require __DIR__ . '/includes/head.php';
 
     <div class="order-huvud">
       <div>
-        <?php if ($redigerbar): ?><form method="post" action="admin-order.php" id="orderForm" novalidate><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="action" value="spara"><?php endif; ?>
+        <?php if ($redigerbar): ?><form method="post" action="admin-order" id="orderForm" novalidate><?php echo csrf_field(); ?><input type="hidden" name="id" value="<?php echo $id; ?>"><input type="hidden" name="action" value="spara"><?php endif; ?>
         <div class="detail-card">
           <h2>Order</h2>
           <?php if ($redigerbar): ?>
@@ -562,7 +562,7 @@ require __DIR__ . '/includes/head.php';
             <dl class="kv">
               <dt>Leveransdag</dt><dd><?php echo e(($leveransdagar[$order['leveransdag']] ?? $order['leveransdag']) . ($osk ? ' ' . date('j/n', strtotime($osk['leveransdatum'])) : '')); ?></dd>
               <?php if ($osk): ?>
-                <dt>Från</dt><dd><?php if ($osk['superklipp_id'] && far($user, 'erbjudanden')): ?><a href="admin-superklipp-redigera.php?id=<?php echo (int)$osk['superklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php elseif (!empty($osk['veckansklipp_id']) && far($user, 'erbjudanden')): ?><a href="admin-veckansklipp.php?id=<?php echo (int)$osk['veckansklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php else: ?><?php echo e($osk['etikett']); ?><?php endif; ?></dd>
+                <dt>Från</dt><dd><?php if ($osk['superklipp_id'] && far($user, 'erbjudanden')): ?><a href="admin-superklipp-redigera?id=<?php echo (int)$osk['superklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php elseif (!empty($osk['veckansklipp_id']) && far($user, 'erbjudanden')): ?><a href="admin-veckansklipp?id=<?php echo (int)$osk['veckansklipp_id']; ?>" style="color:var(--brand);"><?php echo e($osk['etikett']); ?></a><?php else: ?><?php echo e($osk['etikett']); ?><?php endif; ?></dd>
               <?php elseif ($order['kategorier'] !== ''): ?>
                 <dt>Varugrupper</dt><dd><?php echo e(kategori_namn($order['kategorier'])); ?></dd>
               <?php endif; ?>
@@ -708,7 +708,7 @@ require __DIR__ . '/includes/head.php';
   }
   function valj(i) { if (!traffar[i]) return; laggTill(traffar[i]); sok.value = ''; traffar = []; stang(); }
   function hamta(q, sedan) {
-    fetch('admin-artikelsok.php?q=' + encodeURIComponent(q) + '&kund=' + sok.dataset.kund, {credentials: 'same-origin'})
+    fetch('admin-artikelsok?q=' + encodeURIComponent(q) + '&kund=' + sok.dataset.kund, {credentials: 'same-origin'})
       .then(function (r) { return r.json(); })
       .then(function (data) { if (sok.value.trim() !== q) return; traffar = data; aktiv = data.length ? 0 : -1; visa(); if (sedan) sedan(); })
       .catch(function () {});

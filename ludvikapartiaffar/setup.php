@@ -114,10 +114,10 @@ require __DIR__ . '/includes/head.php';
       <div class="form-card">
         <h1 class="card-title">Installationen är klar</h1>
         <p class="lead">Databasen är skapad och ditt admin-konto finns. <strong>Ta nu bort <code>setup.php</code> från servern</strong> via FileZilla.</p>
-        <a class="btn primary" href="logga-in.php" style="margin-top:20px;">Logga in</a>
+        <a class="btn primary" href="logga-in" style="margin-top:20px;">Logga in</a>
       </div>
     <?php else: ?>
-      <form class="form-card" method="post" action="setup.php">
+      <form class="form-card" method="post" action="setup">
         <h1 class="card-title">Installation</h1>
         <p class="lead">Databastabellerna är skapade. Skapa nu det första admin-kontot.</p>
         <?php if ($fel): ?><div class="alert error" role="alert"><?php echo implode('<br>', array_map('e', $fel)); ?></div><?php endif; ?>

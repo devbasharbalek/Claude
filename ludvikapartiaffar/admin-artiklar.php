@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   db()->commit();
   flash(($antal === 1 ? '1 pris är ändrat.' : "$antal priser är ändrade.") . ($fel ? ' Sparades inte: ' . implode('; ', array_slice($fel, 0, 5)) . '.' : ''));
-  redirect(adm_lank('admin-artiklar.php', $f, ['sida' => (int)($_POST['sida'] ?? 1)]));
+  redirect(adm_lank('admin-artiklar', $f, ['sida' => (int)($_POST['sida'] ?? 1)]));
 }
 
 $where = [];
@@ -142,7 +142,7 @@ function pris_cell(?string $pris, bool $redigera, int $id, string $namn, string 
        . ($platshallare !== '' ? ' placeholder="' . e($platshallare) . '"' : '') . ' aria-label="' . e($namn) . '" autocomplete="off"></td>';
 }
 
-$sortLank = fn(string $s, string $text) => '<a href="' . e(adm_lank('admin-artiklar.php', $f, ['sort' => $s])) . '" style="color:inherit;' . ($f['sort'] === $s ? '' : ' text-decoration:none;') . '">' . $text . '</a>';
+$sortLank = fn(string $s, string $text) => '<a href="' . e(adm_lank('admin-artiklar', $f, ['sort' => $s])) . '" style="color:inherit;' . ($f['sort'] === $s ? '' : ' text-decoration:none;') . '">' . $text . '</a>';
 
 $active = 'admin';
 $adminSida = 'artiklar';
@@ -158,10 +158,10 @@ require __DIR__ . '/includes/head.php';
       </div>
       <div class="portal-actions">
         <?php if (!$registretTomt): ?>
-          <a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', array_merge($f, ['redigera' => 0]), ['export' => 'csv'])); ?>">Ladda ner för Excel</a>
-          <?php if ($kanRedigera && !$f['redigera']): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', $f, ['redigera' => 1])); ?>">Ändra priser</a><?php endif; ?>
+          <a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar', array_merge($f, ['redigera' => 0]), ['export' => 'csv'])); ?>">Ladda ner för Excel</a>
+          <?php if ($kanRedigera && !$f['redigera']): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar', $f, ['redigera' => 1])); ?>">Ändra priser</a><?php endif; ?>
         <?php endif; ?>
-        <a class="btn primary small" href="admin-artikel.php?ny=1">Ny artikel</a>
+        <a class="btn primary small" href="admin-artikel?ny=1">Ny artikel</a>
       </div>
     </div>
 
@@ -169,18 +169,18 @@ require __DIR__ . '/includes/head.php';
       <div class="detail-card tomt-register">
         <h2>Artikelregistret är tomt</h2>
         <p>Läs in artiklarna från Partihandel, eller lägg upp dem en och en.</p>
-        <?php if (far($user, 'import')): ?><a class="btn primary" href="admin-import.php">Importera artiklar</a><?php else: ?><p>Be en administratör att importera artiklarna.</p><?php endif; ?>
+        <?php if (far($user, 'import')): ?><a class="btn primary" href="admin-import">Importera artiklar</a><?php else: ?><p>Be en administratör att importera artiklarna.</p><?php endif; ?>
       </div>
     <?php else: ?>
 
     <?php if ($kund): ?>
       <div class="kund-banner">
         <span>Priser för <strong><?php echo e($kund['namn']); ?></strong> (<?php echo e($kund['kundnr']); ?>), <?php echo e(prisgrupp_text($kund['prisgrupp'] === null ? null : (int)$kund['prisgrupp'])); ?>. Kolumnen Kundens pris visar vad kunden betalar.</span>
-        <span><a href="admin-kund.php?id=<?php echo (int)$kund['id']; ?>">Till kunden</a> &middot; <a href="<?php echo e(adm_lank('admin-artiklar.php', $f, ['kund' => 0])); ?>">Visa utan kund</a></span>
+        <span><a href="admin-kund?id=<?php echo (int)$kund['id']; ?>">Till kunden</a> &middot; <a href="<?php echo e(adm_lank('admin-artiklar', $f, ['kund' => 0])); ?>">Visa utan kund</a></span>
       </div>
     <?php endif; ?>
 
-    <form class="verktyg" method="get" action="admin-artiklar.php">
+    <form class="verktyg" method="get" action="admin-artiklar">
       <?php foreach (['kund', 'redigera', 'sort'] as $dold): if ($f[$dold]): ?><input type="hidden" name="<?php echo $dold; ?>" value="<?php echo e($f[$dold]); ?>"><?php endif; endforeach; ?>
       <input type="search" name="sok" value="<?php echo e($f['sok']); ?>" placeholder="Sök namn eller artikelnummer" aria-label="Sök artiklar">
       <select name="pg" aria-label="Produktgrupp">
@@ -197,7 +197,7 @@ require __DIR__ . '/includes/head.php';
         <option value="alla"<?php echo $f['status'] === 'alla' ? ' selected' : ''; ?>>Alla</option>
       </select>
       <button class="btn ghost small" type="submit">Visa</button>
-      <?php if ($f['sok'] !== '' || $f['pg'] !== '' || $f['ag'] !== '' || $f['status'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', ['kund' => $f['kund'], 'redigera' => $f['redigera']])); ?>">Rensa</a><?php endif; ?>
+      <?php if ($f['sok'] !== '' || $f['pg'] !== '' || $f['ag'] !== '' || $f['status'] !== ''): ?><a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar', ['kund' => $f['kund'], 'redigera' => $f['redigera']])); ?>">Rensa</a><?php endif; ?>
     </form>
     <p class="rad-info"><?php echo number_format($totalt, 0, ',', ' '); ?> artiklar<?php echo $sidor > 1 ? ', sida ' . $sida . ' av ' . $sidor : ''; ?>.<?php if ($f['redigera']): ?> Ändra priserna direkt i tabellen. Töm en gruppruta så gäller grundpriset.<?php endif; ?></p>
 
@@ -205,7 +205,7 @@ require __DIR__ . '/includes/head.php';
       <div class="empty"><p>Inga artiklar matchar sökningen.</p></div>
     <?php else: ?>
     <?php if ($f['redigera']): ?>
-    <form method="post" action="admin-artiklar.php" id="prisForm">
+    <form method="post" action="admin-artiklar" id="prisForm">
       <?php echo csrf_field(); ?>
       <?php foreach (['sok', 'pg', 'ag', 'status', 'sort', 'kund', 'redigera'] as $dold): ?><input type="hidden" name="<?php echo $dold; ?>" value="<?php echo e($f[$dold]); ?>"><?php endforeach; ?>
       <input type="hidden" name="sida" value="<?php echo $sida; ?>">
@@ -223,7 +223,7 @@ require __DIR__ . '/includes/head.php';
           <?php foreach ($artiklar as $a): $id = (int)$a['id']; ?>
             <tr<?php echo (int)$a['aktiv'] ? '' : ' class="inaktiv"'; ?>>
               <td class="nr"><?php echo e($a['artikelnr']); ?></td>
-              <td><a class="row-link" href="admin-artikel.php?id=<?php echo $id; ?>"><?php echo e($a['namn']); ?></a><?php echo (int)$a['aktiv'] ? '' : ' <span class="pill pill-off liten">Inaktiv</span>'; ?></td>
+              <td><a class="row-link" href="admin-artikel?id=<?php echo $id; ?>"><?php echo e($a['namn']); ?></a><?php echo (int)$a['aktiv'] ? '' : ' <span class="pill pill-off liten">Inaktiv</span>'; ?></td>
               <td class="num"><?php echo e(kolli_text($a)); ?></td>
               <td><?php echo e($a['enhet']); ?></td>
               <td class="muted"><?php echo e($a['produktgrupp']); ?></td>
@@ -248,13 +248,13 @@ require __DIR__ . '/includes/head.php';
       <div class="sk-bar">
         <span id="prisAntal">Inga ändringar än.</span>
         <span style="display:flex; gap:8px; flex-wrap:wrap;">
-          <a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar.php', $f, ['redigera' => 0, 'sida' => $sida])); ?>">Klar</a>
+          <a class="btn ghost small" href="<?php echo e(adm_lank('admin-artiklar', $f, ['redigera' => 0, 'sida' => $sida])); ?>">Klar</a>
           <button class="btn primary small" type="submit">Spara priser</button>
         </span>
       </div>
     </form>
     <?php endif; ?>
-    <?php echo sida_navigering('admin-artiklar.php', $f, $sida, $sidor); ?>
+    <?php echo sida_navigering('admin-artiklar', $f, $sida, $sidor); ?>
     <?php endif; ?>
     <?php endif; ?>
   </div>

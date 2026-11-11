@@ -26,7 +26,7 @@ if ($reset && $_SERVER['REQUEST_METHOD'] === 'POST') {
     clear_failed_logins($reset['email']);
     logout_user();
     flash('Ditt lösenord är ändrat. Logga in med det nya lösenordet.');
-    redirect('logga-in.php');
+    redirect('logga-in');
   }
 }
 
@@ -40,10 +40,10 @@ require __DIR__ . '/includes/head.php';
       <div class="form-card">
         <h1 class="card-title">Länken fungerar inte</h1>
         <p class="lead">Länken har redan använts eller har gått ut. Beställ en ny länk så fixar vi det.</p>
-        <a class="btn primary" href="glomt-losenord.php" style="margin-top:20px;">Skicka ny länk</a>
+        <a class="btn primary" href="glomt-losenord" style="margin-top:20px;">Skicka ny länk</a>
       </div>
     <?php else: ?>
-      <form class="form-card" method="post" action="aterstall-losenord.php">
+      <form class="form-card" method="post" action="aterstall-losenord">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="token" value="<?php echo e($token); ?>">
         <h1 class="card-title">Välj nytt lösenord</h1>

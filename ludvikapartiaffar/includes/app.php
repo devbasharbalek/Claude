@@ -29,8 +29,8 @@ const KUNDGRUPPER = [
 // Veckans erbjudanden syns bara för inloggade kunder med tillgång. Utan eget val
 // följer tillgången kundgruppen: butiker ser Superklipp, restauranger och pizzerior Veckansklipp.
 const ERBJUDANDEN = [
-  'superklipp'   => ['namn' => 'Superklipp',   'sida' => 'superklipp.php',   'grupper' => ['B']],
-  'veckansklipp' => ['namn' => 'Veckansklipp', 'sida' => 'veckansklipp.php', 'grupper' => ['L']],
+  'superklipp'   => ['namn' => 'Superklipp',   'sida' => 'superklipp',   'grupper' => ['B']],
+  'veckansklipp' => ['namn' => 'Veckansklipp', 'sida' => 'veckansklipp', 'grupper' => ['L']],
 ];
 const KUNDGRUPP_EXEMPEL = [
   'A' => 'Skola, förskola, äldreboende m.m.',
@@ -72,9 +72,11 @@ function datum(string $dt): string {
   return date('Y-m-d H:i', strtotime($dt));
 }
 
+// Sidan man skickas till efter inloggning. Gamla länkar med .php blir korta adresser.
 function safe_next(?string $next): string {
   $next = (string)$next;
-  return preg_match('/^[a-z0-9\-]+\.php(\?[A-Za-z0-9=&%_\-]*)?(#[a-z0-9\-]+)?$/', $next) ? $next : 'konto.php';
+  if (!preg_match('/^[a-z0-9\-]+(\.php)?(\?[A-Za-z0-9=&%_\-]*)?(#[a-z0-9\-]+)?$/', $next)) return 'konto';
+  return (string)preg_replace('/\.php(?=$|[?#])/', '', $next, 1);
 }
 
 function client_ip(): string {
@@ -178,12 +180,12 @@ function erbjudande_sparr(string $vilket, ?array $user, string $intro): string {
     $html .= '<p><strong>' . e($namn) . ' är för våra kunder.</strong> Erbjudandet visas när du är inloggad med ett godkänt kundkonto.</p>';
   } elseif (!ar_godkand($user)) {
     $html .= '<p><strong>Ditt konto väntar på godkännande.</strong> När vi har godkänt kontot ser du veckans erbjudanden här. Under tiden kan du beställa som vanligt.</p>'
-           . '<div class="actions"><a class="btn primary small" href="bestall.php">Till beställning</a>'
+           . '<div class="actions"><a class="btn primary small" href="bestall">Till beställning</a>'
            . '<a class="btn ghost small" href="tel:+4624018355">Ring 0240-183 55</a></div>';
   } else {
     $html .= '<p><strong>' . e($namn) . ' ingår inte i ert konto.</strong> Hör av er om ni vill ta del av erbjudandena, så hjälper vi er.</p>'
            . '<div class="actions"><a class="btn primary small" href="tel:+4624018355">Ring 0240-183 55</a>'
-           . '<a class="btn ghost small" href="bestall.php">Till beställning</a></div>';
+           . '<a class="btn ghost small" href="bestall">Till beställning</a></div>';
   }
   return $html . '</div></div></section>';
 }
@@ -271,7 +273,7 @@ function require_login(): array {
   $u = current_user();
   if (!$u) {
     $next = basename($_SERVER['SCRIPT_NAME']) . (($_SERVER['QUERY_STRING'] ?? '') !== '' ? '?' . $_SERVER['QUERY_STRING'] : '');
-    redirect('logga-in.php?next=' . rawurlencode(safe_next($next)));
+    redirect('logga-in?next=' . rawurlencode(safe_next($next)));
   }
   return $u;
 }

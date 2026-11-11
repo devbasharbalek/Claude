@@ -23,12 +23,12 @@ require __DIR__ . '/includes/head.php';
         <p>Lägg in veckans lista från Google Sheets. Inloggade kunder ser priserna och kan beställa fram till sista beställningsdag.</p>
       </div>
       <div class="portal-actions">
-        <a class="btn ghost" href="superklipp.php">Visa som kund</a>
+        <a class="btn ghost" href="superklipp">Visa som kund</a>
       </div>
     </div>
 
     <div class="detail-grid">
-      <form class="detail-card" method="post" action="admin-superklipp-redigera.php" enctype="multipart/form-data">
+      <form class="detail-card" method="post" action="admin-superklipp-redigera" enctype="multipart/form-data">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="import">
         <h2>Nytt superklipp</h2>
@@ -46,7 +46,7 @@ require __DIR__ . '/includes/head.php';
           <li>Kontrollera, kryssa i veckans toppklipp och tryck <strong>Spara och publicera</strong>.</li>
           <li>Kopiera den färdiga mejltexten och skicka den till kunderna.</li>
         </ol>
-        <p style="margin-top:12px; color:var(--ink-soft); line-height:1.6;">Beställningarna kommer in under <a href="admin.php" style="color:var(--brand);">Beställningar</a> och summeras i en plocklista per vecka.</p>
+        <p style="margin-top:12px; color:var(--ink-soft); line-height:1.6;">Beställningarna kommer in under <a href="admin" style="color:var(--brand);">Beställningar</a> och summeras i en plocklista per vecka.</p>
       </div>
     </div>
 
@@ -60,12 +60,12 @@ require __DIR__ . '/includes/head.php';
           <tbody>
           <?php foreach ($listor as $s): ?>
             <tr>
-              <td data-label="Vecka"><a class="row-link" href="admin-superklipp-redigera.php?id=<?php echo (int)$s['id']; ?>">v.<?php echo (int)$s['vecka']; ?> <?php echo (int)$s['ar']; ?></a></td>
+              <td data-label="Vecka"><a class="row-link" href="admin-superklipp-redigera?id=<?php echo (int)$s['id']; ?>">v.<?php echo (int)$s['vecka']; ?> <?php echo (int)$s['ar']; ?></a></td>
               <td data-label="Sista beställning" class="muted"><?php echo e(sk_deadline_text($s['deadline'])); ?></td>
               <td data-label="Status"><?php echo sk_status_pill($s); ?></td>
               <td data-label="Varor"><?php echo (int)$s['varor']; ?></td>
               <td data-label="Beställningar"><?php echo (int)$s['bestallningar']; ?></td>
-              <td class="actions"><a class="btn ghost small" href="admin-superklipp-redigera.php?kopiera=<?php echo (int)$s['id']; ?>">Kopiera till ny vecka</a></td>
+              <td class="actions"><a class="btn ghost small" href="admin-superklipp-redigera?kopiera=<?php echo (int)$s['id']; ?>">Kopiera till ny vecka</a></td>
             </tr>
           <?php endforeach; ?>
           </tbody>
