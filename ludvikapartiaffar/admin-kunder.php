@@ -44,9 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($erb) {
           $rader[] = '';
           $rader[] = 'När du är inloggad ser du veckans erbjudanden här:';
-          foreach ($erb as $v) $rader[] = ERBJUDANDEN[$v]['namn'] . ': ' . $CONFIG['site_url'] . '/' . ERBJUDANDEN[$v]['sida'];
+          foreach ($erb as $v) $rader[] = ERBJUDANDEN[$v]['namn'] . ': ' . webbadress(ERBJUDANDEN[$v]['sida']);
         }
-        array_push($rader, '', 'Logga in: ' . $CONFIG['site_url'] . '/logga-in', '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
+        array_push($rader, '', 'Logga in: ' . webbadress('logga-in'), '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
         send_mail($kund['email'], 'Ditt konto hos Ludvika Partiaffär är godkänt', implode("\n", $rader), $CONFIG['mail_to']);
         flash($kund['foretag'] . ' är godkänt och har fått ett mejl om det. Ser: ' . erbjudanden_text($uppdaterad) . '.');
       } else {

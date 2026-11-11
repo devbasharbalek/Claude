@@ -267,7 +267,7 @@ require __DIR__ . '/includes/head.php';
     if (e.submitter && e.submitter.name) data.append(e.submitter.name, e.submitter.value);
     var kort = form.closest('.plock-kort');
     kort.classList.add('sparar');
-    fetch('admin-plock', {method: 'POST', body: data, credentials: 'same-origin', headers: {'X-Requested-With': 'fetch'}})
+    fetch(form.getAttribute('action'), {method: 'POST', body: data, credentials: 'same-origin', headers: {'X-Requested-With': 'fetch'}})
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(function (svar) {
         if (svar.meddelande) alert(svar.meddelande);

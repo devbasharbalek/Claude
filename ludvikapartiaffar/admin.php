@@ -145,6 +145,10 @@ require __DIR__ . '/includes/head.php';
       </div>
     <?php endif; ?>
 
+    <?php if (!korta_adresser() && $admin['role'] === 'admin'): ?>
+      <div class="alert warn"><strong>Korta adresser är avstängda.</strong> Filen .htaccess saknas i public_html på servern, eller så läses den inte. Webbplatsen fungerar ändå, men adresserna slutar på .php. Ladda upp .htaccess till public_html (slå på "Visa dolda filer" i FileZilla), så blir adresserna korta av sig själva.</div>
+    <?php endif; ?>
+
     <div class="stat-row">
       <div class="stat-tile<?php echo $statusAntal['ny'] ? ' warn' : ''; ?>"><b><?php echo $statusAntal['ny']; ?></b><span>Nya, väntar på bekräftelse</span></div>
       <div class="stat-tile"><b><?php echo $statusAntal['ny'] + $statusAntal['bekraftad']; ?></b><span>Ej plockade</span></div>

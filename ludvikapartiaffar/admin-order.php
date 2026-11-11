@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $text = ["Hej {$order['kontakt']}!", '', sprintf($statusMejl[$ny], $id)];
         if ($order['user_id']) {
           $text[] = '';
-          $text[] = 'Se beställningen: ' . $CONFIG['site_url'] . '/order?id=' . $id;
+          $text[] = 'Se beställningen: ' . webbadress('order') . '?id=' . $id;
         }
         array_push($text, '', 'Med vänlig hälsning', 'Ludvika Partiaffär, 0240-183 55');
         $meddelat = send_mail($order['epost'], "Beställning #$id: " . mb_strtolower(ORDER_STATUS[$ny]), implode("\n", $text), $CONFIG['mail_to']);
@@ -533,7 +533,7 @@ require __DIR__ . '/includes/head.php';
           </div>
           <?php if ($redigerbar): ?>
             <div class="artikelsok">
-              <input type="search" id="artSok" placeholder="Sök artikel med namn eller nummer och tryck Enter" autocomplete="off" aria-label="Sök artikel" aria-controls="artLista" aria-expanded="false" role="combobox" data-kund="<?php echo (int)($kund['id'] ?? 0); ?>">
+              <input type="search" id="artSok" placeholder="Sök artikel med namn eller nummer och tryck Enter" autocomplete="off" aria-label="Sök artikel" aria-controls="artLista" aria-expanded="false" role="combobox" data-url="admin-artikelsok" data-kund="<?php echo (int)($kund['id'] ?? 0); ?>">
               <ul class="art-lista" id="artLista" role="listbox" hidden></ul>
               <button type="button" class="btn ghost small" id="nyTextrad">+ Textrad</button>
             </div>
@@ -708,7 +708,7 @@ require __DIR__ . '/includes/head.php';
   }
   function valj(i) { if (!traffar[i]) return; laggTill(traffar[i]); sok.value = ''; traffar = []; stang(); }
   function hamta(q, sedan) {
-    fetch('admin-artikelsok?q=' + encodeURIComponent(q) + '&kund=' + sok.dataset.kund, {credentials: 'same-origin'})
+    fetch(sok.dataset.url + '?q=' + encodeURIComponent(q) + '&kund=' + sok.dataset.kund, {credentials: 'same-origin'})
       .then(function (r) { return r.json(); })
       .then(function (data) { if (sok.value.trim() !== q) return; traffar = data; aktiv = data.length ? 0 : -1; visa(); if (sedan) sedan(); })
       .catch(function () {});

@@ -3,6 +3,10 @@
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
+  RewriteBase /
+
+  # Talar om för sidorna att korta adresser fungerar. Utan den här filen länkar sidorna med .php som förut.
+  RewriteRule ^ - [E=LP_KORTA:1]
 
   # Gamla adresser med .php skickas vidare till den korta adressen, så att bokmärken och sökmotorer följer med.
   # Bara vid vanlig visning: formulär som skickas till en .php-adress tas emot som vanligt.

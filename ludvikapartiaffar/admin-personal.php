@@ -11,7 +11,7 @@ function skicka_inbjudan(array $u, bool $ny): string {
   $token = bin2hex(random_bytes(32));
   db()->prepare('INSERT INTO password_resets (user_id, token_hash, created_at, expires_at) VALUES (?, ?, ?, ?)')
       ->execute([$u['id'], hash('sha256', $token), now(), date('Y-m-d H:i:s', time() + INBJUDAN_DAGAR * 86400)]);
-  $lank = $CONFIG['site_url'] . '/aterstall-losenord?token=' . $token;
+  $lank = webbadress('aterstall-losenord') . '?token=' . $token;
   send_mail($u['email'], $ny ? 'Ditt konto i Ludvika Partiaffärs affärssystem' : 'Ny länk till affärssystemet', implode("\n", [
     "Hej {$u['kontakt']}!",
     '',
@@ -20,7 +20,7 @@ function skicka_inbjudan(array $u, bool $ny): string {
     '',
     $lank,
     '',
-    'Sedan loggar du in här med din e-postadress: ' . $CONFIG['site_url'] . '/logga-in',
+    'Sedan loggar du in här med din e-postadress: ' . webbadress('logga-in'),
     '',
     'Ludvika Partiaffär',
   ]));

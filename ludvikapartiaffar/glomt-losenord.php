@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           'Någon (förhoppningsvis du) har bett om att återställa lösenordet till ditt konto hos Ludvika Partiaffär.',
           'Klicka på länken nedan för att välja ett nytt lösenord. Länken gäller i en timme.',
           '',
-          $CONFIG['site_url'] . '/aterstall-losenord?token=' . $token,
+          webbadress('aterstall-losenord') . '?token=' . $token,
           '',
           'Har du inte bett om det här kan du bortse från mejlet, lösenordet ändras inte.',
           '',

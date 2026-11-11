@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $v['meddelande'] !== '' ? $v['meddelande'] : '(inget meddelande)',
         '',
         str_repeat('-', 44),
-        'Hantera beställningen: ' . $CONFIG['site_url'] . '/admin-order?id=' . $orderId,
+        'Hantera beställningen: ' . webbadress('admin-order') . '?id=' . $orderId,
         'Svara på det här mejlet för att svara kunden direkt.',
       ]);
       send_mail($CONFIG['mail_to'], "Beställning #$orderId: {$v['foretag']} ($dag)", $body, $v['epost']);
@@ -99,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           'Varugrupper: ' . $kategoriNamn,
           '',
           'Du kan följa beställningen under Mitt konto:',
-          $CONFIG['site_url'] . '/order?id=' . $orderId,
+          webbadress('order') . '?id=' . $orderId,
           '',
           'Med vänlig hälsning',
           'Ludvika Partiaffär, 0240-183 55',

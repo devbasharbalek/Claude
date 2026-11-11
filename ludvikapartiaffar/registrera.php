@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       'Adress:    ' . $v['adress'],
       '',
       'Kunden ser inga erbjudanden förrän du godkänner kontot. Godkänn eller stäng av det här:',
-      $CONFIG['site_url'] . '/admin-kunder?visa=nya',
+      webbadress('admin-kunder') . '?visa=nya',
     ]), $v['email']);
 
     $st = db()->prepare('SELECT * FROM users WHERE id = ?');

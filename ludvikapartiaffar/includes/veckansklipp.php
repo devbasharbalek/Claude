@@ -169,7 +169,7 @@ function vk_startsidan_ersatt(): bool {
 
 function vk_lank(): string {
   global $CONFIG;
-  return rtrim($CONFIG['site_url'], '/') . '/veckansklipp';
+  return webbadress('veckansklipp');
 }
 
 // Kort sms utan emoji, så att det får plats i ett sms (160 tecken).

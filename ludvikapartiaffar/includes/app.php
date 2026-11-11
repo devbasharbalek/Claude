@@ -54,8 +54,52 @@ function now(): string {
 }
 
 function redirect(string $to): never {
-  header('Location: ' . $to);
+  header('Location: ' . adress($to));
   exit;
+}
+
+// ---------- korta adresser ----------
+// Sidorna länkar med korta adresser (/sortiment). Det kräver att .htaccess fungerar på servern, och då sätter
+// den LP_KORTA för varje sida. Saknas den, eller läses den inte, länkar sidorna med .php som förut.
+
+function korta_adresser(): bool {
+  static $ja = null;
+  if ($ja === null) {
+    $ja = false;
+    foreach (array_keys($_SERVER) as $nyckel) {
+      // Efter en intern omskrivning heter den REDIRECT_LP_KORTA.
+      if (str_ends_with((string)$nyckel, 'LP_KORTA')) {
+        $ja = true;
+        break;
+      }
+    }
+  }
+  return $ja;
+}
+
+// Sidorna i rotmappen, t.ex. "sortiment" och "admin-order".
+function lp_sidor(): array {
+  static $sidor = null;
+  return $sidor ??= array_map(fn($f) => basename($f, '.php'), glob(dirname(__DIR__) . '/*.php') ?: []);
+}
+
+// "sortiment?x=1" blir "sortiment.php?x=1" när korta adresser inte fungerar.
+function adress(string $till): string {
+  if (korta_adresser()) return $till;
+  return (string)preg_replace_callback('~^(/?)([a-z0-9-]+)(?=$|[?#])~', fn($m) => in_array($m[2], lp_sidor(), true) ? $m[1] . $m[2] . '.php' : $m[0], $till);
+}
+
+// Hel adress till en sida, för mejl och sms.
+function webbadress(string $sida): string {
+  global $CONFIG;
+  return rtrim($CONFIG['site_url'], '/') . '/' . adress(ltrim($sida, '/'));
+}
+
+// Lägger till .php i sidans länkar när korta adresser inte fungerar. Även i HTML som skickas som JSON.
+function lankar_med_php(string $html): string {
+  static $monster = null;
+  $monster ??= '~(\b(?:href|action|src|data-url)=)(\\\\?["\'])(' . implode('|', array_map(fn($s) => preg_quote($s, '~'), lp_sidor())) . ')(?=[?#"\'\\\\])~';
+  return (string)preg_replace($monster, '$1$2$3.php', $html);
 }
 
 function flash(?string $msg = null): ?string {
@@ -226,6 +270,7 @@ session_set_cookie_params([
 // och skickar inga no-cache-rubriker, så att webbläsaren kan spara bilderna.
 if (!defined('LP_SESSION_LAS')) {
   session_start();
+  if (!korta_adresser() && PHP_SAPI !== 'cli') ob_start('lankar_med_php');
 } elseif (isset($_COOKIE[session_name()])) {
   session_start(['read_and_close' => true, 'cache_limiter' => '']);
 }
