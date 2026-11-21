@@ -194,6 +194,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($action === 'status') {
     $ny = (string)($_POST['status'] ?? '');
+    if ($order['faktura_id'] !== null && $ny !== $order['status']) {
+      flash('Ordern ligger på ' . utkast_namn((int)$order['faktura_id']) . '. Ta bort den från fakturautkastet först, så kan du ändra statusen.');
+      redirect('admin-order?id=' . $id);
+    }
     if (isset(ORDER_STATUS[$ny]) && $ny !== $order['status']) {
       $extra = match ($ny) {
         'plockad' => ', plockad_at = COALESCE(plockad_at, NOW())',
@@ -402,6 +406,10 @@ require __DIR__ . '/includes/head.php';
           <input type="hidden" name="id" value="<?php echo $id; ?>">
           <input type="hidden" name="action" value="status">
           <h2>Status</h2>
+          <?php if ($order['faktura_id'] !== null): ?>
+            <p style="margin:0 0 10px;"><?php echo status_pill($order['status']); ?></p>
+            <p class="muted" style="margin:0; font-size:.9rem;">Ordern ligger på <?php if (far($user, 'fakturera')): ?><a href="admin-faktura?id=<?php echo (int)$order['faktura_id']; ?>" style="color:var(--brand); font-weight:700;"><?php echo e(utkast_namn((int)$order['faktura_id'])); ?></a><?php else: echo e(utkast_namn((int)$order['faktura_id'])); endif; ?>. Ta bort den från fakturautkastet om något behöver ändras.</p>
+          <?php else: ?>
           <div class="status-form">
             <label for="status" class="sr-only">Ny status</label>
             <select id="status" name="status">
@@ -413,6 +421,7 @@ require __DIR__ . '/includes/head.php';
           </div>
           <?php if (filter_var($order['epost'], FILTER_VALIDATE_EMAIL)): ?>
             <label class="check inline" style="margin-top:14px;"><input type="checkbox" name="meddela" value="1"<?php echo $order['user_id'] ? ' checked' : ''; ?>> <span>Mejla kunden om ändringen (<?php echo e($order['epost']); ?>)</span></label>
+          <?php endif; ?>
           <?php endif; ?>
           <dl class="kv" style="margin-top:16px;">
             <dt>Plockare</dt><dd><?php echo e($order['plockare_namn'] ?? 'Ej tilldelad'); ?></dd>

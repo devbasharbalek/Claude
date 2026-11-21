@@ -420,3 +420,4 @@ require __DIR__ . '/superklipp.php';
 require __DIR__ . '/veckansklipp.php';
 require __DIR__ . '/erp.php';
 require __DIR__ . '/order.php';
+require __DIR__ . '/faktura.php';

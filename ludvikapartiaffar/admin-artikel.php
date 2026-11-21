@@ -265,9 +265,9 @@ require __DIR__ . '/includes/head.php';
         </div>
 
         <div class="detail-card">
-          <h2>Visma</h2>
+          <h2>Spiris (Visma)</h2>
           <dl class="kv">
-            <dt>Artikel i Visma</dt><dd><?php echo $artikel['visma_id'] ? 'Kopplad' : 'Inte kopplad än'; ?></dd>
+            <dt>Artikel i Spiris</dt><dd><?php echo $artikel['visma_id'] ? 'Kopplad' : 'Inte kopplad än. Letas upp med artikelnumret när en faktura skickas.'; ?></dd>
             <dt>Ändrad</dt><dd><?php echo e(datum($artikel['uppdaterad']) . ($artikel['uppdaterad_av'] !== '' ? ' av ' . $artikel['uppdaterad_av'] : '')); ?></dd>
           </dl>
         </div>

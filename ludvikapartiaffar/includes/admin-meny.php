@@ -1,8 +1,11 @@
 <?php
 // Sidomenyn i adminportalen. Varje roll ser bara det den har behörighet till.
+erp_schema();
 $admIkon = [
   'order' => '<path d="M9 5h10M9 12h10M9 19h10"/><path d="M4.5 5h.01M4.5 12h.01M4.5 19h.01"/>',
   'plock' => '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
+  'fakturering' => '<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  'spiris' => '<path d="M9 7H6a4 4 0 0 0 0 8h3M15 7h3a4 4 0 0 1 0 8h-3M8 11h8"/>',
   'kunder' => '<path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="12" cy="7.5" r="3.5"/>',
   'webbkonton' => '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
   'artiklar' => '<path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/>',
@@ -12,11 +15,13 @@ $admIkon = [
   'personal' => '<circle cx="9" cy="8" r="3.2"/><path d="M3 20v-.5A5.5 5.5 0 0 1 8.5 14h1A5.5 5.5 0 0 1 15 19.5v.5"/><path d="M16 4.5a3.2 3.2 0 0 1 0 6.2M21 20v-.5a5.5 5.5 0 0 0-4-5.3"/>',
 ];
 $admNyaOrder = far($navUser, 'order') ? (int)db()->query("SELECT COUNT(*) FROM orders WHERE status = 'ny'")->fetchColumn() : 0;
+$admEjSkickade = far($navUser, 'fakturera') ? (int)db()->query("SELECT COUNT(*) FROM fakturor WHERE status = 'utkast'")->fetchColumn() : 0;
 $admVantar = far($navUser, 'webbkonton') ? (int)db()->query("SELECT COUNT(*) FROM users WHERE role = 'kund' AND godkand = 0 AND active = 1")->fetchColumn() : 0;
 $admMeny = [
   'Försäljning' => [
     'order' => ['admin', 'Order', 'order', $admNyaOrder],
     'plock' => ['admin-plock', 'Plock', 'plock', 0],
+    'fakturering' => ['admin-fakturering', 'Fakturering', 'fakturera', $admEjSkickade],
     'kunder' => ['admin-kundregister', 'Kunder', 'kunder', 0],
     'webbkonton' => ['admin-kunder', 'Webbkonton', 'webbkonton', $admVantar],
   ],
@@ -30,6 +35,7 @@ $admMeny = [
   'Inställningar' => [
     'import' => ['admin-import', 'Import', 'import', 0],
     'personal' => ['admin-personal', 'Personal', 'personal', 0],
+    'spiris' => ['admin-spiris', 'Spiris', 'personal', 0],
   ],
 ];
 $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1, 'UTF-8'), array_slice(preg_split('/\s+/u', trim($navUser['kontakt'] ?: $navUser['email'])), 0, 2))), 'UTF-8');
@@ -43,7 +49,7 @@ $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1
         if (!$admSynliga) continue; ?>
         <p class="adm-rubrik"><?php echo e($admRubrik); ?></p>
         <?php foreach ($admSynliga as $admNyckel => [$admHref, $admNamn, , $admAntal]): ?>
-          <a href="<?php echo $admHref; ?>"<?php echo $admNyckel === $adminSida ? ' class="on" aria-current="page"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?php echo $admIkon[$admNyckel]; ?></svg><?php echo e($admNamn); ?><?php if ($admAntal): ?><span class="adm-badge" title="<?php echo $admNyckel === 'order' ? 'Nya order' : 'Väntar på godkännande'; ?>"><?php echo $admAntal; ?></span><?php endif; ?></a>
+          <a href="<?php echo $admHref; ?>"<?php echo $admNyckel === $adminSida ? ' class="on" aria-current="page"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?php echo $admIkon[$admNyckel]; ?></svg><?php echo e($admNamn); ?><?php if ($admAntal): ?><span class="adm-badge" title="<?php echo ['order' => 'Nya order', 'fakturering' => 'Fakturautkast som inte är skickade till Spiris'][$admNyckel] ?? 'Väntar på godkännande'; ?>"><?php echo $admAntal; ?></span><?php endif; ?></a>
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>

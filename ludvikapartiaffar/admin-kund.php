@@ -302,9 +302,9 @@ require __DIR__ . '/includes/head.php';
         <?php endif; ?>
 
         <div class="detail-card">
-          <h2>Visma</h2>
+          <h2>Spiris (Visma)</h2>
           <dl class="kv">
-            <dt>Kund i Visma</dt><dd><?php echo $kund['visma_id'] ? 'Kopplad' : 'Inte kopplad än'; ?></dd>
+            <dt>Kund i Spiris</dt><dd><?php echo $kund['visma_id'] ? 'Kopplad' : 'Inte kopplad än. Letas upp med kundnumret när en faktura skickas.'; ?></dd>
             <dt>Ändrad</dt><dd><?php echo e(datum($kund['uppdaterad']) . ($kund['uppdaterad_av'] !== '' ? ' av ' . $kund['uppdaterad_av'] : '')); ?></dd>
           </dl>
         </div>

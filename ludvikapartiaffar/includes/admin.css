@@ -227,3 +227,22 @@
   .beh-omrade legend{font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); padding:0 4px; margin:0;}
   .beh-omrade .check.inline{font-size:.9rem;}
   .field-grid > fieldset + fieldset{margin-top:0; padding-top:0; border-top:none;}
+
+  /* Fakturering */
+  .fakt-kund{margin-bottom:16px; padding-block:16px;}
+  .fakt-kund-topp{display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; margin-bottom:10px;}
+  .fakt-kund-topp .pill-grupp{margin-left:0;}
+  .fakt-info{color:var(--ink-soft); font-size:.86rem; margin-left:auto;}
+  table.erp th.val, table.erp td.val{width:38px; padding-right:0;}
+  table.erp td.val input, table.erp th.val input{width:18px; height:18px; margin:0; accent-color:var(--brand);}
+  .fakt-tom td{opacity:.7;}
+  .fakt-varning{color:var(--danger); font-size:.86rem;}
+  .fakt-fel{color:var(--danger); font-size:.82rem; margin-top:4px; max-width:340px; overflow-wrap:anywhere;}
+  .fakt-bar{margin-bottom:16px;}
+  .fakt-bar-val{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .fakt-bar-val input[type=date]{width:auto; padding:7px 10px;}
+  .fakt-rader tr.fakt-rubrik td{font-weight:700; background:var(--bg-alt); padding-top:9px; padding-bottom:9px;}
+  .fakt-rader tr.fakt-text td{font-style:italic; color:var(--ink-soft);}
+  .spiris-steg{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:6px; line-height:1.5;}
+  .kopiera-rad{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .kopiera-rad code{background:var(--bg-alt); border:1px solid var(--border); border-radius:8px; padding:7px 10px; font-size:.88rem; overflow-wrap:anywhere;}

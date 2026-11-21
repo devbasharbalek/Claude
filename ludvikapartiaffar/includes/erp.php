@@ -20,6 +20,7 @@ const BEHORIGHETER = [
     'order_andra' => 'Lägga och ändra order',
     'plock' => 'Plocka order',
     'plock_alla' => 'Se alla order på plocksidan, inte bara sina egna',
+    'fakturera' => 'Fakturera: skapa fakturautkast och skicka dem till Spiris',
   ],
   'Kunder' => [
     'kunder' => 'Kundregistret',
@@ -42,13 +43,13 @@ const BEHORIGHETER = [
 // Personalens roller är mallar: varje person kan få egna kryss. Kunderna har rollen 'kund' och kommer aldrig åt adminportalen.
 const ROLLER = [
   'admin'   => ['namn' => 'Administratör', 'text' => 'Allt, även personal, behörigheter och import.',
-                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden', 'import', 'personal']],
-  'kontor'  => ['namn' => 'Kontor och sälj', 'text' => 'Order, kundregister, artiklar och priser, erbjudanden och webbkonton.',
-                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden']],
+                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'fakturera', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden', 'import', 'personal']],
+  'kontor'  => ['namn' => 'Kontor och sälj', 'text' => 'Order, fakturering, kundregister, artiklar och priser, erbjudanden och webbkonton.',
+                'kan' => ['order', 'order_andra', 'plock', 'plock_alla', 'fakturera', 'kunder', 'webbkonton', 'artiklar', 'priser', 'inpris_se', 'inpris_andra', 'erbjudanden']],
   'saljare' => ['namn' => 'Säljare', 'text' => 'Lägger order och ser kunder och prislistan, men ändrar inte priser och ser inte inköpspriser.',
                 'kan' => ['order', 'order_andra', 'kunder', 'artiklar']],
-  'ekonomi' => ['namn' => 'Ekonomi', 'text' => 'Ser order, kunder, priser och vinst. Ändrar inget i order eller priser.',
-                'kan' => ['order', 'kunder', 'artiklar', 'inpris_se']],
+  'ekonomi' => ['namn' => 'Ekonomi', 'text' => 'Fakturerar och ser order, kunder, priser och vinst. Ändrar inget i order eller priser.',
+                'kan' => ['order', 'fakturera', 'kunder', 'artiklar', 'inpris_se']],
   'lager'   => ['namn' => 'Lager och plock', 'text' => 'Ser order, plockar och skriver ut plocksedlar och följesedlar.',
                 'kan' => ['order', 'plock', 'plock_alla']],
 ];
@@ -195,6 +196,7 @@ function erp_schema(): void {
     $pdo->query('SELECT kalla FROM orders LIMIT 0');
     $pdo->query('SELECT behorigheter FROM users LIMIT 0');
     $pdo->query('SELECT belopp FROM order_rader LIMIT 0');
+    $pdo->query('SELECT faktura_id FROM orders LIMIT 0');
     return;
   } catch (PDOException $e) {
     // Något saknas, skapas nedan.
@@ -217,6 +219,7 @@ function erp_schema(): void {
   superklipp_schema();
   veckansklipp_schema();
   order_kolumner($pdo);
+  faktura_schema($pdo);
 }
 
 // ---------- roller ----------
