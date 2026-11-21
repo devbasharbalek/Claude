@@ -222,6 +222,9 @@ function spiris_felmeddelande(int $kod, mixed $json): string {
     foreach (['ErrorMessage', 'Message', 'DeveloperErrorMessage', 'error_description'] as $k) {
       if (!empty($json[$k]) && is_string($json[$k]) && !in_array($json[$k], $delar, true)) $delar[] = $json[$k];
     }
+    foreach ((array)($json['Errors'] ?? []) as $e) {
+      if (is_array($e) && !empty($e['Message'])) $delar[] = (!empty($e['Field']) ? $e['Field'] . ': ' : '') . $e['Message'];
+    }
     foreach ((array)($json['ValidationErrors'] ?? $json['ModelState'] ?? []) as $falt => $v) {
       foreach ((array)$v as $m) if (is_string($m)) $delar[] = (is_string($falt) ? $falt . ': ' : '') . $m;
     }
@@ -475,12 +478,7 @@ function faktura_spiris_data(array $f, array $inn): array {
     'InvoiceDate' => $f['fakturadatum'],
     'RotReducedInvoicingType' => 0,
     'EuThirdParty' => false,
-    'ReverseChargeOnConstructionServices' => false,
-    'InvoiceCustomerName' => spiris_kort($kund['fakt_namn'] ?: $kund['namn'], 50),
-    'InvoiceAddress1' => spiris_kort($kund['fakt_adress'] ?: $kund['lev_adress'], 50),
-    'InvoicePostalCode' => spiris_kort($kund['fakt_postnr'] ?: $kund['lev_postnr'], 10),
-    'InvoiceCity' => spiris_kort($kund['fakt_ort'] ?: $kund['lev_ort'], 50),
-    'InvoiceCountryCode' => $kund['land'] ?: 'SE',
+    // Fakturaadressen tar Spiris från kunden där. Leveransadressen skickas från kundregistret, som på följesedeln.
     'DeliveryCustomerName' => spiris_kort($kund['lev_namn'] ?: $kund['namn'], 50),
     'DeliveryAddress1' => spiris_kort($kund['lev_adress'], 50),
     'DeliveryPostalCode' => spiris_kort($kund['lev_postnr'], 10),
@@ -488,9 +486,9 @@ function faktura_spiris_data(array $f, array $inn): array {
     'DeliveryCountryCode' => $kund['land'] ?: 'SE',
     'DeliveryDate' => $leverans ? max($leverans) : null,
     'DueDate' => faktura_forfallodag($f),
-    'YourReference' => spiris_kort($f['er_referens'], 50),
-    'OurReference' => spiris_kort($f['var_referens'], 50),
-    'BuyersOrderReference' => spiris_kort($f['kundens_ordernr'], 50),
+    'YourReference' => spiris_kort($f['er_referens'], 100),
+    'OurReference' => spiris_kort($f['var_referens'], 100),
+    'BuyersOrderReference' => spiris_kort($f['kundens_ordernr'], 35),
     'Rows' => $rader,
   ];
   return array_filter($data, fn($v) => $v !== null && $v !== '');
