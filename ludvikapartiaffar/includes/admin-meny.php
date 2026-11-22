@@ -2,6 +2,7 @@
 // Sidomenyn i adminportalen. Varje roll ser bara det den har behörighet till.
 erp_schema();
 $admIkon = [
+  'oversikt' => '<rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/>',
   'order' => '<path d="M9 5h10M9 12h10M9 19h10"/><path d="M4.5 5h.01M4.5 12h.01M4.5 19h.01"/>',
   'plock' => '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
   'fakturering' => '<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
@@ -19,6 +20,7 @@ $admEjSkickade = far($navUser, 'fakturera') ? (int)db()->query("SELECT COUNT(*) 
 $admVantar = far($navUser, 'webbkonton') ? (int)db()->query("SELECT COUNT(*) FROM users WHERE role = 'kund' AND godkand = 0 AND active = 1")->fetchColumn() : 0;
 $admMeny = [
   'Försäljning' => [
+    'oversikt' => ['admin-oversikt', 'Översikt', 'order', 0],
     'order' => ['admin', 'Order', 'order', $admNyaOrder],
     'plock' => ['admin-plock', 'Plock', 'plock', 0],
     'fakturering' => ['admin-fakturering', 'Fakturering', 'fakturera', $admEjSkickade],
@@ -42,7 +44,7 @@ $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1
 ?>
 <div class="adm" id="adm">
   <aside class="adm-side" id="admSide" aria-label="Adminmeny">
-    <a class="adm-logo" href="admin"><img src="<?php echo $logoSrc; ?>" alt=""><span>Ludvika Partiaffär<small>Affärssystem</small></span></a>
+    <a class="adm-logo" href="<?php echo far($navUser, 'order') ? 'admin-oversikt' : 'profil'; ?>"><img src="<?php echo $logoSrc; ?>" alt=""><span>Ludvika Partiaffär<small>Affärssystem</small></span></a>
     <nav class="adm-nav">
       <?php foreach ($admMeny as $admRubrik => $admPoster):
         $admSynliga = array_filter($admPoster, fn($p) => far($navUser, $p[2]));

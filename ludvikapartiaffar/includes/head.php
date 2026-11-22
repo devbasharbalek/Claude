@@ -30,10 +30,10 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 <meta property="og:description" content="<?php echo e($metaBeskrivning ?? ''); ?>">
 <meta property="og:image" content="<?php echo e($ogBild); ?>">
 <?php endif; ?>
-<script>try{var t=localStorage.getItem('lp-tema');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<script>var t='dark';try{var v=localStorage.getItem('lp-tema');if(v==='light'||v==='dark')t=v;}catch(e){}document.documentElement.setAttribute('data-theme',t);</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
 <style>
   /* Profilfärger: logoblå #032CB9, gul #F7CC11 och vitt. Mörkt läge heter Grafit. */
   :root{
@@ -780,9 +780,11 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
   .footer-bottom{padding-block:22px 28px; border-top:1px solid var(--footer-line); font-size:.86rem; color:var(--footer-soft); line-height:1.7;}
   .footer-bottom b{color:var(--footer-ink); text-transform:uppercase; letter-spacing:.02em;}
 <?php if ($adminSida !== null) readfile(__DIR__ . '/admin.css'); ?>
+<?php readfile(__DIR__ . '/glas.css'); ?>
 </style>
 </head>
 <body<?php echo $adminSida !== null ? ' class="adm-body"' : ''; ?>>
+<div class="klot" aria-hidden="true"><span class="k1"></span><span class="k2"></span><span class="k3"></span><span class="k4"></span><span class="k5"></span></div>
 <?php if ($adminSida !== null): require __DIR__ . '/admin-meny.php'; else: ?>
 
 <div class="topbar">
