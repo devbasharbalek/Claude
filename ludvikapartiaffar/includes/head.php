@@ -35,7 +35,7 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap">
 <style>
-  /* Profilfärger: logoblå #032CB9, gul #F7CC11 och vitt. Mörkt läge heter Grafit. */
+  /* Profilfärger: Sveriges flagga, blå #006AA7 och gul #FECC02, plus vitt. Glas-stilen i glas.css sätter de slutliga färgerna. */
   :root{
     color-scheme:light;
     --font:'Figtree', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;

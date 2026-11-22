@@ -51,8 +51,8 @@ $rubrik = $typ === 'plocksedel' ? 'Plocksedel' : 'Följesedel';
   @page{size:A4; margin:14mm 12mm;}
   *{box-sizing:border-box;}
   body{margin:0; font-family:system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; font-size:11pt; color:#111; background:#e9e9e6;}
-  .verktyg{position:sticky; top:0; display:flex; gap:10px; justify-content:center; align-items:center; padding:10px; background:#021F86; color:#fff; font-size:10.5pt;}
-  .verktyg button, .verktyg a{font:inherit; font-weight:700; border:none; border-radius:999px; padding:8px 18px; cursor:pointer; background:#F7CC11; color:#111; text-decoration:none;}
+  .verktyg{position:sticky; top:0; display:flex; gap:10px; justify-content:center; align-items:center; padding:10px; background:#006AA7; color:#fff; font-size:10.5pt;}
+  .verktyg button, .verktyg a{font:inherit; font-weight:700; border:none; border-radius:999px; padding:8px 18px; cursor:pointer; background:#FECC02; color:#111; text-decoration:none;}
   .verktyg a{background:#fff;}
   .sida{background:#fff; width:210mm; min-height:297mm; margin:12px auto; padding:14mm 12mm; box-shadow:0 2px 12px rgba(0,0,0,.15);}
   .huvud{display:flex; justify-content:space-between; gap:20px; border-bottom:2px solid #111; padding-bottom:8px; margin-bottom:12px;}

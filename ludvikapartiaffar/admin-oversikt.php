@@ -85,7 +85,7 @@ if (far($user, 'fakturera')) {
 $st = db()->prepare("SELECT o.kalla, SUM(r.belopp) AS v $fran AND o.leveransdatum BETWEEN ? AND ? GROUP BY o.kalla ORDER BY v DESC");
 $st->execute(array_merge($gp, [ov_dag(-29), $idag]));
 $kallor = array_map('floatval', $st->fetchAll(PDO::FETCH_KEY_PAIR));
-$kallFarg = ['personal' => '#1D63FF', 'webb' => '#3FD3EC', 'superklipp' => '#F7CC11', 'veckansklipp' => '#2FD484', 'proceedo' => '#B78CFF', 'abicart' => '#FF8A65'];
+$kallFarg = ['personal' => '#006AA7', 'webb' => '#4FB3EC', 'superklipp' => '#FECC02', 'veckansklipp' => '#2FD484', 'proceedo' => '#B78CFF', 'abicart' => '#FF8A65'];
 
 // Största kunderna, senaste 30 dagarna.
 $st = db()->prepare("SELECT COALESCE(k.namn, o.foretag) AS namn, k.kundnr, COUNT(DISTINCT o.id) AS n, SUM(r.belopp) AS v $fran AND o.leveransdatum BETWEEN ? AND ?
@@ -138,7 +138,7 @@ require __DIR__ . '/includes/head.php';
         </div>
         <div class="ov-kort-head"><h2>Försäljning, 30 dagar</h2><span class="muted" style="font-size:.86rem;"><?php echo ov_kr($summa30); ?> <?php echo ov_andring($summa30, $summa30Forra); ?></span></div>
         <svg class="ov-graf" viewBox="0 0 <?php echo $B; ?> <?php echo $H; ?>" role="img" aria-label="Försäljning per leveransdag de senaste 30 dagarna, totalt <?php echo e(ov_kr($summa30)); ?>">
-          <defs><linearGradient id="ovYta" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1D63FF" stop-opacity=".35"/><stop offset="1" stop-color="#1D63FF" stop-opacity="0"/></linearGradient></defs>
+          <defs><linearGradient id="ovYta" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--fill)" stop-opacity=".4"/><stop offset="1" style="stop-color:var(--fill)" stop-opacity="0"/></linearGradient></defs>
           <?php for ($g = 0; $g <= 4; $g++): $v = $topp / 4 * $g; $gy = $y($v); ?>
             <line class="rutnat" x1="<?php echo $vMarg; ?>" x2="<?php echo $B; ?>" y1="<?php echo $gy; ?>" y2="<?php echo $gy; ?>"/>
             <text x="<?php echo $vMarg - 8; ?>" y="<?php echo $gy + 4; ?>" text-anchor="end"><?php echo $v >= 1000 ? e(rtrim(rtrim(number_format($v / 1000, 1, ',', ''), '0'), ',')) . ' tkr' : (int)$v; ?></text>
