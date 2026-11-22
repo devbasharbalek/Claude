@@ -1,4 +1,4 @@
-  /* ===== Glas: mörkblå bakgrund med färgade klot, kort av matt glas och klarblå knappar. Läggs ovanpå allt annat. ===== */
+  /* ===== Glas: mörk bakgrund med färgglöd, kort av matt glas och klarblå knappar. Läggs ovanpå allt annat. ===== */
   :root{
     --font:'Outfit', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
     --radius:18px;
@@ -30,14 +30,12 @@
     --glas-blur:blur(22px) saturate(150%);
     --shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 22px 50px -26px rgba(20,40,90,.35);
     --hero-glas:linear-gradient(135deg, rgba(29,99,255,.92), rgba(18,52,160,.88));
-    --klot-ljus:.5;
-    --sloja:rgba(238,242,249,.55);
     --side-bg:rgba(255,255,255,.62); --side-ink:#121A2C; --side-soft:#5B667D; --side-hover:rgba(15,30,70,.06);
     --side-on:#1D63FF; --side-line:rgba(15,30,70,.09);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55); --klot-ljus:.78; --sloja:rgba(5,8,15,.55);
+      --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55);
       --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#5B95FF; --brand-deep:#9DBFFF; --brand-ink:#FFFFFF; --brand-soft:rgba(59,130,255,.16);
       --fill:#1D63FF; --fill-ink:#FFFFFF; --hero:#14389E; --hero-deep:#0E2A78; --hero-soft:#C9D7FF;
       --panel:rgba(15,21,36,.62); --topbar-bg:transparent; --topbar-ink:#9AA5BB;
@@ -51,7 +49,7 @@
     }
   }
   :root[data-theme="dark"]{
-    --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55); --klot-ljus:.78; --sloja:rgba(5,8,15,.55);
+    --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55);
     --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#5B95FF; --brand-deep:#9DBFFF; --brand-ink:#FFFFFF; --brand-soft:rgba(59,130,255,.16);
     --fill:#1D63FF; --fill-ink:#FFFFFF; --hero:#14389E; --hero-deep:#0E2A78; --hero-soft:#C9D7FF;
     --panel:rgba(15,21,36,.62); --topbar-bg:transparent; --topbar-ink:#9AA5BB;
@@ -64,34 +62,50 @@
     --side-on:#1D63FF; --side-line:rgba(255,255,255,.07);
   }
 
-  /* bakgrund och klot */
+  /* bakgrund: Ludvika-blå för kunderna, norrsken för personalen. Ljust läge får ljusa versioner av samma. */
   html{background:var(--bg);}
   body, body.adm-body{background:transparent; position:relative; isolation:isolate;}
-  .klot{position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none;}
-  .klot span{position:absolute; border-radius:50%; opacity:var(--klot-ljus);}
-  .klot::after{content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 60% at 50% 35%, var(--sloja) 0%, transparent 100%);}
-  .klot .k1{width:min(26vw,330px); aspect-ratio:1; top:16%; right:-7%;
-    background:radial-gradient(circle at 34% 30%, #FFE7A3 0%, #F7CC11 28%, #D58A0C 62%, #6B3A04 100%);
-    box-shadow:0 0 120px 10px rgba(247,180,17,.25);}
-  .klot .k2{width:min(50vw,640px); aspect-ratio:1; bottom:-46%; left:-22%;
-    background:radial-gradient(circle at 62% 30%, #7FB2FF 0%, #2F6BFF 30%, #1435B8 62%, #060F45 100%);
-    box-shadow:0 0 160px 20px rgba(40,100,255,.25);}
-  .klot .k3{width:min(11vw,140px); aspect-ratio:1; top:64%; left:47%;
-    background:radial-gradient(circle at 35% 30%, #A8FFD0 0%, #2FD484 32%, #0E8F4E 68%, #03331B 100%);
-    box-shadow:0 0 90px 6px rgba(47,212,132,.22); filter:blur(1px);}
-  .klot .k4{width:min(34vw,440px); aspect-ratio:1; bottom:-36%; right:-15%;
-    background:radial-gradient(circle at 35% 28%, #B8FBFF 0%, #3FD3EC 30%, #1384A6 64%, #053345 100%);
-    box-shadow:0 0 140px 14px rgba(63,211,236,.22);}
-  .klot .k5{width:min(6vw,76px); aspect-ratio:1; top:78%; left:30%;
-    background:radial-gradient(circle at 35% 30%, #FFFFFF 0%, #C7D0E0 38%, #6F7B92 75%, #2A3243 100%);
-    box-shadow:0 0 50px rgba(200,210,230,.18);}
-  @media (prefers-reduced-motion: no-preference){
-    .klot .k1{animation:svava 22s ease-in-out infinite alternate;}
-    .klot .k3{animation:svava 17s ease-in-out infinite alternate-reverse;}
-    .klot .k5{animation:svava 26s ease-in-out infinite alternate;}
-    @keyframes svava{from{transform:translate(0,0);} to{transform:translate(-26px,34px);}}
+  .bakgrund{position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--bakgrund);}
+  :root{
+    --bakgrund-kund:
+      radial-gradient(55% 45% at 85% 5%, rgba(247,204,17,.32), transparent 70%),
+      radial-gradient(70% 60% at 10% 100%, rgba(3,44,185,.28), transparent 75%),
+      linear-gradient(160deg, #EAF0FF 0%, #F3F6FC 55%, #E6ECFA 100%);
+    --bakgrund-personal:
+      radial-gradient(60% 50% at 15% 10%, rgba(29,99,255,.20), transparent 70%),
+      radial-gradient(50% 45% at 90% 25%, rgba(63,211,236,.18), transparent 70%),
+      radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.14), transparent 70%),
+      radial-gradient(45% 40% at 5% 90%, rgba(120,80,255,.14), transparent 70%),
+      #EEF2F9;
   }
-  @media (max-width:700px){ .klot .k5{display:none;} .klot .k1{width:200px; right:-90px; top:30%;} .klot .k3{width:90px;} }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bakgrund-kund:
+        radial-gradient(55% 45% at 85% 5%, rgba(247,204,17,.30), transparent 70%),
+        radial-gradient(70% 60% at 10% 100%, rgba(3,44,185,.85), transparent 75%),
+        linear-gradient(160deg, #031552 0%, #020B3A 55%, #01061F 100%);
+      --bakgrund-personal:
+        radial-gradient(60% 50% at 15% 10%, rgba(29,99,255,.45), transparent 70%),
+        radial-gradient(50% 45% at 90% 25%, rgba(63,211,236,.28), transparent 70%),
+        radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.22), transparent 70%),
+        radial-gradient(45% 40% at 5% 90%, rgba(120,80,255,.22), transparent 70%),
+        #05080F;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bakgrund-kund:
+      radial-gradient(55% 45% at 85% 5%, rgba(247,204,17,.30), transparent 70%),
+      radial-gradient(70% 60% at 10% 100%, rgba(3,44,185,.85), transparent 75%),
+      linear-gradient(160deg, #031552 0%, #020B3A 55%, #01061F 100%);
+    --bakgrund-personal:
+      radial-gradient(60% 50% at 15% 10%, rgba(29,99,255,.45), transparent 70%),
+      radial-gradient(50% 45% at 90% 25%, rgba(63,211,236,.28), transparent 70%),
+      radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.22), transparent 70%),
+      radial-gradient(45% 40% at 5% 90%, rgba(120,80,255,.22), transparent 70%),
+      #05080F;
+  }
+  body{--bakgrund:var(--bakgrund-kund);}
+  body.adm-body{--bakgrund:var(--bakgrund-personal);}
 
   /* glas på allt som är kort */
   header.nav, .detail-card, .stat-tile, .table-wrap, .empty, .kontakt-card, .form-card, .side-card, .produkt-card, .kund-card,

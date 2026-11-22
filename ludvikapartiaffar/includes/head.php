@@ -784,7 +784,7 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 </style>
 </head>
 <body<?php echo $adminSida !== null ? ' class="adm-body"' : ''; ?>>
-<div class="klot" aria-hidden="true"><span class="k1"></span><span class="k2"></span><span class="k3"></span><span class="k4"></span><span class="k5"></span></div>
+<div class="bakgrund" aria-hidden="true"></div>
 <?php if ($adminSida !== null): require __DIR__ . '/admin-meny.php'; else: ?>
 
 <div class="topbar">
