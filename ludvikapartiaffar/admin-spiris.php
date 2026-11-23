@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($action === 'anslut') {
     if ((string)installning('spiris_client_id', '') === '' || hemlig_las('spiris_client_secret') === null) {
-      flash('Fyll i Client ID och Client secret från Visma först.');
+      flash('Fyll i Client ID och Client secret från Spiris först.');
       redirect('admin-spiris');
     }
     $_SESSION['spiris_state'] = bin2hex(random_bytes(16));
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   if ($action === 'koppla_fran') {
     spiris_koppla_fran();
-    flash('Systemet är frånkopplat från Spiris. Nycklarna från Visma finns kvar, så det går att ansluta igen.');
+    flash('Systemet är frånkopplat från Spiris. Nycklarna från Spiris finns kvar, så det går att ansluta igen.');
     redirect('admin-spiris');
   }
 
@@ -144,7 +144,7 @@ require __DIR__ . '/includes/head.php';
           </div>
         <?php else: ?>
           <p><span class="pill pill-off">Inte ansluten</span></p>
-          <p class="muted">Fyll i nycklarna från Visma nedan och tryck sedan Anslut. Du loggar in hos Visma med ett Spiris-konto som får skapa fakturor, och kommer sedan tillbaka hit.</p>
+          <p class="muted">Fyll i nycklarna från Spiris nedan och tryck sedan Anslut. Du loggar in hos Visma med ett Spiris-konto som får skapa fakturor, och kommer sedan tillbaka hit.</p>
           <form method="post" action="admin-spiris" style="margin:0;"><?php echo csrf_field(); ?><button class="btn primary small" type="submit" name="action" value="anslut"<?php echo $clientId !== '' && $harHemlig ? '' : ' disabled'; ?>>Anslut till Spiris</button></form>
         <?php endif; ?>
       </div>
@@ -163,14 +163,14 @@ require __DIR__ . '/includes/head.php';
     <form class="detail-card" method="post" action="admin-spiris" style="margin-top:20px;" autocomplete="off">
       <?php echo csrf_field(); ?>
       <input type="hidden" name="action" value="spara_nycklar">
-      <h2>Nycklar från Visma</h2>
+      <h2>Nycklar från Spiris</h2>
       <ol class="spiris-steg">
-        <li>Registrera en integration i Vismas utvecklarportal (developer.vismaonline.com) för Visma eEkonomi, som numera heter Spiris. Är ni osäkra, fråga Spiris support om API-nycklar för egen integration.</li>
-        <li>Ange den här adressen som <strong>Redirect URI</strong>:
+        <li>Mejla Spiris API-support på <strong>api@spiris.se</strong> och be om Client ID och Client secret för en egen integration. Skicka med uppgifterna i punkt 2 och 3.</li>
+        <li>Redirect URI, alltså adressen Spiris skickar tillbaka till efter inloggningen:
           <div class="kopiera-rad" style="margin-top:6px;"><code id="redirectUri"><?php echo e(spiris_tillbaka_url()); ?></code><button class="btn ghost small" type="button" data-kopiera="redirectUri">Kopiera</button></div>
         </li>
-        <li>Välj behörigheterna <strong>ea:api</strong>, <strong>ea:sales</strong> och <strong>offline_access</strong>.</li>
-        <li>Visma ger er ett Client ID och ett Client secret. Fyll i dem här, tryck Spara och sedan Anslut till Spiris.</li>
+        <li>Behörigheterna: <strong>ea:api</strong>, <strong>ea:sales</strong> och <strong>offline_access</strong>.</li>
+        <li>När ni har fått Client ID och Client secret från Spiris: fyll i dem här, tryck Spara och sedan Anslut till Spiris.</li>
       </ol>
       <div class="field-grid" style="margin-top:16px;">
         <div class="field"><label for="client_id">Client ID</label><input type="text" id="client_id" name="client_id" value="<?php echo e($clientId); ?>" spellcheck="false"></div>
