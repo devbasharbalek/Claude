@@ -8,15 +8,15 @@
     --falt:rgba(255,255,255,.85);
     --ink:#121A2C;
     --ink-soft:#5B667D;
-    --brand:#006AA7;
-    --brand-deep:#00507F;
+    --brand:#0051BA;
+    --brand-deep:#003F91;
     --brand-ink:#FFFFFF;
-    --brand-soft:rgba(0,106,167,.10);
-    --accent:#FECC02; --accent-ink:#1B1D22; --accent-text:#7A5F00; --accent-soft:rgba(254,204,2,.18);
-    --fill:#006AA7;
+    --brand-soft:rgba(0,81,186,.10);
+    --accent:#FFDA1A; --accent-ink:#1B1D22; --accent-text:#7A5F00; --accent-soft:rgba(255,218,26,.18);
+    --fill:#0051BA;
     --fill-ink:#FFFFFF;
-    --hero:#006AA7;
-    --hero-deep:#00507F;
+    --hero:#0051BA;
+    --hero-deep:#003F91;
     --hero-soft:#DCE6FF;
     --panel:rgba(255,255,255,.6);
     --topbar-bg:transparent;
@@ -30,37 +30,37 @@
     --glas-kant:rgba(255,255,255,.7);
     --glas-blur:blur(22px) saturate(150%);
     --shadow:0 1px 0 rgba(255,255,255,.6) inset, 0 22px 50px -26px rgba(20,40,90,.35);
-    --hero-glas:linear-gradient(135deg, rgba(0,106,167,.95), rgba(0,74,118,.92));
+    --hero-glas:linear-gradient(135deg, rgba(0,81,186,.95), rgba(0,74,118,.92));
     --side-bg:rgba(255,255,255,.62); --side-ink:#121A2C; --side-soft:#5B667D; --side-hover:rgba(15,30,70,.06);
-    --side-on:#006AA7; --side-line:rgba(15,30,70,.09);
+    --side-on:#0051BA; --side-line:rgba(15,30,70,.09);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55);
-      --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#4FB3EC; --brand-deep:#9AD3F5; --brand-ink:#FFFFFF; --brand-soft:rgba(0,106,167,.22); --accent:#FECC02; --accent-text:#FECC02; --accent-soft:rgba(254,204,2,.13);
-      --fill:#006AA7; --fill-ink:#FFFFFF; --hero:#006AA7; --hero-deep:#00456D; --hero-soft:#C9D7FF;
+      --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#6FA3FF; --brand-deep:#B3CCFF; --brand-ink:#FFFFFF; --brand-soft:rgba(0,81,186,.22); --accent:#FFDA1A; --accent-text:#FFDA1A; --accent-soft:rgba(255,218,26,.13);
+      --fill:#0051BA; --fill-ink:#FFFFFF; --hero:#0051BA; --hero-deep:#00388A; --hero-soft:#C9D7FF;
       --panel:rgba(15,21,36,.62); --topbar-bg:transparent; --topbar-ink:#9AA5BB;
       --footer-bg:rgba(10,15,27,.6); --footer-ink:#EDF1F9; --footer-soft:#8C97AD; --footer-line:rgba(255,255,255,.07);
       --green:#4ADE80; --green-soft:rgba(74,222,128,.13); --accent-soft:rgba(247,204,17,.13);
       --border:rgba(255,255,255,.075); --border-strong:rgba(255,255,255,.15); --glas-kant:rgba(255,255,255,.06);
       --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 26px 60px -28px rgba(0,0,0,.85);
-      --hero-glas:linear-gradient(135deg, rgba(0,106,167,.62), rgba(0,36,60,.62));
+      --hero-glas:linear-gradient(135deg, rgba(0,81,186,.62), rgba(0,36,60,.62));
       --side-bg:rgba(12,17,30,.66); --side-ink:#EDF1F9; --side-soft:#8C97AD; --side-hover:rgba(255,255,255,.05);
-      --side-on:#006AA7; --side-line:rgba(255,255,255,.07);
+      --side-on:#0051BA; --side-line:rgba(255,255,255,.07);
     }
   }
   :root[data-theme="dark"]{
     --bg:#05080F; --bg-alt:rgba(255,255,255,.035); --surface:rgba(15,21,36,.62); --falt:rgba(6,10,20,.55);
-    --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#4FB3EC; --brand-deep:#9AD3F5; --brand-ink:#FFFFFF; --brand-soft:rgba(0,106,167,.22); --accent:#FECC02; --accent-text:#FECC02; --accent-soft:rgba(254,204,2,.13);
-    --fill:#006AA7; --fill-ink:#FFFFFF; --hero:#006AA7; --hero-deep:#00456D; --hero-soft:#C9D7FF;
+    --ink:#EDF1F9; --ink-soft:#8C97AD; --brand:#6FA3FF; --brand-deep:#B3CCFF; --brand-ink:#FFFFFF; --brand-soft:rgba(0,81,186,.22); --accent:#FFDA1A; --accent-text:#FFDA1A; --accent-soft:rgba(255,218,26,.13);
+    --fill:#0051BA; --fill-ink:#FFFFFF; --hero:#0051BA; --hero-deep:#00388A; --hero-soft:#C9D7FF;
     --panel:rgba(15,21,36,.62); --topbar-bg:transparent; --topbar-ink:#9AA5BB;
     --footer-bg:rgba(10,15,27,.6); --footer-ink:#EDF1F9; --footer-soft:#8C97AD; --footer-line:rgba(255,255,255,.07);
     --green:#4ADE80; --green-soft:rgba(74,222,128,.13); --accent-soft:rgba(247,204,17,.13);
     --border:rgba(255,255,255,.075); --border-strong:rgba(255,255,255,.15); --glas-kant:rgba(255,255,255,.06);
     --shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 26px 60px -28px rgba(0,0,0,.85);
-    --hero-glas:linear-gradient(135deg, rgba(0,106,167,.62), rgba(0,36,60,.62));
+    --hero-glas:linear-gradient(135deg, rgba(0,81,186,.62), rgba(0,36,60,.62));
     --side-bg:rgba(12,17,30,.66); --side-ink:#EDF1F9; --side-soft:#8C97AD; --side-hover:rgba(255,255,255,.05);
-    --side-on:#006AA7; --side-line:rgba(255,255,255,.07);
+    --side-on:#0051BA; --side-line:rgba(255,255,255,.07);
   }
 
   /* bakgrund: Ludvika-blå för kunderna, norrsken för personalen. Ljust läge får ljusa versioner av samma. */
@@ -69,40 +69,40 @@
   .bakgrund{position:fixed; inset:0; z-index:-1; pointer-events:none; background:var(--bakgrund);}
   :root{
     --bakgrund-kund:
-      radial-gradient(55% 45% at 85% 5%, rgba(254,204,2,.32), transparent 70%),
-      radial-gradient(70% 60% at 10% 100%, rgba(0,106,167,.25), transparent 75%),
-      linear-gradient(160deg, #E6F2FA 0%, #F3F7FB 55%, #E3EEF7 100%);
+      radial-gradient(55% 45% at 85% 5%, rgba(255,218,26,.32), transparent 70%),
+      radial-gradient(70% 60% at 10% 100%, rgba(0,81,186,.25), transparent 75%),
+      linear-gradient(160deg, #E7EEFB 0%, #F4F7FC 55%, #E2EAF8 100%);
     --bakgrund-personal:
-      radial-gradient(60% 50% at 15% 10%, rgba(0,106,167,.20), transparent 70%),
-      radial-gradient(50% 45% at 90% 25%, rgba(79,179,236,.16), transparent 70%),
+      radial-gradient(60% 50% at 15% 10%, rgba(0,81,186,.20), transparent 70%),
+      radial-gradient(50% 45% at 90% 25%, rgba(111,163,255,.16), transparent 70%),
       radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.14), transparent 70%),
-      radial-gradient(45% 40% at 5% 90%, rgba(254,204,2,.12), transparent 70%),
+      radial-gradient(45% 40% at 5% 90%, rgba(255,218,26,.12), transparent 70%),
       #EEF2F9;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       --bakgrund-kund:
-        radial-gradient(55% 45% at 85% 5%, rgba(254,204,2,.30), transparent 70%),
-        radial-gradient(70% 60% at 10% 100%, rgba(0,106,167,.85), transparent 75%),
-        linear-gradient(160deg, #003F66 0%, #002640 55%, #00141F 100%);
+        radial-gradient(55% 45% at 85% 5%, rgba(255,218,26,.30), transparent 70%),
+        radial-gradient(70% 60% at 10% 100%, rgba(0,81,186,.85), transparent 75%),
+        linear-gradient(160deg, #00378C 0%, #002260 55%, #001233 100%);
       --bakgrund-personal:
-        radial-gradient(60% 50% at 15% 10%, rgba(0,106,167,.55), transparent 70%),
-        radial-gradient(50% 45% at 90% 25%, rgba(79,179,236,.26), transparent 70%),
+        radial-gradient(60% 50% at 15% 10%, rgba(0,81,186,.55), transparent 70%),
+        radial-gradient(50% 45% at 90% 25%, rgba(111,163,255,.26), transparent 70%),
         radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.22), transparent 70%),
-        radial-gradient(45% 40% at 5% 90%, rgba(254,204,2,.13), transparent 70%),
+        radial-gradient(45% 40% at 5% 90%, rgba(255,218,26,.13), transparent 70%),
         #05080F;
     }
   }
   :root[data-theme="dark"]{
     --bakgrund-kund:
-      radial-gradient(55% 45% at 85% 5%, rgba(254,204,2,.30), transparent 70%),
-      radial-gradient(70% 60% at 10% 100%, rgba(0,106,167,.85), transparent 75%),
-      linear-gradient(160deg, #003F66 0%, #002640 55%, #00141F 100%);
+      radial-gradient(55% 45% at 85% 5%, rgba(255,218,26,.30), transparent 70%),
+      radial-gradient(70% 60% at 10% 100%, rgba(0,81,186,.85), transparent 75%),
+      linear-gradient(160deg, #00378C 0%, #002260 55%, #001233 100%);
     --bakgrund-personal:
-      radial-gradient(60% 50% at 15% 10%, rgba(0,106,167,.55), transparent 70%),
-      radial-gradient(50% 45% at 90% 25%, rgba(79,179,236,.26), transparent 70%),
+      radial-gradient(60% 50% at 15% 10%, rgba(0,81,186,.55), transparent 70%),
+      radial-gradient(50% 45% at 90% 25%, rgba(111,163,255,.26), transparent 70%),
       radial-gradient(55% 50% at 70% 95%, rgba(47,212,132,.22), transparent 70%),
-      radial-gradient(45% 40% at 5% 90%, rgba(254,204,2,.13), transparent 70%),
+      radial-gradient(45% 40% at 5% 90%, rgba(255,218,26,.13), transparent 70%),
       #05080F;
   }
   body{--bakgrund:var(--bakgrund-kund);}
@@ -119,11 +119,11 @@
   .alert{-webkit-backdrop-filter:var(--glas-blur); backdrop-filter:var(--glas-blur); border-radius:14px;}
 
   /* knappar */
-  .btn.primary{background:var(--fill); color:#fff; box-shadow:0 8px 22px -10px rgba(0,106,167,.75);}
-  .btn.primary:hover{background:#0A7DC2;}
+  .btn.primary{background:var(--fill); color:#fff; box-shadow:0 8px 22px -10px rgba(0,81,186,.75);}
+  .btn.primary:hover{background:#1A66D6;}
   .btn.ghost{background:var(--surface); border-color:var(--border-strong); -webkit-backdrop-filter:var(--glas-blur); backdrop-filter:var(--glas-blur);}
   .btn.ghost:hover{border-color:var(--brand);}
-  .btn.accent{box-shadow:0 8px 22px -10px rgba(254,204,2,.7);}
+  .btn.accent{box-shadow:0 8px 22px -10px rgba(255,218,26,.7);}
 
   /* fält */
   input[type=text], input[type=email], input[type=tel], input[type=password], input[type=search], input[type=number], input[type=date], input[type=time], select, textarea{
@@ -153,7 +153,7 @@
 
   /* listor, flikar och märken */
   .tabs a{border-radius:999px;}
-  .tabs a.on{background:var(--fill); border-color:var(--fill); color:#fff; box-shadow:0 8px 20px -10px rgba(0,106,167,.8);}
+  .tabs a.on{background:var(--fill); border-color:var(--fill); color:#fff; box-shadow:0 8px 20px -10px rgba(0,81,186,.8);}
   .tabs a.on .count{color:rgba(255,255,255,.8);}
   table.list th, table.erp th{background:transparent;}
   .pill{border-radius:999px;}
@@ -163,9 +163,9 @@
   .adm-side{top:12px; height:calc(100vh - 24px); margin:12px 0 12px 12px; border-radius:22px; border:1px solid var(--glas-kant);
     -webkit-backdrop-filter:var(--glas-blur); backdrop-filter:var(--glas-blur); box-shadow:var(--shadow);}
   .adm-nav a{border-radius:12px;}
-  .adm-nav a.on{background:var(--side-on); color:#fff; box-shadow:0 8px 20px -10px rgba(0,106,167,.9);}
+  .adm-nav a.on{background:var(--side-on); color:#fff; box-shadow:0 8px 20px -10px rgba(0,81,186,.9);}
   .adm-nav a.on::before{display:none;}
-  .adm-nav a.on .adm-badge{background:#fff; color:#00507F;}
+  .adm-nav a.on .adm-badge{background:#fff; color:#003F91;}
   .adm-main section{padding-top:22px;}
   @media (max-width:1000px){
     .adm-side{margin:0; top:0; height:auto; border-radius:0 22px 22px 0;}
