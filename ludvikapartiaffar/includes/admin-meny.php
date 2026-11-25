@@ -6,6 +6,7 @@ $admIkon = [
   'order' => '<path d="M9 5h10M9 12h10M9 19h10"/><path d="M4.5 5h.01M4.5 12h.01M4.5 19h.01"/>',
   'plock' => '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',
   'fakturering' => '<path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+  'webbplats' => '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
   'spiris' => '<path d="M9 7H6a4 4 0 0 0 0 8h3M15 7h3a4 4 0 0 1 0 8h-3M8 11h8"/>',
   'kunder' => '<path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/><circle cx="12" cy="7.5" r="3.5"/>',
   'webbkonton' => '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
@@ -38,6 +39,7 @@ $admMeny = [
     'import' => ['admin-import', 'Import', 'import', 0],
     'personal' => ['admin-personal', 'Personal', 'personal', 0],
     'spiris' => ['admin-spiris', 'Spiris', 'personal', 0],
+    'webbplats' => ['admin-webbplats', 'Webbplats', 'personal', far($navUser, 'personal') && underhall_pa() ? 'Stängd' : 0],
   ],
 ];
 $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1, 'UTF-8'), array_slice(preg_split('/\s+/u', trim($navUser['kontakt'] ?: $navUser['email'])), 0, 2))), 'UTF-8');
@@ -51,7 +53,7 @@ $admInitialer = mb_strtoupper(implode('', array_map(fn($d) => mb_substr($d, 0, 1
         if (!$admSynliga) continue; ?>
         <p class="adm-rubrik"><?php echo e($admRubrik); ?></p>
         <?php foreach ($admSynliga as $admNyckel => [$admHref, $admNamn, , $admAntal]): ?>
-          <a href="<?php echo $admHref; ?>"<?php echo $admNyckel === $adminSida ? ' class="on" aria-current="page"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?php echo $admIkon[$admNyckel]; ?></svg><?php echo e($admNamn); ?><?php if ($admAntal): ?><span class="adm-badge" title="<?php echo ['order' => 'Nya order', 'fakturering' => 'Fakturautkast som inte är skickade till Spiris'][$admNyckel] ?? 'Väntar på godkännande'; ?>"><?php echo $admAntal; ?></span><?php endif; ?></a>
+          <a href="<?php echo $admHref; ?>"<?php echo $admNyckel === $adminSida ? ' class="on" aria-current="page"' : ''; ?>><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><?php echo $admIkon[$admNyckel]; ?></svg><?php echo e($admNamn); ?><?php if ($admAntal): ?><span class="adm-badge" title="<?php echo ['order' => 'Nya order', 'fakturering' => 'Fakturautkast som inte är skickade till Spiris', 'webbplats' => 'Underhållsläget är på: allmänheten ser underhållssidan'][$admNyckel] ?? 'Väntar på godkännande'; ?>"><?php echo $admAntal; ?></span><?php endif; ?></a>
         <?php endforeach; ?>
       <?php endforeach; ?>
     </nav>

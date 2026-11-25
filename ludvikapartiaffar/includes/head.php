@@ -836,6 +836,9 @@ $kontoAktiv = !$skapaAktiv && in_array($active, ['konto', 'admin', 'login'], tru
 </header>
 
 <main>
+<?php if (ar_personal($navUser) && underhall_pa()): ?>
+  <div class="wrap"><div class="alert warn" style="margin:16px 0 0;"><strong>Underhållsläge är på.</strong> Besökare och kunder ser bara en underhållssida. Du ser webbplatsen eftersom du är inloggad som personal.<?php if ($navUser['role'] === 'admin'): ?> <a href="admin-webbplats" style="color:var(--brand); font-weight:700;">Ändra</a><?php endif; ?></div></div>
+<?php endif; ?>
 <?php if ($flashMsg = flash()): ?>
   <div class="wrap"><div class="flash" role="status"><?php echo e($flashMsg); ?></div></div>
 <?php endif; ?>

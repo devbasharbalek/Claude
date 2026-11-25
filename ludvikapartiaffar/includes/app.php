@@ -421,3 +421,5 @@ require __DIR__ . '/veckansklipp.php';
 require __DIR__ . '/erp.php';
 require __DIR__ . '/order.php';
 require __DIR__ . '/faktura.php';
+require __DIR__ . '/underhall.php';
+underhall_vakt();
