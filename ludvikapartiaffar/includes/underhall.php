@@ -2,8 +2,10 @@
 // Underhållsläge: besökare och kunder ser en underhållssida, personalen loggar in och jobbar som vanligt.
 // Läget är på tills en administratör stänger av det under Inställningar → Webbplats.
 
-// Sidor som alltid fungerar, så att personalen kan logga in.
-const UNDERHALL_OPPNA = ['logga-in', 'logga-ut', 'glomt-losenord', 'aterstall-losenord', 'setup'];
+// Sidor som alltid fungerar. Återställningssidan kräver ändå en personlig länk från mejlet.
+const UNDERHALL_OPPNA = ['logga-ut', 'aterstall-losenord', 'setup'];
+// Inloggningen syns inte för allmänheten. Den öppnas med den hemliga länken från Inställningar → Webbplats.
+const UNDERHALL_INLOGGNING = ['logga-in', 'glomt-losenord'];
 const UNDERHALL_STANDARDTEXT = 'Vi bygger om vår webbplats och öppnar snart igen. Under tiden tar vi emot beställningar och frågor som vanligt på telefon och e‑post.';
 
 function underhall_pa(): bool {
@@ -24,12 +26,41 @@ function underhall_text(): string {
   return $t !== '' ? $t : UNDERHALL_STANDARDTEXT;
 }
 
+function underhall_nyckel(): ?string {
+  try {
+    $n = installning('underhall_nyckel');
+  } catch (PDOException $e) {
+    return null;
+  }
+  return $n !== null && $n !== '' ? $n : null;
+}
+
+function underhall_ny_nyckel(): string {
+  $n = bin2hex(random_bytes(12));
+  satt_installning('underhall_nyckel', $n);
+  return $n;
+}
+
+// Den hemliga adressen till inloggningen.
+function underhall_lank(string $nyckel): string {
+  return webbadress('logga-in') . '?personal=' . rawurlencode($nyckel);
+}
+
 // Visar underhållssidan för alla utom personalen och stoppar sidan.
 function underhall_vakt(): void {
   if (PHP_SAPI === 'cli') return;
   $sida = basename((string)($_SERVER['SCRIPT_NAME'] ?? ''), '.php');
   if (in_array($sida, UNDERHALL_OPPNA, true) || !underhall_pa()) return;
   if (ar_personal(current_user())) return;
+  if (in_array($sida, UNDERHALL_INLOGGNING, true)) {
+    $nyckel = underhall_nyckel();
+    // Innan någon administratör har skapat länken är inloggningen öppen, så att ingen låses ute.
+    if ($nyckel === null || !empty($_SESSION['underhall_ok'])) return;
+    if (hash_equals($nyckel, (string)($_GET['personal'] ?? ''))) {
+      $_SESSION['underhall_ok'] = 1;
+      return;
+    }
+  }
   underhall_sida();
 }
 
@@ -42,7 +73,6 @@ function underhall_sida(): never {
   header('Content-Type: text/html; charset=utf-8');
   header('Cache-Control: no-store');
   $epost = filter_var($CONFIG['mail_to'] ?? '', FILTER_VALIDATE_EMAIL) ? $CONFIG['mail_to'] : '';
-  $loggain = adress('logga-in');
   ?><!doctype html>
 <html lang="sv">
 <head>
@@ -74,7 +104,6 @@ function underhall_sida(): never {
   .ring{background:var(--gul); color:#1B1D22;}
   .mejl{border:2px solid rgba(255,255,255,.8); color:#fff;}
   .personal{margin-top:30px; font-size:.86rem; color:var(--mjuk);}
-  .personal a{color:#fff;}
 </style>
 </head>
 <body>
@@ -87,7 +116,7 @@ function underhall_sida(): never {
       <a class="ring" href="tel:+4624018355">Ring 0240-183 55</a>
       <?php if ($epost !== ''): ?><a class="mejl" href="mailto:<?php echo e($epost); ?>">Mejla oss</a><?php endif; ?>
     </div>
-    <p class="personal">Mån–fre 06:00–14:30 &middot; Fläderstigen 2, Ludvika<br>Personal? <a href="<?php echo e($loggain); ?>">Logga in</a></p>
+    <p class="personal">Mån–fre 06:00–14:30 &middot; Fläderstigen 2, Ludvika</p>
   </main>
 </body>
 </html>

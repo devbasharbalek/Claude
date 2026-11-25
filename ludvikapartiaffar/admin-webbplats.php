@@ -14,6 +14,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif ($action === 'stang') {
     satt_installning('underhall', '1');
     flash('Underhållsläget är på. Besökare och kunder ser underhållssidan, personalen ser allt som vanligt.');
+  } elseif ($action === 'ny_nyckel') {
+    underhall_ny_nyckel();
+    flash('Inloggningslänken är bytt. Den gamla länken fungerar inte längre. Spara den nya.');
   } elseif ($action === 'text') {
     $text = trim(str_replace("\r", '', (string)($_POST['text'] ?? '')));
     satt_installning('underhall_text', $text !== '' ? mb_substr($text, 0, 600, 'UTF-8') : null);
@@ -23,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pa = underhall_pa();
+// Länken skapas första gången en administratör öppnar sidan. Innan dess är inloggningen öppen.
+$nyckel = underhall_nyckel() ?? underhall_ny_nyckel();
+$lank = underhall_lank($nyckel);
 $egenText = (string)installning('underhall_text', '');
 
 $active = 'admin';
@@ -45,7 +51,7 @@ require __DIR__ . '/includes/head.php';
         <h2>Underhållsläge</h2>
         <?php if ($pa): ?>
           <p><span class="pill pill-ny">På</span></p>
-          <p class="muted" style="color:var(--ink-soft);">Besökare och kunder ser bara underhållssidan. Ingen kan registrera sig eller beställa via webbplatsen. Personalen loggar in på <strong>/logga-in</strong> och ser allt som vanligt.</p>
+          <p class="muted" style="color:var(--ink-soft);">Besökare och kunder ser bara underhållssidan. Ingen kan registrera sig eller beställa via webbplatsen. Personalen loggar in via den hemliga länken och ser allt som vanligt.</p>
           <form method="post" action="admin-webbplats" style="margin-top:14px;" onsubmit="return confirm('Öppna webbplatsen för alla? Då kan kunder registrera sig och beställa.');"><?php echo csrf_field(); ?><button class="btn primary small" type="submit" name="action" value="oppna">Öppna webbplatsen för alla</button></form>
         <?php else: ?>
           <p><span class="pill pill-levererad">Av, webbplatsen är öppen</span></p>
@@ -55,6 +61,15 @@ require __DIR__ . '/includes/head.php';
         <p style="margin:16px 0 0;"><a href="admin-webbplats?forhandsvisa=1" target="_blank" style="color:var(--brand); font-weight:600;">Se underhållssidan som besökarna ser den</a></p>
       </div>
 
+      <div class="detail-card">
+        <h2>Hemlig inloggningslänk</h2>
+        <p class="muted" style="color:var(--ink-soft); margin-top:0;">Medan underhållsläget är på finns ingen inloggning att se. Personalen loggar in via den här länken. Spara den som bokmärke och ge den bara till personalen.</p>
+        <div class="kopiera-rad"><code id="hemligLank"><?php echo e($lank); ?></code><button class="btn ghost small" type="button" data-kopiera="hemligLank">Kopiera</button></div>
+        <form method="post" action="admin-webbplats" style="margin-top:14px;" onsubmit="return confirm('Byta länk? Den gamla slutar fungera, och personalen behöver den nya.');"><?php echo csrf_field(); ?><button class="lank" type="submit" name="action" value="ny_nyckel" style="color:var(--brand); font-weight:600; background:none; border:none; padding:0; cursor:pointer; font:inherit;">Byt länk</button></form>
+      </div>
+    </div>
+
+    <div class="order-topp" style="margin-top:20px;">
       <form class="detail-card" method="post" action="admin-webbplats">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="action" value="text">
@@ -69,4 +84,12 @@ require __DIR__ . '/includes/head.php';
     </div>
   </div>
 </section>
+<script>
+document.querySelectorAll('[data-kopiera]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var text = document.getElementById(b.dataset.kopiera).textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { b.textContent = 'Kopierad'; }, function () { b.textContent = 'Markera och kopiera'; });
+  });
+});
+</script>
 <?php require __DIR__ . '/includes/foot.php'; ?>
