@@ -1,0 +1,31 @@
+# Korta adresser: ludvikaparti.se/sortiment visar sortiment.php, utan .php i adressfältet.
+# Kräver Apache med mod_rewrite, vilket Loopia har.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Talar om för sidorna att korta adresser fungerar. Utan den här filen länkar sidorna med .php som förut.
+  RewriteRule ^ - [E=LP_KORTA:1]
+
+  # Gamla adresser med .php skickas vidare till den korta adressen, så att bokmärken och sökmotorer följer med.
+  # Bara vid vanlig visning: formulär som skickas till en .php-adress tas emot som vanligt.
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+  RewriteCond %{THE_REQUEST} \s/+index\.php[\s?]
+  RewriteRule ^index\.php$ / [R=301,L]
+
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+  RewriteCond %{THE_REQUEST} \s/+([a-z0-9-]+)\.php[\s?]
+  RewriteRule ^([a-z0-9-]+)\.php$ /$1 [R=301,L]
+
+  # Kortlänken i sms:et: /veckansklipp visar veckansklippet. Finns den gamla mappen veckansklipp kvar
+  # lägger Apache till ett snedstreck; då visas sidan ändå, och sidan tar bort mappen och rättar adressen.
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^veckansklipp/$ /veckansklipp [R=301,L]
+  RewriteRule ^veckansklipp/?$ veckansklipp.php [L]
+
+  # /sida visar sida.php när den filen finns.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME}.php -f
+  RewriteRule ^([a-z0-9-]+)$ $1.php [L]
+</IfModule>
