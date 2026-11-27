@@ -26,6 +26,10 @@ function underhall_text(): string {
   return $t !== '' ? $t : UNDERHALL_STANDARDTEXT;
 }
 
+// Nödöppning: finns den här filen i includes kan man logga in utan den hemliga länken.
+// Sidan Inställningar → Webbplats tar bort filen och skapar en ny länk.
+const UNDERHALL_NODFIL = __DIR__ . '/oppna-inloggning.txt';
+
 function underhall_nyckel(): ?string {
   try {
     $n = installning('underhall_nyckel');
@@ -55,7 +59,7 @@ function underhall_vakt(): void {
   if (in_array($sida, UNDERHALL_INLOGGNING, true)) {
     $nyckel = underhall_nyckel();
     // Innan någon administratör har skapat länken är inloggningen öppen, så att ingen låses ute.
-    if ($nyckel === null || !empty($_SESSION['underhall_ok'])) return;
+    if ($nyckel === null || !empty($_SESSION['underhall_ok']) || is_file(UNDERHALL_NODFIL)) return;
     if (hash_equals($nyckel, (string)($_GET['personal'] ?? ''))) {
       $_SESSION['underhall_ok'] = 1;
       return;

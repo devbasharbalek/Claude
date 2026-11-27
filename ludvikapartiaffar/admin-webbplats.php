@@ -4,6 +4,14 @@ require __DIR__ . '/includes/app.php';
 $user = require_behorighet('personal');
 erp_schema();
 if (!empty($_GET['forhandsvisa'])) underhall_sida();
+// Nödöppningen har gjort sitt: ta bort filen och skapa en ny hemlig länk.
+if (is_file(UNDERHALL_NODFIL)) {
+  @unlink(UNDERHALL_NODFIL);
+  underhall_ny_nyckel();
+  flash(is_file(UNDERHALL_NODFIL)
+    ? 'En ny inloggningslänk är skapad. Ta bort filen oppna-inloggning.txt i mappen includes med FileZilla, annars är inloggningen fortfarande öppen.'
+    : 'Nödöppningen är stängd och en ny inloggningslänk är skapad. Spara länken nedan.');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   csrf_check();
